@@ -64,12 +64,15 @@ export type SplitPlan = {
  */
 export function splitPlan(quotes: StoreQuote[], single: StoreQuote | undefined): SplitPlan | null {
   if (!single || quotes.length < 2) return null;
+  const mustHave = single.items.map((i) => i.item_id);
   let best: { a: StoreQuote; b: StoreQuote; total: number; found: number } | null = null;
   for (let x = 0; x < quotes.length; x++) for (let y = x + 1; y < quotes.length; y++) {
     const a = quotes[x]; const b = quotes[y];
     const prices = new Map<string, number>();
     for (const i of a.items) prices.set(i.item_id, i.line_total);
     for (const i of b.items) { const p = prices.get(i.item_id); if (p === undefined || i.line_total < p) prices.set(i.item_id, i.line_total); }
+    // A split must never lose an item the best single store already had.
+    if (!mustHave.every((id) => prices.has(id))) continue;
     let total = 0; for (const v of prices.values()) total += v;
     const found = prices.size;
     if (!best || found > best.found || (found === best.found && total < best.total - 0.005)) best = { a, b, total, found };
@@ -86,7 +89,8 @@ export function splitPlan(quotes: StoreQuote[], single: StoreQuote | undefined):
   let saving = 0;
   for (const i of single.items) { const c = cheapest.get(i.item_id); if (c !== undefined) saving += i.line_total - c; }
   const extraItems = best.found - single.items_found;
-  if (saving < 0.5 && extraItems <= 0) return null;
+  if (saving < 0) return null;                      // never suggest paying more
+  if (saving < 0.5 && extraItems <= 0) return null; // not worth a second trip
   // Put the store with more items first so the sentence reads naturally.
   const swap = bItems.length > aItems.length;
   return {

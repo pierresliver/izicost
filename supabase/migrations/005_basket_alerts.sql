@@ -60,6 +60,7 @@ grant select, insert, update, delete on public.shopping_lists, public.shopping_l
 -- Items whose product_id is null are matched by their name fingerprint at quote time.
 -- basket_total = sum(latest community price at that store × qty) over the items found there.
 -- lat/lng come from the store row so the app can show a distance (position never leaves the phone).
+drop function if exists public.basket_quote(uuid, text, text);  -- keeps the file re-runnable if columns change
 create or replace function public.basket_quote(p_list uuid, p_city text default null, p_currency text default 'MZN')
 returns table (
   store_id uuid, store_name text, branch_address text, city text, store_type text,
@@ -71,7 +72,7 @@ language sql stable as $$
            coalesce(i.product_id,
                     (select p.id from public.products p where p.product_key = public.product_key_clean(i.name) limit 1)) as product_id
     from public.shopping_list_items i
-    where i.list_id = p_list and i.user_id = auth.uid()
+    where i.list_id = p_list and i.user_id = auth.uid() and not i.checked  -- ticked = already bought
   ),
   total as (select count(*)::int as n from li),
   matched as (
@@ -101,6 +102,7 @@ grant execute on function public.basket_quote(uuid, text, text) to authenticated
 
 -- ── 5. Alerts whose product is now at or below the target (cheapest current community price) ──
 -- Alerts already recorded in price_alert_hits are skipped, so each hit is shown once.
+drop function if exists public.check_price_alerts();
 create or replace function public.check_price_alerts()
 returns table (
   alert_id uuid, product_id uuid, product_key text, display_name text, currency text, target_price numeric,

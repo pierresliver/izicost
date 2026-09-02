@@ -66,7 +66,7 @@ export default function QuoteScreen() {
   const cur = currency ?? (cityScope.country === 'ZA' ? 'ZAR' : 'MZN');
 
   const load = useCallback(async () => {
-    if (!cityScope.ready) return;
+    if (!cityScope.ready) { setLoading(false); return; } // e.g. city picker dismissed: don't spin forever
     setLoading(true);
     try {
       const list = await getDefaultList();
@@ -81,9 +81,9 @@ export default function QuoteScreen() {
   const nearFilter = scope.mode === 'near' && scope.nearStatus === 'ok' && pos ? NEAR_KM : undefined;
   const { ranked, partial } = useMemo(() => rankQuotes(quotes, pos, nearFilter), [quotes, pos, nearFilter]);
   const inScope = useMemo(() => [...ranked, ...partial], [ranked, partial]);
-  const plan = useMemo(() => splitPlan(inScope, ranked[0]), [inScope, ranked]);
+  const plan = useMemo(() => splitPlan(inScope, ranked[0] ?? inScope[0]), [inScope, ranked]); // a split helps even when every store is partial
   const perItem = useMemo(() => bestPerItem(inScope), [inScope]);
-  const missing = useMemo(() => missingItems(inScope, items), [inScope, items]);
+  const missing = useMemo(() => missingItems(inScope, items.filter((i) => !i.checked)), [inScope, items]); // ticked items are not quoted
   const saving = savingVsNext(ranked[0], ranked[1]);
 
   const onMode = (m: ScopeMode) => {
@@ -95,7 +95,7 @@ export default function QuoteScreen() {
     switch (scope.mode) {
       case 'near':
         if (scope.nearStatus === 'locating' || scope.nearStatus === 'idle') return t('Finding stores near you…');
-        if (scope.nearStatus === 'ok') return t('Stores within 15 km');
+        if (scope.nearStatus === 'ok') return nearFilter ? t('Stores within 15 km') : t('No location — showing everywhere');
         return scope.myCity ? t('No location — showing %city%', { city: scope.myCity.city }) : t('No location — showing everywhere');
       case 'mycity': return scope.myCity?.city ?? t('Choose your city');
       case 'bycity': return scope.otherCity?.city ?? t('Choose a city');

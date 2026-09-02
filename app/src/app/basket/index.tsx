@@ -78,6 +78,7 @@ export default function BasketScreen() {
       <View style={[styles.input, { backgroundColor: theme.backgroundElement }]}>
         <Ionicons name="add-circle-outline" size={20} color={Brand.primary} />
         <TextInput
+          maxLength={120}
           style={[styles.inputText, { color: theme.text }]} value={text} onChangeText={setText}
           placeholder={t('Add an item, e.g. rice 5kg')} placeholderTextColor="#888" autoCorrect={false} returnKeyType="done"
           onSubmitEditing={() => add(text)} blurOnSubmit={false}

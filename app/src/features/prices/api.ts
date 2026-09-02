@@ -154,6 +154,6 @@ export async function reportPrice(pricePointId: number, reason: string): Promise
 
 export async function setPriceAlert(productId: string, currency: string, targetPrice: number): Promise<void> {
   const uid = await ensureSession();
-  const { error } = await supabase.from('price_alerts').insert({ user_id: uid, product_id: productId, currency, target_price: targetPrice });
+  const { error } = await supabase.from('price_alerts').upsert({ user_id: uid, product_id: productId, currency, target_price: targetPrice }, { onConflict: 'user_id,product_id,currency' });
   if (error) throw new Error(error.message);
 }

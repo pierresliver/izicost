@@ -27,7 +27,8 @@ function toItem(r: RawItem): BasketItem {
 /** The user's one list — created silently the first time. */
 export async function getDefaultList(): Promise<BasketList> {
   const uid = await ensureSession();
-  const { data } = await supabase.from('shopping_lists').select('id, name').eq('user_id', uid).order('created_at').limit(1).maybeSingle();
+  const { data, error: selErr } = await supabase.from('shopping_lists').select('id, name').eq('user_id', uid).order('created_at').limit(1).maybeSingle();
+  if (selErr) throw new Error(selErr.message); // a transient failure must not create a second list
   if (data) return data as BasketList;
   const { data: created, error } = await supabase.from('shopping_lists').insert({ user_id: uid, name: 'My basket' }).select('id, name').single();
   if (error || !created) throw new Error(error?.message ?? 'could not create the list');
@@ -47,11 +48,11 @@ export async function listItems(listId: string): Promise<BasketItem[]> {
  */
 export async function addItem(listId: string, x: { name: string; productId?: string | null; qty?: number }): Promise<BasketItem> {
   const uid = await ensureSession();
-  const name = x.name.trim().replace(/\s+/g, ' ');
+  const name = x.name.trim().replace(/\s+/g, ' ').slice(0, 120);
   if (!name) throw new Error('empty name');
-  const qty = x.qty && x.qty > 0 ? x.qty : 1;
+  const qty = Math.min(x.qty && x.qty > 0 ? x.qty : 1, 1000);
   let q = supabase.from('shopping_list_items').select(ITEM_COLS).eq('list_id', listId).limit(1);
-  q = x.productId ? q.eq('product_id', x.productId) : q.ilike('name', name);
+  q = x.productId ? q.eq('product_id', x.productId) : q.eq('name', name); // exact match: "%" and "_" are not wildcards here
   const { data: existing } = await q.maybeSingle();
   if (existing) {
     const cur = toItem(existing as unknown as RawItem);

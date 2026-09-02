@@ -30,6 +30,12 @@ if ($needPrebuild) {
 }
 [System.IO.File]::WriteAllText((Join-Path $app 'android\local.properties'), "sdk.dir=D:/Android/Sdk`n", (New-Object System.Text.UTF8Encoding($false)))
 
+# Test builds for real phones only (drops the x86 emulator ABIs: ~40% smaller). prebuild resets this file.
+$gp = Join-Path $app 'android\gradle.properties'
+if (-not (Select-String -Path $gp -Pattern 'reactNativeArchitectures=armeabi' -Quiet)) {
+  Add-Content -Path $gp -Value "`nreactNativeArchitectures=armeabi-v7a,arm64-v8a" -Encoding ascii
+}
+
 Write-Host '>> gradle assembleRelease...' -ForegroundColor Cyan
 & 'android\gradlew.bat' -p android assembleRelease
 if ($LASTEXITCODE -ne 0) { throw 'gradle build failed' }
