@@ -1,0 +1,40 @@
+{
+  "model": "claude-haiku-4-5",
+  "stop_reason": "end_turn",
+  "latency_s": 7.45,
+  "usage": {
+    "input_tokens": 2949,
+    "output_tokens": 183
+  },
+  "cost_usd": 0.003864,
+  "request_id": "req_011CeeYiFdNE7h1fNpGNQfRr",
+  "raw_text": "{\"doc_type\":\"invoice\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"TVCABO\",\"store_branch_address\":\"RUA F 169 3 CASAS Coop Maputo\",\"store_tax_id\":\"00000000\",\"receipt_number\":\"2023140580\",\"date\":\"2026-08-27\",\"time\":\"12:00\",\"payment_method\":\"card\",\"subtotal\":2905.17,\"tax_total\":464.83,\"discount_total\":0,\"total\":3370.00,\"items\":[{\"name\":\"Item 1\",\"qty\":1,\"unit_price\":3370.00,\"line_total\":3370.00,\"category\":\"other\"}],\"legibility\":\"good\",\"notes\":\"Invoice with folded format; single line item with total amount shown.\"}",
+  "parsed": {
+    "doc_type": "invoice",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "TVCABO",
+    "store_branch_address": "RUA F 169 3 CASAS Coop Maputo",
+    "store_tax_id": "00000000",
+    "receipt_number": "2023140580",
+    "date": "2026-08-27",
+    "time": "12:00",
+    "payment_method": "card",
+    "subtotal": 2905.17,
+    "tax_total": 464.83,
+    "discount_total": 0,
+    "total": 3370.0,
+    "items": [
+      {
+        "name": "Item 1",
+        "qty": 1,
+        "unit_price": 3370.0,
+        "line_total": 3370.0,
+        "category": "other"
+      }
+    ],
+    "legibility": "good",
+    "notes": "Invoice with folded format; single line item with total amount shown."
+  },
+  "receipt": "r16"
+}

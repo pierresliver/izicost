@@ -1,0 +1,47 @@
+{
+  "model": "claude-opus-5",
+  "stop_reason": "end_turn",
+  "latency_s": 9.07,
+  "usage": {
+    "input_tokens": 3340,
+    "output_tokens": 570
+  },
+  "cost_usd": 0.03095,
+  "request_id": "req_011CeeZ7mBWXpEGfwrdLxspE",
+  "raw_text": "{\"doc_type\":\"itemized_receipt\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"Shoprite\",\"store_branch_address\":\"Costa do Sol, Av. Da Marginal - No 9519\",\"store_tax_id\":\"400009694\",\"receipt_number\":\"0016330280826004000075\",\"date\":\"2026-08-28\",\"time\":\"11:30\",\"payment_method\":\"card\",\"subtotal\":237.05,\"tax_total\":37.93,\"discount_total\":0,\"total\":274.98,\"items\":[{\"name\":\"MOSTARDA EM GRAO\",\"qty\":1,\"unit_price\":189.99,\"line_total\":189.99,\"category\":\"grocery\"},{\"name\":\"MAYNARDS 60G\",\"qty\":1,\"unit_price\":84.99,\"line_total\":84.99,\"category\":\"snack\"}],\"legibility\":\"good\",\"notes\":\"Red pen mark drawn across the middle of the receipt; payment shown as \\\"EFT Manual\\\".\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "Shoprite",
+    "store_branch_address": "Costa do Sol, Av. Da Marginal - No 9519",
+    "store_tax_id": "400009694",
+    "receipt_number": "0016330280826004000075",
+    "date": "2026-08-28",
+    "time": "11:30",
+    "payment_method": "card",
+    "subtotal": 237.05,
+    "tax_total": 37.93,
+    "discount_total": 0,
+    "total": 274.98,
+    "items": [
+      {
+        "name": "MOSTARDA EM GRAO",
+        "qty": 1,
+        "unit_price": 189.99,
+        "line_total": 189.99,
+        "category": "grocery"
+      },
+      {
+        "name": "MAYNARDS 60G",
+        "qty": 1,
+        "unit_price": 84.99,
+        "line_total": 84.99,
+        "category": "snack"
+      }
+    ],
+    "legibility": "good",
+    "notes": "Red pen mark drawn across the middle of the receipt; payment shown as \"EFT Manual\"."
+  },
+  "receipt": "r10"
+}

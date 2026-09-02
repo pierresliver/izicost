@@ -1,0 +1,42 @@
+{
+  "model": "claude-sonnet-5",
+  "stop_reason": "end_turn",
+  "latency_s": 5.11,
+  "usage": {
+    "input_tokens": 4296,
+    "output_tokens": 255
+  },
+  "cost_usd": 0.011142,
+  "request_id": "req_011Ceedhj8e5iT3ssZsX6HWN",
+  "raw_text": "{\"doc_type\":\"itemized_receipt\",\"store_type\":\"convenience_store\",\"country\":\"ZA\",\"currency\":\"ZAR\",\"store_name\":\"Malalane Quick Shop\",\"store_branch_address\":\"1 Air Street, Malelane, 1320\",\"store_tax_id\":\"4670102930\",\"receipt_number\":\"02-21355-8146\",\"date\":\"2026-08-25\",\"time\":\"10:41\",\"payment_method\":\"cash\",\"subtotal\":13.91,\"tax_total\":2.09,\"discount_total\":0,\"total\":16.00,\"items\":[{\"name\":\"Jaw Breaker Black Ch\",\"qty\":1,\"unit_price\":16.00,\"line_total\":16.00,\"category\":\"food\",\"subcategory\":\"snacks_sweets\"}],\"legibility\":\"good\",\"notes\":\"\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "store_type": "convenience_store",
+    "country": "ZA",
+    "currency": "ZAR",
+    "store_name": "Malalane Quick Shop",
+    "store_branch_address": "1 Air Street, Malelane, 1320",
+    "store_tax_id": "4670102930",
+    "receipt_number": "02-21355-8146",
+    "date": "2026-08-25",
+    "time": "10:41",
+    "payment_method": "cash",
+    "subtotal": 13.91,
+    "tax_total": 2.09,
+    "discount_total": 0,
+    "total": 16.0,
+    "items": [
+      {
+        "name": "Jaw Breaker Black Ch",
+        "qty": 1,
+        "unit_price": 16.0,
+        "line_total": 16.0,
+        "category": "food",
+        "subcategory": "snacks_sweets"
+      }
+    ],
+    "legibility": "good",
+    "notes": ""
+  },
+  "receipt": "r07_MalalaneQuickShop_ZA.jpeg"
+}

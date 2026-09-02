@@ -1,0 +1,42 @@
+{
+  "model": "claude-sonnet-5",
+  "stop_reason": "end_turn",
+  "latency_s": 4.69,
+  "usage": {
+    "input_tokens": 4296,
+    "output_tokens": 304
+  },
+  "cost_usd": 0.011632,
+  "request_id": "req_011Ceedx51rykivm6iuoFave",
+  "raw_text": "{\"doc_type\":\"invoice\",\"store_type\":\"utility_provider\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"TV Cabo\",\"store_branch_address\":\"Av. dos Presidentes 5B, Maputo-Mozambique\",\"store_tax_id\":null,\"receipt_number\":\"1056725/FR26\",\"date\":\"2026-08-27\",\"time\":\"12:00\",\"payment_method\":\"card\",\"subtotal\":2905.17,\"tax_total\":464.83,\"discount_total\":0,\"total\":3370.00,\"items\":[{\"name\":\"Serviço TVCabo (rede TVCabo)\",\"qty\":1,\"unit_price\":3370.00,\"line_total\":3370.00,\"category\":\"utilities\",\"subcategory\":\"tv\"}],\"legibility\":\"good\",\"notes\":\"A card slip (Millennium/Visa) is stapled on top of the TVCabo invoice, matching the payment amount of 3370 MZN.\"}",
+  "parsed": {
+    "doc_type": "invoice",
+    "store_type": "utility_provider",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "TV Cabo",
+    "store_branch_address": "Av. dos Presidentes 5B, Maputo-Mozambique",
+    "store_tax_id": null,
+    "receipt_number": "1056725/FR26",
+    "date": "2026-08-27",
+    "time": "12:00",
+    "payment_method": "card",
+    "subtotal": 2905.17,
+    "tax_total": 464.83,
+    "discount_total": 0,
+    "total": 3370.0,
+    "items": [
+      {
+        "name": "Serviço TVCabo (rede TVCabo)",
+        "qty": 1,
+        "unit_price": 3370.0,
+        "line_total": 3370.0,
+        "category": "utilities",
+        "subcategory": "tv"
+      }
+    ],
+    "legibility": "good",
+    "notes": "A card slip (Millennium/Visa) is stapled on top of the TVCabo invoice, matching the payment amount of 3370 MZN."
+  },
+  "receipt": "r16_TVCabo_invoice.jpeg"
+}

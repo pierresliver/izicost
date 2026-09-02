@@ -1,0 +1,178 @@
+{
+  "model": "claude-sonnet-5",
+  "stop_reason": "end_turn",
+  "latency_s": 18.28,
+  "usage": {
+    "input_tokens": 4296,
+    "output_tokens": 1864
+  },
+  "cost_usd": 0.027232,
+  "request_id": "req_011Ceee1ZnKk19DutE46JEiL",
+  "raw_text": "{\"doc_type\":\"itemized_receipt\",\"store_type\":\"restaurant\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"Complexo Piripiri\",\"store_branch_address\":\"Av. 24 de Julho, Nº 22\",\"store_tax_id\":null,\"receipt_number\":null,\"date\":\"2026-08-29\",\"time\":\"15:20\",\"payment_method\":null,\"subtotal\":null,\"tax_total\":null,\"discount_total\":0,\"total\":12290,\"items\":[{\"name\":\"Cafe expresso Delta\",\"qty\":2,\"unit_price\":90,\"line_total\":180,\"category\":\"restaurant\",\"subcategory\":\"coffee\"},{\"name\":\"Txilar Copo grande\",\"qty\":5,\"unit_price\":190,\"line_total\":950,\"category\":\"restaurant\",\"subcategory\":\"drink\"},{\"name\":\"Sprite Grf\",\"qty\":2,\"unit_price\":80,\"line_total\":160,\"category\":\"restaurant\",\"subcategory\":\"drink\"},{\"name\":\"Castle Lite Grf\",\"qty\":2,\"unit_price\":180,\"line_total\":360,\"category\":\"restaurant\",\"subcategory\":\"alcohol\"},{\"name\":\"Chamussas de Carne\",\"qty\":2,\"unit_price\":290,\"line_total\":580,\"category\":\"restaurant\",\"subcategory\":\"starter_snack\"},{\"name\":\"Rissois\",\"qty\":2,\"unit_price\":290,\"line_total\":580,\"category\":\"restaurant\",\"subcategory\":\"starter_snack\"},{\"name\":\"Fanta Uva Lata\",\"qty\":1,\"unit_price\":120,\"line_total\":120,\"category\":\"restaurant\",\"subcategory\":\"drink\"},{\"name\":\"Agua Nacional Pequena\",\"qty\":2,\"unit_price\":75,\"line_total\":150,\"category\":\"restaurant\",\"subcategory\":\"drink\"},{\"name\":\"Moelas\",\"qty\":2,\"unit_price\":330,\"line_total\":660,\"category\":\"restaurant\",\"subcategory\":\"starter_snack\"},{\"name\":\"Moelas Fritas\",\"qty\":1,\"unit_price\":330,\"line_total\":330,\"category\":\"restaurant\",\"subcategory\":\"starter_snack\"},{\"name\":\"Coca Cola Grf\",\"qty\":2,\"unit_price\":80,\"line_total\":160,\"category\":\"restaurant\",\"subcategory\":\"drink\"},{\"name\":\"Sprite Grf\",\"qty\":1,\"unit_price\":80,\"line_total\":80,\"category\":\"restaurant\",\"subcategory\":\"drink\"},{\"name\":\"Gin Tanqueray\",\"qty\":1,\"unit_price\":480,\"line_total\":480,\"category\":\"restaurant\",\"subcategory\":\"alcohol\"},{\"name\":\"Agua Tonica Lata\",\"qty\":2,\"unit_price\":120,\"line_total\":240,\"category\":\"restaurant\",\"subcategory\":\"drink\"},{\"name\":\"Bife Rump\",\"qty\":1,\"unit_price\":1075,\"line_total\":1075,\"category\":\"restaurant\",\"subcategory\":\"meal\"},{\"name\":\"Frango Sala\",\"qty\":2,\"unit_price\":1100,\"line_total\":2200,\"category\":\"restaurant\",\"subcategory\":\"meal\"},{\"name\":\"Camarao Pequeno\",\"qty\":3,\"unit_price\":990,\"line_total\":2970,\"category\":\"restaurant\",\"subcategory\":\"meal\"},{\"name\":\"Monte Velho Tin. 375\",\"qty\":1,\"unit_price\":1015,\"line_total\":1015,\"category\":\"restaurant\",\"subcategory\":\"alcohol\"}],\"legibility\":\"good\",\"notes\":\"Quantity for Gin Tanqueray was printed as ',000' and interpreted as 1; date/time line was condensed and interpreted as 29-08-2026 15:20.\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "store_type": "restaurant",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "Complexo Piripiri",
+    "store_branch_address": "Av. 24 de Julho, Nº 22",
+    "store_tax_id": null,
+    "receipt_number": null,
+    "date": "2026-08-29",
+    "time": "15:20",
+    "payment_method": null,
+    "subtotal": null,
+    "tax_total": null,
+    "discount_total": 0,
+    "total": 12290,
+    "items": [
+      {
+        "name": "Cafe expresso Delta",
+        "qty": 2,
+        "unit_price": 90,
+        "line_total": 180,
+        "category": "restaurant",
+        "subcategory": "coffee"
+      },
+      {
+        "name": "Txilar Copo grande",
+        "qty": 5,
+        "unit_price": 190,
+        "line_total": 950,
+        "category": "restaurant",
+        "subcategory": "drink"
+      },
+      {
+        "name": "Sprite Grf",
+        "qty": 2,
+        "unit_price": 80,
+        "line_total": 160,
+        "category": "restaurant",
+        "subcategory": "drink"
+      },
+      {
+        "name": "Castle Lite Grf",
+        "qty": 2,
+        "unit_price": 180,
+        "line_total": 360,
+        "category": "restaurant",
+        "subcategory": "alcohol"
+      },
+      {
+        "name": "Chamussas de Carne",
+        "qty": 2,
+        "unit_price": 290,
+        "line_total": 580,
+        "category": "restaurant",
+        "subcategory": "starter_snack"
+      },
+      {
+        "name": "Rissois",
+        "qty": 2,
+        "unit_price": 290,
+        "line_total": 580,
+        "category": "restaurant",
+        "subcategory": "starter_snack"
+      },
+      {
+        "name": "Fanta Uva Lata",
+        "qty": 1,
+        "unit_price": 120,
+        "line_total": 120,
+        "category": "restaurant",
+        "subcategory": "drink"
+      },
+      {
+        "name": "Agua Nacional Pequena",
+        "qty": 2,
+        "unit_price": 75,
+        "line_total": 150,
+        "category": "restaurant",
+        "subcategory": "drink"
+      },
+      {
+        "name": "Moelas",
+        "qty": 2,
+        "unit_price": 330,
+        "line_total": 660,
+        "category": "restaurant",
+        "subcategory": "starter_snack"
+      },
+      {
+        "name": "Moelas Fritas",
+        "qty": 1,
+        "unit_price": 330,
+        "line_total": 330,
+        "category": "restaurant",
+        "subcategory": "starter_snack"
+      },
+      {
+        "name": "Coca Cola Grf",
+        "qty": 2,
+        "unit_price": 80,
+        "line_total": 160,
+        "category": "restaurant",
+        "subcategory": "drink"
+      },
+      {
+        "name": "Sprite Grf",
+        "qty": 1,
+        "unit_price": 80,
+        "line_total": 80,
+        "category": "restaurant",
+        "subcategory": "drink"
+      },
+      {
+        "name": "Gin Tanqueray",
+        "qty": 1,
+        "unit_price": 480,
+        "line_total": 480,
+        "category": "restaurant",
+        "subcategory": "alcohol"
+      },
+      {
+        "name": "Agua Tonica Lata",
+        "qty": 2,
+        "unit_price": 120,
+        "line_total": 240,
+        "category": "restaurant",
+        "subcategory": "drink"
+      },
+      {
+        "name": "Bife Rump",
+        "qty": 1,
+        "unit_price": 1075,
+        "line_total": 1075,
+        "category": "restaurant",
+        "subcategory": "meal"
+      },
+      {
+        "name": "Frango Sala",
+        "qty": 2,
+        "unit_price": 1100,
+        "line_total": 2200,
+        "category": "restaurant",
+        "subcategory": "meal"
+      },
+      {
+        "name": "Camarao Pequeno",
+        "qty": 3,
+        "unit_price": 990,
+        "line_total": 2970,
+        "category": "restaurant",
+        "subcategory": "meal"
+      },
+      {
+        "name": "Monte Velho Tin. 375",
+        "qty": 1,
+        "unit_price": 1015,
+        "line_total": 1015,
+        "category": "restaurant",
+        "subcategory": "alcohol"
+      }
+    ],
+    "legibility": "good",
+    "notes": "Quantity for Gin Tanqueray was printed as ',000' and interpreted as 1; date/time line was condensed and interpreted as 29-08-2026 15:20."
+  },
+  "receipt": "r06_Piripiri_bar_tab_18_items.jpeg"
+}

@@ -1,0 +1,159 @@
+{
+  "model": "claude-opus-5",
+  "stop_reason": "end_turn",
+  "latency_s": 26.68,
+  "usage": {
+    "input_tokens": 3340,
+    "output_tokens": 1501
+  },
+  "cost_usd": 0.054225,
+  "request_id": "req_011CeeZ3XgHrYw6WsZaLs4FU",
+  "raw_text": "{\"doc_type\":\"bar_tab\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"Complexo Piripiri\",\"store_branch_address\":\"Av. 24 de Julho, N° 22\",\"store_tax_id\":null,\"receipt_number\":null,\"date\":\"2026-08-29\",\"time\":\"15:20\",\"payment_method\":null,\"subtotal\":null,\"tax_total\":null,\"discount_total\":0,\"total\":12290.00,\"items\":[{\"name\":\"Cafe expresso Delta\",\"qty\":2,\"unit_price\":90.00,\"line_total\":180.00,\"category\":\"drink\"},{\"name\":\"Txilar Copo grande\",\"qty\":5,\"unit_price\":190.00,\"line_total\":950.00,\"category\":\"drink\"},{\"name\":\"Sprite Grf\",\"qty\":2,\"unit_price\":80.00,\"line_total\":160.00,\"category\":\"drink\"},{\"name\":\"Castle Lite Grf\",\"qty\":2,\"unit_price\":180.00,\"line_total\":360.00,\"category\":\"alcohol\"},{\"name\":\"Chamussas de Carne\",\"qty\":2,\"unit_price\":290.00,\"line_total\":580.00,\"category\":\"snack\"},{\"name\":\"Rissois\",\"qty\":2,\"unit_price\":290.00,\"line_total\":580.00,\"category\":\"snack\"},{\"name\":\"Fanta Uva Lata\",\"qty\":1,\"unit_price\":120.00,\"line_total\":120.00,\"category\":\"drink\"},{\"name\":\"Agua Nacional Pequena\",\"qty\":2,\"unit_price\":75.00,\"line_total\":150.00,\"category\":\"drink\"},{\"name\":\"Moelas\",\"qty\":2,\"unit_price\":330.00,\"line_total\":660.00,\"category\":\"restaurant\"},{\"name\":\"Moelas Fritas\",\"qty\":1,\"unit_price\":330.00,\"line_total\":330.00,\"category\":\"restaurant\"},{\"name\":\"Coca Cola Grf\",\"qty\":2,\"unit_price\":80.00,\"line_total\":160.00,\"category\":\"drink\"},{\"name\":\"Sprite Grf\",\"qty\":1,\"unit_price\":80.00,\"line_total\":80.00,\"category\":\"drink\"},{\"name\":\"Gin Tanqueray\",\"qty\":null,\"unit_price\":null,\"line_total\":480.00,\"category\":\"alcohol\"},{\"name\":\"Agua Tonica Lata\",\"qty\":2,\"unit_price\":120.00,\"line_total\":240.00,\"category\":\"drink\"},{\"name\":\"Bife Rump\",\"qty\":1,\"unit_price\":1075.00,\"line_total\":1075.00,\"category\":\"restaurant\"},{\"name\":\"Frango Sala\",\"qty\":2,\"unit_price\":1100.00,\"line_total\":2200.00,\"category\":\"restaurant\"},{\"name\":\"Camarao Pequeno\",\"qty\":3,\"unit_price\":990.00,\"line_total\":2970.00,\"category\":\"restaurant\"},{\"name\":\"Monte Velho Tin. 375\",\"qty\":1,\"unit_price\":1015.00,\"line_total\":1015.00,\"category\":\"alcohol\"}],\"legibility\":\"good\",\"notes\":\"Gin Tanqueray quantity printed garbled as \\\",000\\\"; document states it is not a fiscal invoice.\"}",
+  "parsed": {
+    "doc_type": "bar_tab",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "Complexo Piripiri",
+    "store_branch_address": "Av. 24 de Julho, N° 22",
+    "store_tax_id": null,
+    "receipt_number": null,
+    "date": "2026-08-29",
+    "time": "15:20",
+    "payment_method": null,
+    "subtotal": null,
+    "tax_total": null,
+    "discount_total": 0,
+    "total": 12290.0,
+    "items": [
+      {
+        "name": "Cafe expresso Delta",
+        "qty": 2,
+        "unit_price": 90.0,
+        "line_total": 180.0,
+        "category": "drink"
+      },
+      {
+        "name": "Txilar Copo grande",
+        "qty": 5,
+        "unit_price": 190.0,
+        "line_total": 950.0,
+        "category": "drink"
+      },
+      {
+        "name": "Sprite Grf",
+        "qty": 2,
+        "unit_price": 80.0,
+        "line_total": 160.0,
+        "category": "drink"
+      },
+      {
+        "name": "Castle Lite Grf",
+        "qty": 2,
+        "unit_price": 180.0,
+        "line_total": 360.0,
+        "category": "alcohol"
+      },
+      {
+        "name": "Chamussas de Carne",
+        "qty": 2,
+        "unit_price": 290.0,
+        "line_total": 580.0,
+        "category": "snack"
+      },
+      {
+        "name": "Rissois",
+        "qty": 2,
+        "unit_price": 290.0,
+        "line_total": 580.0,
+        "category": "snack"
+      },
+      {
+        "name": "Fanta Uva Lata",
+        "qty": 1,
+        "unit_price": 120.0,
+        "line_total": 120.0,
+        "category": "drink"
+      },
+      {
+        "name": "Agua Nacional Pequena",
+        "qty": 2,
+        "unit_price": 75.0,
+        "line_total": 150.0,
+        "category": "drink"
+      },
+      {
+        "name": "Moelas",
+        "qty": 2,
+        "unit_price": 330.0,
+        "line_total": 660.0,
+        "category": "restaurant"
+      },
+      {
+        "name": "Moelas Fritas",
+        "qty": 1,
+        "unit_price": 330.0,
+        "line_total": 330.0,
+        "category": "restaurant"
+      },
+      {
+        "name": "Coca Cola Grf",
+        "qty": 2,
+        "unit_price": 80.0,
+        "line_total": 160.0,
+        "category": "drink"
+      },
+      {
+        "name": "Sprite Grf",
+        "qty": 1,
+        "unit_price": 80.0,
+        "line_total": 80.0,
+        "category": "drink"
+      },
+      {
+        "name": "Gin Tanqueray",
+        "qty": null,
+        "unit_price": null,
+        "line_total": 480.0,
+        "category": "alcohol"
+      },
+      {
+        "name": "Agua Tonica Lata",
+        "qty": 2,
+        "unit_price": 120.0,
+        "line_total": 240.0,
+        "category": "drink"
+      },
+      {
+        "name": "Bife Rump",
+        "qty": 1,
+        "unit_price": 1075.0,
+        "line_total": 1075.0,
+        "category": "restaurant"
+      },
+      {
+        "name": "Frango Sala",
+        "qty": 2,
+        "unit_price": 1100.0,
+        "line_total": 2200.0,
+        "category": "restaurant"
+      },
+      {
+        "name": "Camarao Pequeno",
+        "qty": 3,
+        "unit_price": 990.0,
+        "line_total": 2970.0,
+        "category": "restaurant"
+      },
+      {
+        "name": "Monte Velho Tin. 375",
+        "qty": 1,
+        "unit_price": 1015.0,
+        "line_total": 1015.0,
+        "category": "alcohol"
+      }
+    ],
+    "legibility": "good",
+    "notes": "Gin Tanqueray quantity printed garbled as \",000\"; document states it is not a fiscal invoice."
+  },
+  "receipt": "r06"
+}

@@ -1,0 +1,82 @@
+{
+  "model": "claude-sonnet-5",
+  "stop_reason": "end_turn",
+  "latency_s": 7.14,
+  "usage": {
+    "input_tokens": 4296,
+    "output_tokens": 599
+  },
+  "cost_usd": 0.014582,
+  "request_id": "req_011Ceedrkdvj37gCQVLnbXdu",
+  "raw_text": "{\"doc_type\":\"itemized_receipt\",\"store_type\":\"supermarket\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"Lokal\",\"store_branch_address\":\"Av. Kwame Nkrumah, 551, Esquina com a Avenida Kim Il Sung, Maputo\",\"store_tax_id\":\"400010153\",\"receipt_number\":\"FS AAJ002/110197\",\"date\":\"2026-08-23\",\"time\":\"17:23\",\"payment_method\":\"card\",\"subtotal\":1218.80,\"tax_total\":165.38,\"discount_total\":0,\"total\":1384.20,\"items\":[{\"name\":\"Pão de Água -MF 100g\",\"qty\":8,\"unit_price\":20.00,\"line_total\":160.00,\"category\":\"food\",\"subcategory\":\"bakery_bread\"},{\"name\":\"Banana kg\",\"qty\":0.72,\"unit_price\":35.00,\"line_total\":25.20,\"category\":\"food\",\"subcategory\":\"fruit\"},{\"name\":\"Choc Leite Avelãs PD 200g (20)\",\"qty\":1,\"unit_price\":399.00,\"line_total\":399.00,\"category\":\"food\",\"subcategory\":\"snacks_sweets\"},{\"name\":\"Choc Preto 72 PD 200g\",\"qty\":1,\"unit_price\":425.00,\"line_total\":425.00,\"category\":\"food\",\"subcategory\":\"snacks_sweets\"},{\"name\":\"Bol Eet Sum Mor Bakers 200g (12un)\",\"qty\":2,\"unit_price\":185.00,\"line_total\":370.00,\"category\":\"food\",\"subcategory\":\"bakery_bread\"},{\"name\":\"Saco Plastico Alca Lokal\",\"qty\":1,\"unit_price\":5.00,\"line_total\":5.00,\"category\":\"household\",\"subcategory\":\"bags_packaging\"}],\"legibility\":\"good\",\"notes\":\"\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "store_type": "supermarket",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "Lokal",
+    "store_branch_address": "Av. Kwame Nkrumah, 551, Esquina com a Avenida Kim Il Sung, Maputo",
+    "store_tax_id": "400010153",
+    "receipt_number": "FS AAJ002/110197",
+    "date": "2026-08-23",
+    "time": "17:23",
+    "payment_method": "card",
+    "subtotal": 1218.8,
+    "tax_total": 165.38,
+    "discount_total": 0,
+    "total": 1384.2,
+    "items": [
+      {
+        "name": "Pão de Água -MF 100g",
+        "qty": 8,
+        "unit_price": 20.0,
+        "line_total": 160.0,
+        "category": "food",
+        "subcategory": "bakery_bread"
+      },
+      {
+        "name": "Banana kg",
+        "qty": 0.72,
+        "unit_price": 35.0,
+        "line_total": 25.2,
+        "category": "food",
+        "subcategory": "fruit"
+      },
+      {
+        "name": "Choc Leite Avelãs PD 200g (20)",
+        "qty": 1,
+        "unit_price": 399.0,
+        "line_total": 399.0,
+        "category": "food",
+        "subcategory": "snacks_sweets"
+      },
+      {
+        "name": "Choc Preto 72 PD 200g",
+        "qty": 1,
+        "unit_price": 425.0,
+        "line_total": 425.0,
+        "category": "food",
+        "subcategory": "snacks_sweets"
+      },
+      {
+        "name": "Bol Eet Sum Mor Bakers 200g (12un)",
+        "qty": 2,
+        "unit_price": 185.0,
+        "line_total": 370.0,
+        "category": "food",
+        "subcategory": "bakery_bread"
+      },
+      {
+        "name": "Saco Plastico Alca Lokal",
+        "qty": 1,
+        "unit_price": 5.0,
+        "line_total": 5.0,
+        "category": "household",
+        "subcategory": "bags_packaging"
+      }
+    ],
+    "legibility": "good",
+    "notes": ""
+  },
+  "receipt": "r04_Lokal_Maputo.jpeg"
+}

@@ -1,0 +1,54 @@
+{
+  "model": "claude-haiku-4-5",
+  "stop_reason": "end_turn",
+  "latency_s": 6.98,
+  "usage": {
+    "input_tokens": 2949,
+    "output_tokens": 266
+  },
+  "cost_usd": 0.004279,
+  "request_id": "req_011CeeYfS7ZXYjnQLQ24sg43",
+  "raw_text": "{\"doc_type\":\"itemized_receipt\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"Woolworths\",\"store_branch_address\":\"Marcs loa\",\"store_tax_id\":\"400354162\",\"receipt_number\":\"MMM/9613/260828/00000007\",\"date\":\"2028-08-26\",\"time\":null,\"payment_method\":\"cash\",\"subtotal\":3206.90,\"tax_total\":513.10,\"discount_total\":0,\"total\":3720.00,\"items\":[{\"name\":\"2PK WAFFLE TEA\",\"qty\":1,\"unit_price\":1400.00,\"line_total\":1400.00,\"category\":\"snack\"},{\"name\":\"4pk Pleather pl\",\"qty\":1,\"unit_price\":1160.00,\"line_total\":1160.00,\"category\":\"other\"},{\"name\":\"4pk Pleather pl\",\"qty\":1,\"unit_price\":1160.00,\"line_total\":1160.00,\"category\":\"other\"}],\"legibility\":\"partial\",\"notes\":\"Image partially reversed/mirrored at top; some text illegible due to overlay and fading.\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "Woolworths",
+    "store_branch_address": "Marcs loa",
+    "store_tax_id": "400354162",
+    "receipt_number": "MMM/9613/260828/00000007",
+    "date": "2028-08-26",
+    "time": null,
+    "payment_method": "cash",
+    "subtotal": 3206.9,
+    "tax_total": 513.1,
+    "discount_total": 0,
+    "total": 3720.0,
+    "items": [
+      {
+        "name": "2PK WAFFLE TEA",
+        "qty": 1,
+        "unit_price": 1400.0,
+        "line_total": 1400.0,
+        "category": "snack"
+      },
+      {
+        "name": "4pk Pleather pl",
+        "qty": 1,
+        "unit_price": 1160.0,
+        "line_total": 1160.0,
+        "category": "other"
+      },
+      {
+        "name": "4pk Pleather pl",
+        "qty": 1,
+        "unit_price": 1160.0,
+        "line_total": 1160.0,
+        "category": "other"
+      }
+    ],
+    "legibility": "partial",
+    "notes": "Image partially reversed/mirrored at top; some text illegible due to overlay and fading."
+  },
+  "receipt": "r08"
+}

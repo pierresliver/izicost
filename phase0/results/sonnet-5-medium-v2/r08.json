@@ -1,0 +1,58 @@
+{
+  "model": "claude-sonnet-5",
+  "stop_reason": "end_turn",
+  "latency_s": 7.21,
+  "usage": {
+    "input_tokens": 4296,
+    "output_tokens": 523
+  },
+  "cost_usd": 0.013822,
+  "request_id": "req_011Ceee3DBswZ42e3NhWmVWq",
+  "raw_text": "{\"doc_type\":\"itemized_receipt\",\"store_type\":\"clothing_store\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"Woolworths\",\"store_branch_address\":\"Av. Marginal 9519\",\"store_tax_id\":\"400354162\",\"receipt_number\":\"MMM/9613/260828/00000007\",\"date\":\"2026-08-28\",\"time\":null,\"payment_method\":\"cash\",\"subtotal\":3720.00,\"tax_total\":513.10,\"discount_total\":0,\"total\":3720.00,\"items\":[{\"name\":\"2PK WAFFLE TEA\",\"qty\":1,\"unit_price\":1400.00,\"line_total\":1400.00,\"category\":\"clothing\",\"subcategory\":\"clothing\"},{\"name\":\"4pk Pleather pl\",\"qty\":1,\"unit_price\":1160.00,\"line_total\":1160.00,\"category\":\"clothing\",\"subcategory\":\"accessories\"},{\"name\":\"4pk Pleather pl\",\"qty\":1,\"unit_price\":1160.00,\"line_total\":1160.00,\"category\":\"clothing\",\"subcategory\":\"accessories\"}],\"legibility\":\"partial\",\"notes\":\"Faint mirrored text from reverse side of paper bleeds through the receipt.\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "store_type": "clothing_store",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "Woolworths",
+    "store_branch_address": "Av. Marginal 9519",
+    "store_tax_id": "400354162",
+    "receipt_number": "MMM/9613/260828/00000007",
+    "date": "2026-08-28",
+    "time": null,
+    "payment_method": "cash",
+    "subtotal": 3720.0,
+    "tax_total": 513.1,
+    "discount_total": 0,
+    "total": 3720.0,
+    "items": [
+      {
+        "name": "2PK WAFFLE TEA",
+        "qty": 1,
+        "unit_price": 1400.0,
+        "line_total": 1400.0,
+        "category": "clothing",
+        "subcategory": "clothing"
+      },
+      {
+        "name": "4pk Pleather pl",
+        "qty": 1,
+        "unit_price": 1160.0,
+        "line_total": 1160.0,
+        "category": "clothing",
+        "subcategory": "accessories"
+      },
+      {
+        "name": "4pk Pleather pl",
+        "qty": 1,
+        "unit_price": 1160.0,
+        "line_total": 1160.0,
+        "category": "clothing",
+        "subcategory": "accessories"
+      }
+    ],
+    "legibility": "partial",
+    "notes": "Faint mirrored text from reverse side of paper bleeds through the receipt."
+  },
+  "receipt": "r08_Woolworths_3_items.jpeg"
+}

@@ -1,0 +1,152 @@
+{
+  "model": "claude-haiku-4-5",
+  "stop_reason": "end_turn",
+  "latency_s": 8.48,
+  "usage": {
+    "input_tokens": 2949,
+    "output_tokens": 973
+  },
+  "cost_usd": 0.007814,
+  "request_id": "req_011CeeYfwpFSM9jeYBzJ5To5",
+  "raw_text": "{\"doc_type\": \"itemized_receipt\", \"country\": \"ZA\", \"currency\": \"ZAR\", \"store_name\": \"Woolworths\", \"store_branch_address\": \"AV. MARGINAL 9519\", \"store_tax_id\": \"400354162\", \"receipt_number\": \"KIY/9613/260828/00000027\", \"date\": null, \"time\": null, \"payment_method\": \"cash\", \"subtotal\": 8886.45, \"tax_total\": 1182.44, \"discount_total\": 0, \"total\": 8886.45, \"items\": [{\"name\": \"SIMONSTG GEWURZ\", \"qty\": 1, \"unit_price\": 1030.00, \"line_total\": 1030.00, \"category\": \"grocery\"}, {\"name\": \"XL Shopper Grey\", \"qty\": 1, \"unit_price\": 150.00, \"line_total\": 150.00, \"category\": \"household\"}, {\"name\": \"La Motte Cab Sa\", \"qty\": 1, \"unit_price\": 1150.00, \"line_total\": 1150.00, \"category\": \"alcohol\"}, {\"name\": \"Kara Orange SP\", \"qty\": 1, \"unit_price\": 215.00, \"line_total\": 215.00, \"category\": \"drink\"}, {\"name\": \"Lean Beef Mince\", \"qty\": 1, \"unit_price\": 540.00, \"line_total\": 540.00, \"category\": \"grocery\"}, {\"name\": \"4 CHICKEN THIGHO.592\", \"qty\": 1, \"unit_price\": 313.73, \"line_total\": 313.73, \"category\": \"grocery\"}, {\"name\": \"F Bulk Lamb chD.954\", \"qty\": 1, \"unit_price\": 1602.72, \"line_total\": 1602.72, \"category\": \"grocery\"}, {\"name\": \"Solo Washed Roc\", \"qty\": 1, \"unit_price\": 140.00, \"line_total\": 140.00, \"category\": \"grocery\"}, {\"name\": \"Wht Salad Onion\", \"qty\": 1, \"unit_price\": 190.00, \"line_total\": 190.00, \"category\": \"grocery\"}, {\"name\": \"BOS Lime&Ginger\", \"qty\": 1, \"unit_price\": 220.00, \"line_total\": 220.00, \"category\": \"drink\"}, {\"name\": \"Cream of Tartar\", \"qty\": 1, \"unit_price\": 365.00, \"line_total\": 365.00, \"category\": \"grocery\"}, {\"name\": \"200ml Litchi Ju\", \"qty\": 1, \"unit_price\": 80.00, \"line_total\": 80.00, \"category\": \"drink\"}, {\"name\": \"Fig Ginger Pres\", \"qty\": 1, \"unit_price\": 485.00, \"line_total\": 485.00, \"category\": \"drink\"}, {\"name\": \"300ML BOS LEMON\", \"qty\": 1, \"unit_price\": 115.00, \"line_total\": 115.00, \"category\": \"drink\"}, {\"name\": \"Cr Dark Hazelnut\", \"qty\": 1, \"unit_price\": 845.00, \"line_total\": 845.00, \"category\": \"grocery\"}, {\"name\": \"GF Seeded Bread\", \"qty\": 1, \"unit_price\": 480.00, \"line_total\": 480.00, \"category\": \"grocery\"}, {\"name\": \"F MC Egg Giant\", \"qty\": 1, \"unit_price\": 965.00, \"line_total\": 965.00, \"category\": \"grocery\"}], \"legibility\": \"good\", \"notes\": \"Receipt from South African Woolworths store located in Mozambique; text in Portuguese; IVA tax rate 16% for most items, 0% for some.\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "country": "ZA",
+    "currency": "ZAR",
+    "store_name": "Woolworths",
+    "store_branch_address": "AV. MARGINAL 9519",
+    "store_tax_id": "400354162",
+    "receipt_number": "KIY/9613/260828/00000027",
+    "date": null,
+    "time": null,
+    "payment_method": "cash",
+    "subtotal": 8886.45,
+    "tax_total": 1182.44,
+    "discount_total": 0,
+    "total": 8886.45,
+    "items": [
+      {
+        "name": "SIMONSTG GEWURZ",
+        "qty": 1,
+        "unit_price": 1030.0,
+        "line_total": 1030.0,
+        "category": "grocery"
+      },
+      {
+        "name": "XL Shopper Grey",
+        "qty": 1,
+        "unit_price": 150.0,
+        "line_total": 150.0,
+        "category": "household"
+      },
+      {
+        "name": "La Motte Cab Sa",
+        "qty": 1,
+        "unit_price": 1150.0,
+        "line_total": 1150.0,
+        "category": "alcohol"
+      },
+      {
+        "name": "Kara Orange SP",
+        "qty": 1,
+        "unit_price": 215.0,
+        "line_total": 215.0,
+        "category": "drink"
+      },
+      {
+        "name": "Lean Beef Mince",
+        "qty": 1,
+        "unit_price": 540.0,
+        "line_total": 540.0,
+        "category": "grocery"
+      },
+      {
+        "name": "4 CHICKEN THIGHO.592",
+        "qty": 1,
+        "unit_price": 313.73,
+        "line_total": 313.73,
+        "category": "grocery"
+      },
+      {
+        "name": "F Bulk Lamb chD.954",
+        "qty": 1,
+        "unit_price": 1602.72,
+        "line_total": 1602.72,
+        "category": "grocery"
+      },
+      {
+        "name": "Solo Washed Roc",
+        "qty": 1,
+        "unit_price": 140.0,
+        "line_total": 140.0,
+        "category": "grocery"
+      },
+      {
+        "name": "Wht Salad Onion",
+        "qty": 1,
+        "unit_price": 190.0,
+        "line_total": 190.0,
+        "category": "grocery"
+      },
+      {
+        "name": "BOS Lime&Ginger",
+        "qty": 1,
+        "unit_price": 220.0,
+        "line_total": 220.0,
+        "category": "drink"
+      },
+      {
+        "name": "Cream of Tartar",
+        "qty": 1,
+        "unit_price": 365.0,
+        "line_total": 365.0,
+        "category": "grocery"
+      },
+      {
+        "name": "200ml Litchi Ju",
+        "qty": 1,
+        "unit_price": 80.0,
+        "line_total": 80.0,
+        "category": "drink"
+      },
+      {
+        "name": "Fig Ginger Pres",
+        "qty": 1,
+        "unit_price": 485.0,
+        "line_total": 485.0,
+        "category": "drink"
+      },
+      {
+        "name": "300ML BOS LEMON",
+        "qty": 1,
+        "unit_price": 115.0,
+        "line_total": 115.0,
+        "category": "drink"
+      },
+      {
+        "name": "Cr Dark Hazelnut",
+        "qty": 1,
+        "unit_price": 845.0,
+        "line_total": 845.0,
+        "category": "grocery"
+      },
+      {
+        "name": "GF Seeded Bread",
+        "qty": 1,
+        "unit_price": 480.0,
+        "line_total": 480.0,
+        "category": "grocery"
+      },
+      {
+        "name": "F MC Egg Giant",
+        "qty": 1,
+        "unit_price": 965.0,
+        "line_total": 965.0,
+        "category": "grocery"
+      }
+    ],
+    "legibility": "good",
+    "notes": "Receipt from South African Woolworths store located in Mozambique; text in Portuguese; IVA tax rate 16% for most items, 0% for some."
+  },
+  "receipt": "r09"
+}

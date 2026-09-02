@@ -1,0 +1,54 @@
+{
+  "model": "claude-opus-5",
+  "stop_reason": "end_turn",
+  "latency_s": 9.12,
+  "usage": {
+    "input_tokens": 3340,
+    "output_tokens": 596
+  },
+  "cost_usd": 0.0316,
+  "request_id": "req_011CeeZ5pnF9tRwCUHfEdnc6",
+  "raw_text": "{\"doc_type\":\"itemized_receipt\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"Woolworths\",\"store_branch_address\":\"Woolworths Maces, Av. Marginal 9519\",\"store_tax_id\":\"400354162\",\"receipt_number\":\"MMM/9613/260828/00000007 M05\",\"date\":\"2026-08-28\",\"time\":null,\"payment_method\":\"cash\",\"subtotal\":3206.90,\"tax_total\":513.10,\"discount_total\":0,\"total\":3720.00,\"items\":[{\"name\":\"2PK WAFFLE TEA\",\"qty\":1,\"unit_price\":1400.00,\"line_total\":1400.00,\"category\":\"household\"},{\"name\":\"4pk Pleather pl\",\"qty\":1,\"unit_price\":1160.00,\"line_total\":1160.00,\"category\":\"clothing\"},{\"name\":\"4pk Pleather pl\",\"qty\":1,\"unit_price\":1160.00,\"line_total\":1160.00,\"category\":\"clothing\"}],\"legibility\":\"partial\",\"notes\":\"Faded thermal print with folds; reverse-side text showing through the paper.\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "Woolworths",
+    "store_branch_address": "Woolworths Maces, Av. Marginal 9519",
+    "store_tax_id": "400354162",
+    "receipt_number": "MMM/9613/260828/00000007 M05",
+    "date": "2026-08-28",
+    "time": null,
+    "payment_method": "cash",
+    "subtotal": 3206.9,
+    "tax_total": 513.1,
+    "discount_total": 0,
+    "total": 3720.0,
+    "items": [
+      {
+        "name": "2PK WAFFLE TEA",
+        "qty": 1,
+        "unit_price": 1400.0,
+        "line_total": 1400.0,
+        "category": "household"
+      },
+      {
+        "name": "4pk Pleather pl",
+        "qty": 1,
+        "unit_price": 1160.0,
+        "line_total": 1160.0,
+        "category": "clothing"
+      },
+      {
+        "name": "4pk Pleather pl",
+        "qty": 1,
+        "unit_price": 1160.0,
+        "line_total": 1160.0,
+        "category": "clothing"
+      }
+    ],
+    "legibility": "partial",
+    "notes": "Faded thermal print with folds; reverse-side text showing through the paper."
+  },
+  "receipt": "r08"
+}

@@ -1,0 +1,75 @@
+{
+  "model": "claude-haiku-4-5",
+  "stop_reason": "end_turn",
+  "latency_s": 5.93,
+  "usage": {
+    "input_tokens": 2949,
+    "output_tokens": 464
+  },
+  "cost_usd": 0.005269,
+  "request_id": "req_011CeeYddUsUZvjfi9NDnXvc",
+  "raw_text": "{\"doc_type\": \"itemized_receipt\", \"country\": \"MZ\", \"currency\": \"MZN\", \"store_name\": \"LOKAL\", \"store_branch_address\": \"Av. Kuane Nkrumah, 551\", \"store_tax_id\": \"400010153\", \"receipt_number\": \"FS ARJ002/110197\", \"date\": \"2026-08-23\", \"time\": \"17:23\", \"payment_method\": \"card\", \"subtotal\": 1384.20, \"tax_total\": 165.30, \"discount_total\": 0, \"total\": 1549.50, \"items\": [{\"name\": \"PAO DE AGUA -NF 100G UN\", \"qty\": 8, \"unit_price\": 20, \"line_total\": 160, \"category\": \"grocery\"}, {\"name\": \"BANANA KG KG\", \"qty\": 0.72, \"unit_price\": 35, \"line_total\": 25.2, \"category\": \"grocery\"}, {\"name\": \"CHOC LEITE AVELAS PQ 200G (20) UN\", \"qty\": 1, \"unit_price\": 399, \"line_total\": 399, \"category\": \"snack\"}, {\"name\": \"CHOC PRETO 72 PD 200G UN\", \"qty\": 1, \"unit_price\": 425, \"line_total\": 425, \"category\": \"snack\"}, {\"name\": \"BOL EET SUM MOR BAKERS 200G(12 UN\", \"qty\": 2, \"unit_price\": 185, \"line_total\": 370, \"category\": \"snack\"}, {\"name\": \"SACO PLASTICO ALCA LOKAL UN UN\", \"qty\": 1, \"unit_price\": 5, \"line_total\": 5, \"category\": \"household\"}], \"legibility\": \"good\", \"notes\": \"\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "LOKAL",
+    "store_branch_address": "Av. Kuane Nkrumah, 551",
+    "store_tax_id": "400010153",
+    "receipt_number": "FS ARJ002/110197",
+    "date": "2026-08-23",
+    "time": "17:23",
+    "payment_method": "card",
+    "subtotal": 1384.2,
+    "tax_total": 165.3,
+    "discount_total": 0,
+    "total": 1549.5,
+    "items": [
+      {
+        "name": "PAO DE AGUA -NF 100G UN",
+        "qty": 8,
+        "unit_price": 20,
+        "line_total": 160,
+        "category": "grocery"
+      },
+      {
+        "name": "BANANA KG KG",
+        "qty": 0.72,
+        "unit_price": 35,
+        "line_total": 25.2,
+        "category": "grocery"
+      },
+      {
+        "name": "CHOC LEITE AVELAS PQ 200G (20) UN",
+        "qty": 1,
+        "unit_price": 399,
+        "line_total": 399,
+        "category": "snack"
+      },
+      {
+        "name": "CHOC PRETO 72 PD 200G UN",
+        "qty": 1,
+        "unit_price": 425,
+        "line_total": 425,
+        "category": "snack"
+      },
+      {
+        "name": "BOL EET SUM MOR BAKERS 200G(12 UN",
+        "qty": 2,
+        "unit_price": 185,
+        "line_total": 370,
+        "category": "snack"
+      },
+      {
+        "name": "SACO PLASTICO ALCA LOKAL UN UN",
+        "qty": 1,
+        "unit_price": 5,
+        "line_total": 5,
+        "category": "household"
+      }
+    ],
+    "legibility": "good",
+    "notes": ""
+  },
+  "receipt": "r04"
+}

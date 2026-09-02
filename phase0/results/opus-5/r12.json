@@ -1,0 +1,32 @@
+{
+  "model": "claude-opus-5",
+  "stop_reason": "end_turn",
+  "latency_s": 9.91,
+  "usage": {
+    "input_tokens": 3340,
+    "output_tokens": 528
+  },
+  "cost_usd": 0.0299,
+  "request_id": "req_011CeeZ8rX1eWb6exdjQVFaN",
+  "raw_text": "{\"doc_type\":\"handwritten\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"EMME - Estacionamento Rotativo Remunerado (Município de Maputo)\",\"store_branch_address\":null,\"store_tax_id\":\"600003089\",\"receipt_number\":\"0201224\",\"date\":\"2026-08-27\",\"time\":\"14:20\",\"payment_method\":null,\"subtotal\":null,\"tax_total\":null,\"discount_total\":0,\"total\":null,\"items\":[],\"legibility\":\"partial\",\"notes\":\"Parking receipt stamped \\\"PAGO\\\"; Valor line left blank, plate MME 7978, duplicate copy shows entry time 15:02.\"}",
+  "parsed": {
+    "doc_type": "handwritten",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "EMME - Estacionamento Rotativo Remunerado (Município de Maputo)",
+    "store_branch_address": null,
+    "store_tax_id": "600003089",
+    "receipt_number": "0201224",
+    "date": "2026-08-27",
+    "time": "14:20",
+    "payment_method": null,
+    "subtotal": null,
+    "tax_total": null,
+    "discount_total": 0,
+    "total": null,
+    "items": [],
+    "legibility": "partial",
+    "notes": "Parking receipt stamped \"PAGO\"; Valor line left blank, plate MME 7978, duplicate copy shows entry time 15:02."
+  },
+  "receipt": "r12"
+}

@@ -1,0 +1,82 @@
+{
+  "model": "claude-sonnet-5",
+  "stop_reason": "end_turn",
+  "latency_s": 13.94,
+  "usage": {
+    "input_tokens": 4296,
+    "output_tokens": 1303
+  },
+  "cost_usd": 0.021622,
+  "request_id": "req_011CeeddfGNACyCg8JxH2azM",
+  "raw_text": "{\"doc_type\":\"itemized_receipt\",\"store_type\":\"fuel_station\",\"country\":\"ZA\",\"currency\":\"ZAR\",\"store_name\":\"Sasol Komatipoort\",\"store_branch_address\":\"N4 Highway, Komatipoort\",\"store_tax_id\":\"4490211762\",\"receipt_number\":\"001-03485-0490009\",\"date\":\"2026-08-24\",\"time\":\"09:01\",\"payment_method\":\"card\",\"subtotal\":null,\"tax_total\":28.50,\"discount_total\":2.10,\"total\":218.40,\"items\":[{\"name\":\"Capupuccino\",\"qty\":3,\"unit_price\":42.00,\"line_total\":126.00,\"category\":\"drink\",\"subcategory\":\"coffee_tea\"},{\"name\":\"Nestle Bar One 52g\",\"qty\":1,\"unit_price\":23.00,\"line_total\":23.00,\"category\":\"food\",\"subcategory\":\"snacks_sweets\"},{\"name\":\"Fruitella Strawberry\",\"qty\":1,\"unit_price\":15.00,\"line_total\":15.00,\"category\":\"food\",\"subcategory\":\"snacks_sweets\"},{\"name\":\"Black Cat Caramel 56\",\"qty\":1,\"unit_price\":18.00,\"line_total\":18.00,\"category\":\"food\",\"subcategory\":\"snacks_sweets\"},{\"name\":\"Nestle Milky Bar Sma\",\"qty\":1,\"unit_price\":12.50,\"line_total\":12.50,\"category\":\"food\",\"subcategory\":\"snacks_sweets\"},{\"name\":\"Red Bull Sugar Free\",\"qty\":1,\"unit_price\":26.00,\"line_total\":26.00,\"category\":\"drink\",\"subcategory\":\"energy_drink\"}],\"legibility\":\"good\",\"notes\":\"A promo discount line for a separate Red Bull 250ml was applied but not listed as its own item.\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "store_type": "fuel_station",
+    "country": "ZA",
+    "currency": "ZAR",
+    "store_name": "Sasol Komatipoort",
+    "store_branch_address": "N4 Highway, Komatipoort",
+    "store_tax_id": "4490211762",
+    "receipt_number": "001-03485-0490009",
+    "date": "2026-08-24",
+    "time": "09:01",
+    "payment_method": "card",
+    "subtotal": null,
+    "tax_total": 28.5,
+    "discount_total": 2.1,
+    "total": 218.4,
+    "items": [
+      {
+        "name": "Capupuccino",
+        "qty": 3,
+        "unit_price": 42.0,
+        "line_total": 126.0,
+        "category": "drink",
+        "subcategory": "coffee_tea"
+      },
+      {
+        "name": "Nestle Bar One 52g",
+        "qty": 1,
+        "unit_price": 23.0,
+        "line_total": 23.0,
+        "category": "food",
+        "subcategory": "snacks_sweets"
+      },
+      {
+        "name": "Fruitella Strawberry",
+        "qty": 1,
+        "unit_price": 15.0,
+        "line_total": 15.0,
+        "category": "food",
+        "subcategory": "snacks_sweets"
+      },
+      {
+        "name": "Black Cat Caramel 56",
+        "qty": 1,
+        "unit_price": 18.0,
+        "line_total": 18.0,
+        "category": "food",
+        "subcategory": "snacks_sweets"
+      },
+      {
+        "name": "Nestle Milky Bar Sma",
+        "qty": 1,
+        "unit_price": 12.5,
+        "line_total": 12.5,
+        "category": "food",
+        "subcategory": "snacks_sweets"
+      },
+      {
+        "name": "Red Bull Sugar Free",
+        "qty": 1,
+        "unit_price": 26.0,
+        "line_total": 26.0,
+        "category": "drink",
+        "subcategory": "energy_drink"
+      }
+    ],
+    "legibility": "good",
+    "notes": "A promo discount line for a separate Red Bull 250ml was applied but not listed as its own item."
+  },
+  "receipt": "r03_Sasol_Komatipoort_ZA.jpeg"
+}

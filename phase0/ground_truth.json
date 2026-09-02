@@ -1,0 +1,811 @@
+{
+  "_note": "Hand-transcribed ground truth for the 17 Phase 0 receipts (transcribed by Claude from the photos on 2026-09-02, PS to spot-check). Dates are YYYY-MM-DD. Amounts are plain numbers. 'null' = not printed / not readable.",
+  "receipts": [
+    {
+      "id": "r01",
+      "file": "r01_ParksShop_Kruger_ZA.jpeg",
+      "doc_type": "itemized_receipt",
+      "country": "ZA",
+      "currency": "ZAR",
+      "store_name": "The Parks Shop",
+      "store_branch_address": "Skukuza Rest Camp, Kruger National Park, Mpumalanga",
+      "store_tax_id": "4190262198",
+      "receipt_number": "SKUKP/3/000385635",
+      "date": "2026-08-26",
+      "time": "09:08",
+      "payment_method": "cash",
+      "subtotal": 54.0,
+      "tax_total": 7.04,
+      "discount_total": 0,
+      "total": 54.0,
+      "items": [
+        {
+          "name": "Willard Big Krn Bites Tom 120G",
+          "qty": 2,
+          "unit_price": 27.0,
+          "line_total": 54.0
+        }
+      ],
+      "notes": "Clear thermal receipt, slightly creased."
+    },
+    {
+      "id": "r02",
+      "file": "r02_FoodEDrink_PontaDouro_card_slip.jpeg",
+      "doc_type": "card_slip",
+      "country": "MZ",
+      "currency": "MZN",
+      "store_name": "Food e Drink",
+      "store_branch_address": "Ponta Douro, Maputo",
+      "store_tax_id": null,
+      "receipt_number": "003345",
+      "date": "2026-08-20",
+      "time": "09:20",
+      "payment_method": "card",
+      "subtotal": null,
+      "tax_total": null,
+      "discount_total": 0,
+      "total": 4408.0,
+      "items": [],
+      "notes": "POS card slip only, no items. Crumpled, faint print. Store name truncated on paper ('FOOD e DRINK, SOC'). PS 2026-09-02: receipt number is the RECIBO field next to BATCH (very faint; best reading 003345, third digit could be 8). 702273 is the auth code, not the receipt number. Sonnet/Opus returned null here; Haiku wrongly used the card's last 4 digits."
+    },
+    {
+      "id": "r03",
+      "file": "r03_Sasol_Komatipoort_ZA.jpeg",
+      "doc_type": "itemized_receipt",
+      "country": "ZA",
+      "currency": "ZAR",
+      "store_name": "Sasol Komatipoort",
+      "store_branch_address": "N4 Highway, Komatipoort",
+      "store_tax_id": "4490211762",
+      "receipt_number": "001-03485-0490009",
+      "date": "2026-08-24",
+      "time": "09:01",
+      "payment_method": "card",
+      "subtotal": 220.5,
+      "tax_total": 28.5,
+      "discount_total": 2.1,
+      "total": 218.4,
+      "items": [
+        {
+          "name": "CAPUPUCCINO",
+          "qty": 3,
+          "unit_price": 42.0,
+          "line_total": 126.0
+        },
+        {
+          "name": "NESTLE BAR ONE 52G",
+          "qty": 1,
+          "unit_price": 23.0,
+          "line_total": 23.0
+        },
+        {
+          "name": "FRUITELLA STRAWBERRY",
+          "qty": 1,
+          "unit_price": 15.0,
+          "line_total": 15.0
+        },
+        {
+          "name": "BLACK CAT CARAMEL 56",
+          "qty": 1,
+          "unit_price": 18.0,
+          "line_total": 18.0
+        },
+        {
+          "name": "NESTLE MILKY BAR SMA",
+          "qty": 1,
+          "unit_price": 12.5,
+          "line_total": 12.5
+        },
+        {
+          "name": "RED BULL SUGAR FREE",
+          "qty": 1,
+          "unit_price": 26.0,
+          "line_total": 26.0
+        }
+      ],
+      "notes": "Has a promo discount line (-2.10) that must not be counted as an item. 'Total (8) Items' counts units, not lines."
+    },
+    {
+      "id": "r04",
+      "file": "r04_Lokal_Maputo.jpeg",
+      "doc_type": "itemized_receipt",
+      "country": "MZ",
+      "currency": "MZN",
+      "store_name": "Lokal",
+      "store_branch_address": "Av. Kwame Nkrumah 551, Esquina com a Avenida Kim Il Sung, Maputo",
+      "store_tax_id": "400010153",
+      "receipt_number": "FS AAJ002/110197",
+      "date": "2026-08-23",
+      "time": "17:23",
+      "payment_method": "card",
+      "subtotal": 1384.2,
+      "tax_total": 165.38,
+      "discount_total": 0,
+      "total": 1384.2,
+      "items": [
+        {
+          "name": "PAO DE AGUA -MF 100G",
+          "qty": 8,
+          "unit_price": 20.0,
+          "line_total": 160.0
+        },
+        {
+          "name": "BANANA KG",
+          "qty": 0.72,
+          "unit_price": 35.0,
+          "line_total": 25.2
+        },
+        {
+          "name": "CHOC LEITE AVELAS PD 200G",
+          "qty": 1,
+          "unit_price": 399.0,
+          "line_total": 399.0
+        },
+        {
+          "name": "CHOC PRETO 72 PD 200G",
+          "qty": 1,
+          "unit_price": 425.0,
+          "line_total": 425.0
+        },
+        {
+          "name": "BOL EET SUM MOR BAKERS 200G",
+          "qty": 2,
+          "unit_price": 185.0,
+          "line_total": 370.0
+        },
+        {
+          "name": "SACO PLASTICO ALCA LOKAL",
+          "qty": 1,
+          "unit_price": 5.0,
+          "line_total": 5.0
+        }
+      ],
+      "notes": "Long faint receipt, decimal comma, weighed item (0,720 kg), category headers and IVA-exempt notes between lines. Legal name on paper: Mega Distribuicao de Mocambique, SA."
+    },
+    {
+      "id": "r05",
+      "file": "r05_PizzaPerfect_Malalane_ZA.jpeg",
+      "doc_type": "itemized_receipt",
+      "country": "ZA",
+      "currency": "ZAR",
+      "store_name": "Pizza Perfect",
+      "store_branch_address": "1 Air Str, Malalane",
+      "store_tax_id": "4530268418",
+      "receipt_number": "INV133100017-0",
+      "date": "2026-08-25",
+      "time": "10:33",
+      "payment_method": "card",
+      "subtotal": 174.0,
+      "tax_total": 22.69,
+      "discount_total": 0,
+      "total": 174.0,
+      "items": [
+        {
+          "name": "30cm Sweet And Sour Chicken Pizza",
+          "qty": 1,
+          "unit_price": 174.0,
+          "line_total": 174.0
+        }
+      ],
+      "notes": "Clean receipt."
+    },
+    {
+      "id": "r06",
+      "file": "r06_Piripiri_bar_tab_18_items.jpeg",
+      "doc_type": "bar_tab",
+      "country": "MZ",
+      "currency": "MZN",
+      "store_name": "Complexo Piripiri",
+      "store_branch_address": "Av. 24 de Julho, No 22",
+      "store_tax_id": null,
+      "receipt_number": null,
+      "date": "2026-08-29",
+      "time": "15:20",
+      "payment_method": null,
+      "subtotal": 12290.0,
+      "tax_total": null,
+      "discount_total": 0,
+      "total": 12290.0,
+      "items": [
+        {
+          "name": "Cafe expresso Delta",
+          "qty": 2,
+          "unit_price": 90.0,
+          "line_total": 180.0
+        },
+        {
+          "name": "Txilar Copo grande",
+          "qty": 5,
+          "unit_price": 190.0,
+          "line_total": 950.0
+        },
+        {
+          "name": "Sprite Grf",
+          "qty": 2,
+          "unit_price": 80.0,
+          "line_total": 160.0
+        },
+        {
+          "name": "Castle Lite Grf",
+          "qty": 2,
+          "unit_price": 180.0,
+          "line_total": 360.0
+        },
+        {
+          "name": "Chamussas de Carne",
+          "qty": 2,
+          "unit_price": 290.0,
+          "line_total": 580.0
+        },
+        {
+          "name": "Rissois",
+          "qty": 2,
+          "unit_price": 290.0,
+          "line_total": 580.0
+        },
+        {
+          "name": "Fanta Uva Lata",
+          "qty": 1,
+          "unit_price": 120.0,
+          "line_total": 120.0
+        },
+        {
+          "name": "Agua Nacional Pequena",
+          "qty": 2,
+          "unit_price": 75.0,
+          "line_total": 150.0
+        },
+        {
+          "name": "Moelas",
+          "qty": 2,
+          "unit_price": 330.0,
+          "line_total": 660.0
+        },
+        {
+          "name": "Moelas Fritas",
+          "qty": 1,
+          "unit_price": 330.0,
+          "line_total": 330.0
+        },
+        {
+          "name": "Coca Cola Grf",
+          "qty": 2,
+          "unit_price": 80.0,
+          "line_total": 160.0
+        },
+        {
+          "name": "Sprite Grf",
+          "qty": 1,
+          "unit_price": 80.0,
+          "line_total": 80.0
+        },
+        {
+          "name": "Gin Tanqueray",
+          "qty": 1,
+          "unit_price": 480.0,
+          "line_total": 480.0
+        },
+        {
+          "name": "Agua Tonica Lata",
+          "qty": 2,
+          "unit_price": 120.0,
+          "line_total": 240.0
+        },
+        {
+          "name": "Bife Rump",
+          "qty": 1,
+          "unit_price": 1075.0,
+          "line_total": 1075.0
+        },
+        {
+          "name": "Frango Sala",
+          "qty": 2,
+          "unit_price": 1100.0,
+          "line_total": 2200.0
+        },
+        {
+          "name": "Camarao Pequeno",
+          "qty": 3,
+          "unit_price": 990.0,
+          "line_total": 2970.0
+        },
+        {
+          "name": "Monte Velho Tin. 375",
+          "qty": 1,
+          "unit_price": 1015.0,
+          "line_total": 1015.0
+        }
+      ],
+      "notes": "18-line restaurant bill (not a fiscal invoice). Gin line has a garbled qty (',000'). Date printed as '029-08-202615:20'. Unit prices are derived (line/qty), not printed."
+    },
+    {
+      "id": "r07",
+      "file": "r07_MalalaneQuickShop_ZA.jpeg",
+      "doc_type": "itemized_receipt",
+      "country": "ZA",
+      "currency": "ZAR",
+      "store_name": "Malalane Quick Shop",
+      "store_branch_address": "1 Air Street, Malelane, 1320",
+      "store_tax_id": "4670102930",
+      "receipt_number": "02-21355-8146",
+      "date": "2026-08-25",
+      "time": "10:41",
+      "payment_method": "cash",
+      "subtotal": 16.0,
+      "tax_total": 2.09,
+      "discount_total": 0,
+      "total": 16.0,
+      "items": [
+        {
+          "name": "JAW BREAKER BLACK CH",
+          "qty": 1,
+          "unit_price": 16.0,
+          "line_total": 16.0
+        }
+      ],
+      "notes": "Clean receipt, one item."
+    },
+    {
+      "id": "r08",
+      "file": "r08_Woolworths_3_items.jpeg",
+      "doc_type": "itemized_receipt",
+      "country": "MZ",
+      "currency": "MZN",
+      "store_name": "Woolworths",
+      "store_branch_address": "Mares, Av. Marginal 9519, Maputo",
+      "store_tax_id": "400354162",
+      "receipt_number": "MMM/9613/260828/00000007",
+      "date": "2026-08-28",
+      "time": null,
+      "payment_method": "cash",
+      "subtotal": 3720.0,
+      "tax_total": 513.1,
+      "discount_total": 0,
+      "total": 3720.0,
+      "items": [
+        {
+          "name": "2PK WAFFLE TEA",
+          "qty": 1,
+          "unit_price": 1400.0,
+          "line_total": 1400.0
+        },
+        {
+          "name": "4pk Pleather pl",
+          "qty": 1,
+          "unit_price": 1160.0,
+          "line_total": 1160.0
+        },
+        {
+          "name": "4pk Pleather pl",
+          "qty": 1,
+          "unit_price": 1160.0,
+          "line_total": 1160.0
+        }
+      ],
+      "notes": "Heavy reverse-side text bleed-through (hard). Date only encoded in the ref number (260828). Non-food items."
+    },
+    {
+      "id": "r09",
+      "file": "r09_Woolworths_17_items.jpeg",
+      "doc_type": "itemized_receipt",
+      "country": "MZ",
+      "currency": "MZN",
+      "store_name": "Woolworths",
+      "store_branch_address": "Mares, Av. Marginal 9519, Maputo",
+      "store_tax_id": "400354162",
+      "receipt_number": "KIY/9613/260828/00000027",
+      "date": "2026-08-28",
+      "time": null,
+      "payment_method": "cash",
+      "subtotal": 8886.45,
+      "tax_total": 1182.44,
+      "discount_total": 0,
+      "total": 8886.45,
+      "items": [
+        {
+          "name": "SIMONSIG GEWURZ",
+          "qty": 1,
+          "unit_price": 1030.0,
+          "line_total": 1030.0
+        },
+        {
+          "name": "XL Shopper Grey",
+          "qty": 1,
+          "unit_price": 150.0,
+          "line_total": 150.0
+        },
+        {
+          "name": "La Motte Cab Sa",
+          "qty": 1,
+          "unit_price": 1150.0,
+          "line_total": 1150.0
+        },
+        {
+          "name": "Kara Orange SP",
+          "qty": 1,
+          "unit_price": 215.0,
+          "line_total": 215.0
+        },
+        {
+          "name": "Lean Beef Mince",
+          "qty": 1,
+          "unit_price": 540.0,
+          "line_total": 540.0
+        },
+        {
+          "name": "4 CHICKEN THIGH",
+          "qty": 0.592,
+          "unit_price": null,
+          "line_total": 313.73
+        },
+        {
+          "name": "FR Bulk Lamb ch",
+          "qty": 0.954,
+          "unit_price": null,
+          "line_total": 1602.72
+        },
+        {
+          "name": "Solo Washed Roc",
+          "qty": 1,
+          "unit_price": 140.0,
+          "line_total": 140.0
+        },
+        {
+          "name": "Wht Salad Onion",
+          "qty": 1,
+          "unit_price": 190.0,
+          "line_total": 190.0
+        },
+        {
+          "name": "BOS Lime&Ginger",
+          "qty": 1,
+          "unit_price": 220.0,
+          "line_total": 220.0
+        },
+        {
+          "name": "Cream of Tartar",
+          "qty": 1,
+          "unit_price": 365.0,
+          "line_total": 365.0
+        },
+        {
+          "name": "200ml Litchi Ju",
+          "qty": 1,
+          "unit_price": 80.0,
+          "line_total": 80.0
+        },
+        {
+          "name": "Fig Ginger Pres",
+          "qty": 1,
+          "unit_price": 485.0,
+          "line_total": 485.0
+        },
+        {
+          "name": "300ML BOS LEMON",
+          "qty": 1,
+          "unit_price": 115.0,
+          "line_total": 115.0
+        },
+        {
+          "name": "Cr Dark Hzlnut",
+          "qty": 1,
+          "unit_price": 845.0,
+          "line_total": 845.0
+        },
+        {
+          "name": "GF Seeded Bread",
+          "qty": 1,
+          "unit_price": 480.0,
+          "line_total": 480.0
+        },
+        {
+          "name": "F MC Egg Giant",
+          "qty": 1,
+          "unit_price": 965.0,
+          "line_total": 965.0
+        }
+      ],
+      "notes": "17-item grocery receipt with bleed-through, two weighed items (0.592 kg, 0.954 kg), rounding line (.45). The key groceries test."
+    },
+    {
+      "id": "r10",
+      "file": "r10_Shoprite_CostaDoSol.jpeg",
+      "doc_type": "itemized_receipt",
+      "country": "MZ",
+      "currency": "MZN",
+      "store_name": "Shoprite",
+      "store_branch_address": "Costa do Sol, Av. Da Marginal No 9519, Maputo",
+      "store_tax_id": "400009694",
+      "receipt_number": "00163302808260040000075",
+      "date": "2026-08-28",
+      "time": "11:30",
+      "payment_method": "card",
+      "subtotal": 274.98,
+      "tax_total": 37.93,
+      "discount_total": 0,
+      "total": 274.98,
+      "items": [
+        {
+          "name": "MOSTARDA EM GRAO",
+          "qty": 1,
+          "unit_price": 189.99,
+          "line_total": 189.99
+        },
+        {
+          "name": "MAYNARDS 60G",
+          "qty": 1,
+          "unit_price": 84.99,
+          "line_total": 84.99
+        }
+      ],
+      "notes": "Red pen scribble across the item lines. Prices prefixed 'MT'. Date printed 28/08/26."
+    },
+    {
+      "id": "r11",
+      "file": "r11_Primavera_jameson.jpeg",
+      "doc_type": "itemized_receipt",
+      "country": "MZ",
+      "currency": "MZN",
+      "store_name": "Supermercado Primavera",
+      "store_branch_address": "Rua Francisco Barreto No 65/67 R/C, Maputo",
+      "store_tax_id": null,
+      "receipt_number": "20260827152612808480214",
+      "date": "2026-08-27",
+      "time": "15:26",
+      "payment_method": "cash",
+      "subtotal": 2400.0,
+      "tax_total": null,
+      "discount_total": 0,
+      "total": 2400.0,
+      "items": [
+        {
+          "name": "jameson 750ml",
+          "qty": 2,
+          "unit_price": 1200.0,
+          "line_total": 2400.0
+        }
+      ],
+      "notes": "Small clean receipt, column layout (UnitPrice / Amount / Total). No NUIT printed."
+    },
+    {
+      "id": "r12",
+      "file": "r12_EMME_parking_crumpled.jpeg",
+      "doc_type": "handwritten",
+      "country": "MZ",
+      "currency": "MZN",
+      "store_name": "EMME - Empresa Municipal de Mobilidade e Estacionamento",
+      "store_branch_address": "Maputo",
+      "store_tax_id": "600003089",
+      "receipt_number": "0201224",
+      "date": "2026-08-27",
+      "time": "14:20",
+      "payment_method": "cash",
+      "subtotal": null,
+      "tax_total": null,
+      "discount_total": 0,
+      "total": 20.0,
+      "items": [
+        {
+          "name": "Estacionamento",
+          "qty": 1,
+          "unit_price": 20.0,
+          "line_total": 20.0
+        }
+      ],
+      "notes": "Handwritten parking ticket, very crumpled, photographed rotated 90 degrees, two copies side by side, 'PAGO' stamp over the text. Value handwritten '20' (faint). No item lines on the paper. Plate MME 7973. Expected to be the hardest. PS confirmed 2026-09-02: paid in cash. v2 rule: parking = one item line."
+    },
+    {
+      "id": "r13",
+      "file": "r13_Piripiri_bar_tab_1_item.jpeg",
+      "doc_type": "bar_tab",
+      "country": "MZ",
+      "currency": "MZN",
+      "store_name": "Complexo Piripiri",
+      "store_branch_address": "Av. 24 de Julho, No 22",
+      "store_tax_id": null,
+      "receipt_number": null,
+      "date": "2026-08-28",
+      "time": "14:17",
+      "payment_method": null,
+      "subtotal": 190.0,
+      "tax_total": null,
+      "discount_total": 0,
+      "total": 190.0,
+      "items": [
+        {
+          "name": "Txilar Copo grande",
+          "qty": 1,
+          "unit_price": 190.0,
+          "line_total": 190.0
+        }
+      ],
+      "notes": "Crumpled single-line bar bill. Date printed '028-08-202614:17'."
+    },
+    {
+      "id": "r14",
+      "file": "r14_SupermercadoReal.jpeg",
+      "doc_type": "itemized_receipt",
+      "country": "MZ",
+      "currency": "MZN",
+      "store_name": "Supermercado Real",
+      "store_branch_address": "Av. Mao Tse Tung no 627/9, Maputo",
+      "store_tax_id": "400121508",
+      "receipt_number": "100098/2026",
+      "date": "2026-08-28",
+      "time": "14:41",
+      "payment_method": "card",
+      "subtotal": 4026.0,
+      "tax_total": 555.31,
+      "discount_total": 0,
+      "total": 4026.0,
+      "items": [
+        {
+          "name": "WHISKAS",
+          "qty": 4,
+          "unit_price": 75.0,
+          "line_total": 300.0
+        },
+        {
+          "name": "CASTANHA",
+          "qty": 2,
+          "unit_price": 580.0,
+          "line_total": 1160.0
+        },
+        {
+          "name": "CASTANHA 1KG",
+          "qty": 2,
+          "unit_price": 1160.0,
+          "line_total": 2320.0
+        },
+        {
+          "name": "Cadbury Dairy Milk Mint Cr 150g",
+          "qty": 1,
+          "unit_price": 195.0,
+          "line_total": 195.0
+        },
+        {
+          "name": "Pao",
+          "qty": 1,
+          "unit_price": 45.0,
+          "line_total": 45.0
+        },
+        {
+          "name": "SACO",
+          "qty": 1,
+          "unit_price": 6.0,
+          "line_total": 6.0
+        }
+      ],
+      "notes": "Faint dot-matrix style print, thousands separator comma (1,160.00). Payment 'Ned' = Nedbank card. Date 28.08.2026. PS confirmed 2026-09-02: 'Ned' = Nedbank card payment."
+    },
+    {
+      "id": "r15",
+      "file": "r15_EMME_parking_blank_value.jpeg",
+      "doc_type": "handwritten",
+      "country": "MZ",
+      "currency": "MZN",
+      "store_name": "EMME - Empresa Municipal de Mobilidade e Estacionamento",
+      "store_branch_address": "Maputo",
+      "store_tax_id": "600003089",
+      "receipt_number": "000598",
+      "date": "2026-08-28",
+      "time": "11:42",
+      "payment_method": "cash",
+      "subtotal": null,
+      "tax_total": null,
+      "discount_total": 0,
+      "total": null,
+      "items": [
+        {
+          "name": "Estacionamento",
+          "qty": 1,
+          "unit_price": null,
+          "line_total": null
+        }
+      ],
+      "notes": "Handwritten parking ticket, cleaner. 'Valor' is left BLANK, so total is genuinely unknown; a good model should return null, not invent a number. Plate MME 7973. PS confirmed 2026-09-02: paid in cash. v2 rule: parking = one item line, prices null because Valor is blank."
+    },
+    {
+      "id": "r16",
+      "file": "r16_TVCabo_invoice.jpeg",
+      "doc_type": "invoice",
+      "country": "MZ",
+      "currency": "MZN",
+      "store_name": "TV Cabo",
+      "store_branch_address": "Loja 52 Maputo Loja Sede, Av. dos Presidentes 68, Maputo",
+      "store_tax_id": null,
+      "receipt_number": "1056725/FR26",
+      "date": "2026-08-27",
+      "time": "12:00",
+      "payment_method": "card",
+      "subtotal": 2905.17,
+      "tax_total": 464.83,
+      "discount_total": 0,
+      "total": 3370.0,
+      "items": [
+        {
+          "name": "TV Cabo subscription 2026-08-27 a 2026-09-25",
+          "qty": 1,
+          "unit_price": 3370.0,
+          "line_total": 3370.0
+        }
+      ],
+      "notes": "A4 invoice (Factura-Recibo) with a Millennium BIM card slip stapled over the top-left, covering part of the header. Contains a customer name/address (personal data). Photo includes background clutter."
+    },
+    {
+      "id": "r17",
+      "file": "r17_Piripiri_bar_tab_9_items.jpeg",
+      "doc_type": "bar_tab",
+      "country": "MZ",
+      "currency": "MZN",
+      "store_name": "Complexo Piripiri",
+      "store_branch_address": "Av. 24 de Julho, No 22",
+      "store_tax_id": null,
+      "receipt_number": null,
+      "date": "2026-08-28",
+      "time": "14:05",
+      "payment_method": null,
+      "subtotal": 6170.0,
+      "tax_total": null,
+      "discount_total": 0,
+      "total": 6170.0,
+      "items": [
+        {
+          "name": "Txilar Copo grande",
+          "qty": 4,
+          "unit_price": 190.0,
+          "line_total": 760.0
+        },
+        {
+          "name": "Castle Lite Grf",
+          "qty": 2,
+          "unit_price": 180.0,
+          "line_total": 360.0
+        },
+        {
+          "name": "Sprite Grf",
+          "qty": 3,
+          "unit_price": 80.0,
+          "line_total": 240.0
+        },
+        {
+          "name": "Cafe expresso Delta",
+          "qty": 1,
+          "unit_price": 90.0,
+          "line_total": 90.0
+        },
+        {
+          "name": "Rissois",
+          "qty": 1,
+          "unit_price": 290.0,
+          "line_total": 290.0
+        },
+        {
+          "name": "Chamussas de Camarao",
+          "qty": 1,
+          "unit_price": 290.0,
+          "line_total": 290.0
+        },
+        {
+          "name": "Camarao Pequeno",
+          "qty": 1,
+          "unit_price": 990.0,
+          "line_total": 990.0
+        },
+        {
+          "name": "Camarao Pequeno",
+          "qty": 2,
+          "unit_price": 990.0,
+          "line_total": 1980.0
+        },
+        {
+          "name": "Espetada de Marisco",
+          "qty": 1,
+          "unit_price": 1170.0,
+          "line_total": 1170.0
+        }
+      ],
+      "notes": "9-line bar bill with a fold across the item block. Date printed '028-08-202614:05'."
+    }
+  ]
+}

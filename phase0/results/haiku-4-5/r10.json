@@ -1,0 +1,47 @@
+{
+  "model": "claude-haiku-4-5",
+  "stop_reason": "end_turn",
+  "latency_s": 4.09,
+  "usage": {
+    "input_tokens": 2949,
+    "output_tokens": 284
+  },
+  "cost_usd": 0.004369,
+  "request_id": "req_011CeeYga5ZwYzcd8hgSd3B9",
+  "raw_text": "{\"doc_type\": \"itemized_receipt\", \"country\": \"MZ\", \"currency\": \"MZN\", \"store_name\": \"Shoprite\", \"store_branch_address\": \"Av. Da Marginal - No 9519, Costa do Sol\", \"store_tax_id\": \"400009694\", \"receipt_number\": \"7980/11/01/RT/2016\", \"date\": \"2026-08-28\", \"time\": \"11:30\", \"payment_method\": \"cash\", \"subtotal\": 237.05, \"tax_total\": 37.93, \"discount_total\": 0, \"total\": 274.98, \"items\": [{\"name\": \"MOSTARDA EM GRAO\", \"qty\": 1, \"unit_price\": 189.99, \"line_total\": 189.99, \"category\": \"grocery\"}, {\"name\": \"MAYNARDS 60G\", \"qty\": 1, \"unit_price\": 84.99, \"line_total\": 84.99, \"category\": \"snack\"}], \"legibility\": \"good\", \"notes\": \"Red pen marking through items; IVA tax rate 16.0% noted on receipt.\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "Shoprite",
+    "store_branch_address": "Av. Da Marginal - No 9519, Costa do Sol",
+    "store_tax_id": "400009694",
+    "receipt_number": "7980/11/01/RT/2016",
+    "date": "2026-08-28",
+    "time": "11:30",
+    "payment_method": "cash",
+    "subtotal": 237.05,
+    "tax_total": 37.93,
+    "discount_total": 0,
+    "total": 274.98,
+    "items": [
+      {
+        "name": "MOSTARDA EM GRAO",
+        "qty": 1,
+        "unit_price": 189.99,
+        "line_total": 189.99,
+        "category": "grocery"
+      },
+      {
+        "name": "MAYNARDS 60G",
+        "qty": 1,
+        "unit_price": 84.99,
+        "line_total": 84.99,
+        "category": "snack"
+      }
+    ],
+    "legibility": "good",
+    "notes": "Red pen marking through items; IVA tax rate 16.0% noted on receipt."
+  },
+  "receipt": "r10"
+}

@@ -1,0 +1,42 @@
+{
+  "model": "claude-sonnet-5",
+  "stop_reason": "end_turn",
+  "latency_s": 15.08,
+  "usage": {
+    "input_tokens": 4296,
+    "output_tokens": 1189
+  },
+  "cost_usd": 0.020482,
+  "request_id": "req_011CeedoGvim8o58q7LHbEjA",
+  "raw_text": "{\"doc_type\":\"invoice\",\"store_type\":\"utility_provider\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"TV Cabo\",\"store_branch_address\":\"Av. dos Presidentes 5B, Maputo, Mozambique\",\"store_tax_id\":null,\"receipt_number\":\"1056725/FR26\",\"date\":\"2026-08-27\",\"time\":\"12:00\",\"payment_method\":\"card\",\"subtotal\":2905.17,\"tax_total\":464.83,\"discount_total\":0,\"total\":3370.00,\"items\":[{\"name\":\"TV Cabo - Renovação de serviço (rede TVCABO)\",\"qty\":1,\"unit_price\":3370.00,\"line_total\":3370.00,\"category\":\"utilities\",\"subcategory\":\"tv\"}],\"legibility\":\"partial\",\"notes\":\"A separate Visa card payment slip is stapled on top of the main TV Cabo invoice, confirming card payment of 3370.00 MZN.\"}",
+  "parsed": {
+    "doc_type": "invoice",
+    "store_type": "utility_provider",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "TV Cabo",
+    "store_branch_address": "Av. dos Presidentes 5B, Maputo, Mozambique",
+    "store_tax_id": null,
+    "receipt_number": "1056725/FR26",
+    "date": "2026-08-27",
+    "time": "12:00",
+    "payment_method": "card",
+    "subtotal": 2905.17,
+    "tax_total": 464.83,
+    "discount_total": 0,
+    "total": 3370.0,
+    "items": [
+      {
+        "name": "TV Cabo - Renovação de serviço (rede TVCABO)",
+        "qty": 1,
+        "unit_price": 3370.0,
+        "line_total": 3370.0,
+        "category": "utilities",
+        "subcategory": "tv"
+      }
+    ],
+    "legibility": "partial",
+    "notes": "A separate Visa card payment slip is stapled on top of the main TV Cabo invoice, confirming card payment of 3370.00 MZN."
+  },
+  "receipt": "r16_TVCabo_invoice.jpeg"
+}

@@ -1,0 +1,42 @@
+{
+  "model": "claude-sonnet-5",
+  "stop_reason": "end_turn",
+  "latency_s": 4.44,
+  "usage": {
+    "input_tokens": 4296,
+    "output_tokens": 251
+  },
+  "cost_usd": 0.011102,
+  "request_id": "req_011Ceee1EoKKoSMJYJNs8vAq",
+  "raw_text": "{\"doc_type\":\"itemized_receipt\",\"store_type\":\"restaurant\",\"country\":\"ZA\",\"currency\":\"ZAR\",\"store_name\":\"Pizza Perfect\",\"store_branch_address\":\"1 Air Str, Malalane\",\"store_tax_id\":\"4530268418\",\"receipt_number\":\"INV133100017-0\",\"date\":\"2026-08-25\",\"time\":\"10:33\",\"payment_method\":\"card\",\"subtotal\":174.00,\"tax_total\":22.69,\"discount_total\":0,\"total\":174.00,\"items\":[{\"name\":\"30cm Sweet And Sour Chicken Pizza\",\"qty\":1,\"unit_price\":174.00,\"line_total\":174.00,\"category\":\"restaurant\",\"subcategory\":\"meal\"}],\"legibility\":\"good\",\"notes\":\"\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "store_type": "restaurant",
+    "country": "ZA",
+    "currency": "ZAR",
+    "store_name": "Pizza Perfect",
+    "store_branch_address": "1 Air Str, Malalane",
+    "store_tax_id": "4530268418",
+    "receipt_number": "INV133100017-0",
+    "date": "2026-08-25",
+    "time": "10:33",
+    "payment_method": "card",
+    "subtotal": 174.0,
+    "tax_total": 22.69,
+    "discount_total": 0,
+    "total": 174.0,
+    "items": [
+      {
+        "name": "30cm Sweet And Sour Chicken Pizza",
+        "qty": 1,
+        "unit_price": 174.0,
+        "line_total": 174.0,
+        "category": "restaurant",
+        "subcategory": "meal"
+      }
+    ],
+    "legibility": "good",
+    "notes": ""
+  },
+  "receipt": "r05_PizzaPerfect_Malalane_ZA.jpeg"
+}

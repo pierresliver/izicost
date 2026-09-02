@@ -1,0 +1,170 @@
+{
+  "model": "claude-sonnet-5",
+  "stop_reason": "end_turn",
+  "latency_s": 23.71,
+  "usage": {
+    "input_tokens": 4296,
+    "output_tokens": 2732
+  },
+  "cost_usd": 0.035912,
+  "request_id": "req_011CeediqC3rkVX3BeRNNn6b",
+  "raw_text": "{\"doc_type\":\"itemized_receipt\",\"store_type\":\"supermarket\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"Woolworths\",\"store_branch_address\":\"Av. Marginal 9519\",\"store_tax_id\":\"400354162\",\"receipt_number\":\"KIY/9613/260828/00000027\",\"date\":\"2026-08-28\",\"time\":null,\"payment_method\":\"cash\",\"subtotal\":7704.01,\"tax_total\":1182.44,\"discount_total\":0,\"total\":8886.45,\"items\":[{\"name\":\"Simonsig Gewurz\",\"qty\":1,\"unit_price\":1030.00,\"line_total\":1030.00,\"category\":\"alcohol\",\"subcategory\":\"wine\"},{\"name\":\"XL Shopper Grey\",\"qty\":1,\"unit_price\":150.00,\"line_total\":150.00,\"category\":\"household\",\"subcategory\":\"bags_packaging\"},{\"name\":\"La Motte Cab Sa\",\"qty\":1,\"unit_price\":1150.00,\"line_total\":1150.00,\"category\":\"alcohol\",\"subcategory\":\"wine\"},{\"name\":\"Kara Orange SP\",\"qty\":1,\"unit_price\":215.00,\"line_total\":215.00,\"category\":\"drink\",\"subcategory\":\"juice\"},{\"name\":\"Lean Beef Mince\",\"qty\":1,\"unit_price\":540.00,\"line_total\":540.00,\"category\":\"food\",\"subcategory\":\"red_meat\"},{\"name\":\"4 Chicken Thigh\",\"qty\":0.592,\"unit_price\":530.0,\"line_total\":313.73,\"category\":\"food\",\"subcategory\":\"poultry\"},{\"name\":\"FR Bulk Lamb Ch\",\"qty\":0.954,\"unit_price\":1680.0,\"line_total\":1602.72,\"category\":\"food\",\"subcategory\":\"red_meat\"},{\"name\":\"Solo Washed Rocket\",\"qty\":1,\"unit_price\":140.00,\"line_total\":140.00,\"category\":\"food\",\"subcategory\":\"vegetables\"},{\"name\":\"Wht Salad Onion\",\"qty\":1,\"unit_price\":190.00,\"line_total\":190.00,\"category\":\"food\",\"subcategory\":\"vegetables\"},{\"name\":\"BOS Lime&Ginger\",\"qty\":1,\"unit_price\":220.00,\"line_total\":220.00,\"category\":\"drink\",\"subcategory\":\"soft_drink\"},{\"name\":\"Cream of Tartar\",\"qty\":1,\"unit_price\":365.00,\"line_total\":365.00,\"category\":\"food\",\"subcategory\":\"pantry\"},{\"name\":\"200ml Litchi Ju\",\"qty\":1,\"unit_price\":80.00,\"line_total\":80.00,\"category\":\"drink\",\"subcategory\":\"juice\"},{\"name\":\"Fig Ginger Preserve\",\"qty\":1,\"unit_price\":485.00,\"line_total\":485.00,\"category\":\"food\",\"subcategory\":\"pantry\"},{\"name\":\"300ml BOS Lemon\",\"qty\":1,\"unit_price\":115.00,\"line_total\":115.00,\"category\":\"drink\",\"subcategory\":\"soft_drink\"},{\"name\":\"Cr Dark Hazelnut\",\"qty\":1,\"unit_price\":845.00,\"line_total\":845.00,\"category\":\"food\",\"subcategory\":\"pantry\"},{\"name\":\"GF Seeded Bread\",\"qty\":1,\"unit_price\":480.00,\"line_total\":480.00,\"category\":\"food\",\"subcategory\":\"bakery_bread\"},{\"name\":\"F MC Egg Giant\",\"qty\":1,\"unit_price\":965.00,\"line_total\":965.00,\"category\":\"food\",\"subcategory\":\"dairy_eggs\"}],\"legibility\":\"good\",\"notes\":\"Receipt folded and slightly creased but text fully legible; weighted items' unit prices were derived from line totals.\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "store_type": "supermarket",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "Woolworths",
+    "store_branch_address": "Av. Marginal 9519",
+    "store_tax_id": "400354162",
+    "receipt_number": "KIY/9613/260828/00000027",
+    "date": "2026-08-28",
+    "time": null,
+    "payment_method": "cash",
+    "subtotal": 7704.01,
+    "tax_total": 1182.44,
+    "discount_total": 0,
+    "total": 8886.45,
+    "items": [
+      {
+        "name": "Simonsig Gewurz",
+        "qty": 1,
+        "unit_price": 1030.0,
+        "line_total": 1030.0,
+        "category": "alcohol",
+        "subcategory": "wine"
+      },
+      {
+        "name": "XL Shopper Grey",
+        "qty": 1,
+        "unit_price": 150.0,
+        "line_total": 150.0,
+        "category": "household",
+        "subcategory": "bags_packaging"
+      },
+      {
+        "name": "La Motte Cab Sa",
+        "qty": 1,
+        "unit_price": 1150.0,
+        "line_total": 1150.0,
+        "category": "alcohol",
+        "subcategory": "wine"
+      },
+      {
+        "name": "Kara Orange SP",
+        "qty": 1,
+        "unit_price": 215.0,
+        "line_total": 215.0,
+        "category": "drink",
+        "subcategory": "juice"
+      },
+      {
+        "name": "Lean Beef Mince",
+        "qty": 1,
+        "unit_price": 540.0,
+        "line_total": 540.0,
+        "category": "food",
+        "subcategory": "red_meat"
+      },
+      {
+        "name": "4 Chicken Thigh",
+        "qty": 0.592,
+        "unit_price": 530.0,
+        "line_total": 313.73,
+        "category": "food",
+        "subcategory": "poultry"
+      },
+      {
+        "name": "FR Bulk Lamb Ch",
+        "qty": 0.954,
+        "unit_price": 1680.0,
+        "line_total": 1602.72,
+        "category": "food",
+        "subcategory": "red_meat"
+      },
+      {
+        "name": "Solo Washed Rocket",
+        "qty": 1,
+        "unit_price": 140.0,
+        "line_total": 140.0,
+        "category": "food",
+        "subcategory": "vegetables"
+      },
+      {
+        "name": "Wht Salad Onion",
+        "qty": 1,
+        "unit_price": 190.0,
+        "line_total": 190.0,
+        "category": "food",
+        "subcategory": "vegetables"
+      },
+      {
+        "name": "BOS Lime&Ginger",
+        "qty": 1,
+        "unit_price": 220.0,
+        "line_total": 220.0,
+        "category": "drink",
+        "subcategory": "soft_drink"
+      },
+      {
+        "name": "Cream of Tartar",
+        "qty": 1,
+        "unit_price": 365.0,
+        "line_total": 365.0,
+        "category": "food",
+        "subcategory": "pantry"
+      },
+      {
+        "name": "200ml Litchi Ju",
+        "qty": 1,
+        "unit_price": 80.0,
+        "line_total": 80.0,
+        "category": "drink",
+        "subcategory": "juice"
+      },
+      {
+        "name": "Fig Ginger Preserve",
+        "qty": 1,
+        "unit_price": 485.0,
+        "line_total": 485.0,
+        "category": "food",
+        "subcategory": "pantry"
+      },
+      {
+        "name": "300ml BOS Lemon",
+        "qty": 1,
+        "unit_price": 115.0,
+        "line_total": 115.0,
+        "category": "drink",
+        "subcategory": "soft_drink"
+      },
+      {
+        "name": "Cr Dark Hazelnut",
+        "qty": 1,
+        "unit_price": 845.0,
+        "line_total": 845.0,
+        "category": "food",
+        "subcategory": "pantry"
+      },
+      {
+        "name": "GF Seeded Bread",
+        "qty": 1,
+        "unit_price": 480.0,
+        "line_total": 480.0,
+        "category": "food",
+        "subcategory": "bakery_bread"
+      },
+      {
+        "name": "F MC Egg Giant",
+        "qty": 1,
+        "unit_price": 965.0,
+        "line_total": 965.0,
+        "category": "food",
+        "subcategory": "dairy_eggs"
+      }
+    ],
+    "legibility": "good",
+    "notes": "Receipt folded and slightly creased but text fully legible; weighted items' unit prices were derived from line totals."
+  },
+  "receipt": "r09_Woolworths_17_items.jpeg"
+}

@@ -1,0 +1,40 @@
+{
+  "model": "claude-sonnet-5",
+  "stop_reason": "end_turn",
+  "latency_s": 4.82,
+  "usage": {
+    "input_tokens": 3340,
+    "output_tokens": 288
+  },
+  "cost_usd": 0.00956,
+  "request_id": "req_011CeeYwvquAwdgGcgoa7yQJ",
+  "raw_text": "{\"doc_type\":\"invoice\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"TV Cabo\",\"store_branch_address\":\"Av. dos Presidentes 5B, Maputo-Mozambique\",\"store_tax_id\":\"000000000\",\"receipt_number\":\"1056725/FR26\",\"date\":\"2026-08-27\",\"time\":\"12:00\",\"payment_method\":\"card\",\"subtotal\":2905.17,\"tax_total\":464.83,\"discount_total\":0,\"total\":3370.00,\"items\":[{\"name\":\"Subscrição TV Cabo rede TVCabo (2026-08-27 a 2026-09-25)\",\"qty\":1,\"unit_price\":3370.00,\"line_total\":3370.00,\"category\":\"utilities\"}],\"legibility\":\"good\",\"notes\":\"A separate stapled card payment slip confirms the same VISA payment of 3370.00 MZN.\"}",
+  "parsed": {
+    "doc_type": "invoice",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "TV Cabo",
+    "store_branch_address": "Av. dos Presidentes 5B, Maputo-Mozambique",
+    "store_tax_id": "000000000",
+    "receipt_number": "1056725/FR26",
+    "date": "2026-08-27",
+    "time": "12:00",
+    "payment_method": "card",
+    "subtotal": 2905.17,
+    "tax_total": 464.83,
+    "discount_total": 0,
+    "total": 3370.0,
+    "items": [
+      {
+        "name": "Subscrição TV Cabo rede TVCabo (2026-08-27 a 2026-09-25)",
+        "qty": 1,
+        "unit_price": 3370.0,
+        "line_total": 3370.0,
+        "category": "utilities"
+      }
+    ],
+    "legibility": "good",
+    "notes": "A separate stapled card payment slip confirms the same VISA payment of 3370.00 MZN."
+  },
+  "receipt": "r16"
+}

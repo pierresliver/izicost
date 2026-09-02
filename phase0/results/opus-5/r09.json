@@ -1,0 +1,152 @@
+{
+  "model": "claude-opus-5",
+  "stop_reason": "end_turn",
+  "latency_s": 17.16,
+  "usage": {
+    "input_tokens": 3340,
+    "output_tokens": 1685
+  },
+  "cost_usd": 0.058825,
+  "request_id": "req_011CeeZ6Vq1ArcK22TL2xBmT",
+  "raw_text": "{\"doc_type\":\"itemized_receipt\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"Woolworths\",\"store_branch_address\":\"Woolworths Mares, Av. Marginal 9519\",\"store_tax_id\":\"400354162\",\"receipt_number\":\"KIY/9613/260828/00000027 M03\",\"date\":\"2026-08-28\",\"time\":null,\"payment_method\":\"cash\",\"subtotal\":7704.01,\"tax_total\":1182.44,\"discount_total\":0,\"total\":8886.45,\"items\":[{\"name\":\"SIMONSIG GEWURZ\",\"qty\":1,\"unit_price\":1030.00,\"line_total\":1030.00,\"category\":\"alcohol\"},{\"name\":\"XL Shopper Grey\",\"qty\":1,\"unit_price\":150.00,\"line_total\":150.00,\"category\":\"household\"},{\"name\":\"La Motte Cab Sa\",\"qty\":1,\"unit_price\":1150.00,\"line_total\":1150.00,\"category\":\"alcohol\"},{\"name\":\"Kara Orange SP\",\"qty\":1,\"unit_price\":215.00,\"line_total\":215.00,\"category\":\"drink\"},{\"name\":\"Lean Beef Mince\",\"qty\":1,\"unit_price\":540.00,\"line_total\":540.00,\"category\":\"grocery\"},{\"name\":\"4 CHICKEN THIGH\",\"qty\":0.592,\"unit_price\":529.95,\"line_total\":313.73,\"category\":\"grocery\"},{\"name\":\"FR Bulk Lamb ch\",\"qty\":0.954,\"unit_price\":1680.00,\"line_total\":1602.72,\"category\":\"grocery\"},{\"name\":\"Solo Washed Roc\",\"qty\":1,\"unit_price\":140.00,\"line_total\":140.00,\"category\":\"grocery\"},{\"name\":\"Wht Salad Onion\",\"qty\":1,\"unit_price\":190.00,\"line_total\":190.00,\"category\":\"grocery\"},{\"name\":\"BOS Lime&Ginger\",\"qty\":1,\"unit_price\":220.00,\"line_total\":220.00,\"category\":\"drink\"},{\"name\":\"Cream of Tartar\",\"qty\":1,\"unit_price\":365.00,\"line_total\":365.00,\"category\":\"grocery\"},{\"name\":\"200ml Litchi Ju\",\"qty\":1,\"unit_price\":80.00,\"line_total\":80.00,\"category\":\"drink\"},{\"name\":\"Fig Ginger Pres\",\"qty\":1,\"unit_price\":485.00,\"line_total\":485.00,\"category\":\"grocery\"},{\"name\":\"300ML BOS LEMON\",\"qty\":1,\"unit_price\":115.00,\"line_total\":115.00,\"category\":\"drink\"},{\"name\":\"Cr Dark Hzlnut\",\"qty\":1,\"unit_price\":845.00,\"line_total\":845.00,\"category\":\"snack\"},{\"name\":\"GF Seeded Bread\",\"qty\":1,\"unit_price\":480.00,\"line_total\":480.00,\"category\":\"grocery\"},{\"name\":\"F MC Egg Giant\",\"qty\":1,\"unit_price\":965.00,\"line_total\":965.00,\"category\":\"grocery\"}],\"legibility\":\"good\",\"notes\":\"Receipt is folded across some lines; cash 9000.00 tendered with 0.45 rounding and 114.00 change.\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "Woolworths",
+    "store_branch_address": "Woolworths Mares, Av. Marginal 9519",
+    "store_tax_id": "400354162",
+    "receipt_number": "KIY/9613/260828/00000027 M03",
+    "date": "2026-08-28",
+    "time": null,
+    "payment_method": "cash",
+    "subtotal": 7704.01,
+    "tax_total": 1182.44,
+    "discount_total": 0,
+    "total": 8886.45,
+    "items": [
+      {
+        "name": "SIMONSIG GEWURZ",
+        "qty": 1,
+        "unit_price": 1030.0,
+        "line_total": 1030.0,
+        "category": "alcohol"
+      },
+      {
+        "name": "XL Shopper Grey",
+        "qty": 1,
+        "unit_price": 150.0,
+        "line_total": 150.0,
+        "category": "household"
+      },
+      {
+        "name": "La Motte Cab Sa",
+        "qty": 1,
+        "unit_price": 1150.0,
+        "line_total": 1150.0,
+        "category": "alcohol"
+      },
+      {
+        "name": "Kara Orange SP",
+        "qty": 1,
+        "unit_price": 215.0,
+        "line_total": 215.0,
+        "category": "drink"
+      },
+      {
+        "name": "Lean Beef Mince",
+        "qty": 1,
+        "unit_price": 540.0,
+        "line_total": 540.0,
+        "category": "grocery"
+      },
+      {
+        "name": "4 CHICKEN THIGH",
+        "qty": 0.592,
+        "unit_price": 529.95,
+        "line_total": 313.73,
+        "category": "grocery"
+      },
+      {
+        "name": "FR Bulk Lamb ch",
+        "qty": 0.954,
+        "unit_price": 1680.0,
+        "line_total": 1602.72,
+        "category": "grocery"
+      },
+      {
+        "name": "Solo Washed Roc",
+        "qty": 1,
+        "unit_price": 140.0,
+        "line_total": 140.0,
+        "category": "grocery"
+      },
+      {
+        "name": "Wht Salad Onion",
+        "qty": 1,
+        "unit_price": 190.0,
+        "line_total": 190.0,
+        "category": "grocery"
+      },
+      {
+        "name": "BOS Lime&Ginger",
+        "qty": 1,
+        "unit_price": 220.0,
+        "line_total": 220.0,
+        "category": "drink"
+      },
+      {
+        "name": "Cream of Tartar",
+        "qty": 1,
+        "unit_price": 365.0,
+        "line_total": 365.0,
+        "category": "grocery"
+      },
+      {
+        "name": "200ml Litchi Ju",
+        "qty": 1,
+        "unit_price": 80.0,
+        "line_total": 80.0,
+        "category": "drink"
+      },
+      {
+        "name": "Fig Ginger Pres",
+        "qty": 1,
+        "unit_price": 485.0,
+        "line_total": 485.0,
+        "category": "grocery"
+      },
+      {
+        "name": "300ML BOS LEMON",
+        "qty": 1,
+        "unit_price": 115.0,
+        "line_total": 115.0,
+        "category": "drink"
+      },
+      {
+        "name": "Cr Dark Hzlnut",
+        "qty": 1,
+        "unit_price": 845.0,
+        "line_total": 845.0,
+        "category": "snack"
+      },
+      {
+        "name": "GF Seeded Bread",
+        "qty": 1,
+        "unit_price": 480.0,
+        "line_total": 480.0,
+        "category": "grocery"
+      },
+      {
+        "name": "F MC Egg Giant",
+        "qty": 1,
+        "unit_price": 965.0,
+        "line_total": 965.0,
+        "category": "grocery"
+      }
+    ],
+    "legibility": "good",
+    "notes": "Receipt is folded across some lines; cash 9000.00 tendered with 0.45 rounding and 114.00 change."
+  },
+  "receipt": "r09"
+}

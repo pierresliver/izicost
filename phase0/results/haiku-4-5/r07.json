@@ -1,0 +1,40 @@
+{
+  "model": "claude-haiku-4-5",
+  "stop_reason": "end_turn",
+  "latency_s": 3.55,
+  "usage": {
+    "input_tokens": 2949,
+    "output_tokens": 220
+  },
+  "cost_usd": 0.004049,
+  "request_id": "req_011CeeYfAq4BAbqwVerNt4Fn",
+  "raw_text": "{\"doc_type\": \"itemized_receipt\", \"country\": \"ZA\", \"currency\": \"ZAR\", \"store_name\": \"Malalane Quick Shop\", \"store_branch_address\": \"1 Air Street, Malalane, 1320\", \"store_tax_id\": \"4670102930\", \"receipt_number\": null, \"date\": \"2026-08-25\", \"time\": \"10:41\", \"payment_method\": \"cash\", \"subtotal\": 13.91, \"tax_total\": 2.09, \"discount_total\": 0, \"total\": 16.0, \"items\": [{\"name\": \"Jaw Breaker Black Ch\", \"qty\": 1, \"unit_price\": 16.0, \"line_total\": 16.0, \"category\": \"snack\"}], \"legibility\": \"good\", \"notes\": \"Tax invoice format; VAT at standard rate 15%\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "country": "ZA",
+    "currency": "ZAR",
+    "store_name": "Malalane Quick Shop",
+    "store_branch_address": "1 Air Street, Malalane, 1320",
+    "store_tax_id": "4670102930",
+    "receipt_number": null,
+    "date": "2026-08-25",
+    "time": "10:41",
+    "payment_method": "cash",
+    "subtotal": 13.91,
+    "tax_total": 2.09,
+    "discount_total": 0,
+    "total": 16.0,
+    "items": [
+      {
+        "name": "Jaw Breaker Black Ch",
+        "qty": 1,
+        "unit_price": 16.0,
+        "line_total": 16.0,
+        "category": "snack"
+      }
+    ],
+    "legibility": "good",
+    "notes": "Tax invoice format; VAT at standard rate 15%"
+  },
+  "receipt": "r07"
+}

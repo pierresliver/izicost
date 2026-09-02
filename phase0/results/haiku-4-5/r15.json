@@ -1,0 +1,32 @@
+{
+  "model": "claude-haiku-4-5",
+  "stop_reason": "end_turn",
+  "latency_s": 2.94,
+  "usage": {
+    "input_tokens": 2949,
+    "output_tokens": 133
+  },
+  "cost_usd": 0.003614,
+  "request_id": "req_011CeeYi316Z5AMwSLCoVtne",
+  "raw_text": "{\"doc_type\":\"other\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"EMME\",\"store_branch_address\":null,\"store_tax_id\":\"6000003089\",\"receipt_number\":\"000598\",\"date\":\"2026-08-28\",\"time\":null,\"payment_method\":null,\"subtotal\":null,\"tax_total\":null,\"discount_total\":0,\"total\":null,\"items\":[],\"legibility\":\"partial\",\"notes\":\"Parking receipt with handwritten fields; Valor (amount) field is blank; illegible entry and matrícula details.\"}",
+  "parsed": {
+    "doc_type": "other",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "EMME",
+    "store_branch_address": null,
+    "store_tax_id": "6000003089",
+    "receipt_number": "000598",
+    "date": "2026-08-28",
+    "time": null,
+    "payment_method": null,
+    "subtotal": null,
+    "tax_total": null,
+    "discount_total": 0,
+    "total": null,
+    "items": [],
+    "legibility": "partial",
+    "notes": "Parking receipt with handwritten fields; Valor (amount) field is blank; illegible entry and matrícula details."
+  },
+  "receipt": "r15"
+}

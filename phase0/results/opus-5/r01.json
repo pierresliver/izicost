@@ -1,0 +1,40 @@
+{
+  "model": "claude-opus-5",
+  "stop_reason": "end_turn",
+  "latency_s": 6.25,
+  "usage": {
+    "input_tokens": 3340,
+    "output_tokens": 271
+  },
+  "cost_usd": 0.023475,
+  "request_id": "req_011CeeYzpBtiRg12cR8WSPJ3",
+  "raw_text": "{\"doc_type\":\"itemized_receipt\",\"country\":\"ZA\",\"currency\":\"ZAR\",\"store_name\":\"The Park's Shop\",\"store_branch_address\":\"Skukuza Rest Camp, Kruger National Park, Mpumalanga\",\"store_tax_id\":\"4190262198\",\"receipt_number\":\"SKUKP/3/000385635\",\"date\":\"2026-08-26\",\"time\":\"09:08\",\"payment_method\":\"cash\",\"subtotal\":46.96,\"tax_total\":7.04,\"discount_total\":0,\"total\":54.00,\"items\":[{\"name\":\"Willard Big Krn Bites Tom 120G\",\"qty\":2,\"unit_price\":27.00,\"line_total\":54.00,\"category\":\"snack\"}],\"legibility\":\"good\",\"notes\":\"Receipt is creased; barcode ref 003-20260826-090808.\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "country": "ZA",
+    "currency": "ZAR",
+    "store_name": "The Park's Shop",
+    "store_branch_address": "Skukuza Rest Camp, Kruger National Park, Mpumalanga",
+    "store_tax_id": "4190262198",
+    "receipt_number": "SKUKP/3/000385635",
+    "date": "2026-08-26",
+    "time": "09:08",
+    "payment_method": "cash",
+    "subtotal": 46.96,
+    "tax_total": 7.04,
+    "discount_total": 0,
+    "total": 54.0,
+    "items": [
+      {
+        "name": "Willard Big Krn Bites Tom 120G",
+        "qty": 2,
+        "unit_price": 27.0,
+        "line_total": 54.0,
+        "category": "snack"
+      }
+    ],
+    "legibility": "good",
+    "notes": "Receipt is creased; barcode ref 003-20260826-090808."
+  },
+  "receipt": "r01"
+}

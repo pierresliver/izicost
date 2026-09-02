@@ -1,0 +1,32 @@
+{
+  "model": "claude-sonnet-5",
+  "stop_reason": "end_turn",
+  "latency_s": 17.94,
+  "usage": {
+    "input_tokens": 3340,
+    "output_tokens": 1398
+  },
+  "cost_usd": 0.02066,
+  "request_id": "req_011CeeYuFWj2UD4wpL7SXVhZ",
+  "raw_text": "{\"doc_type\":\"other\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"EMME\",\"store_branch_address\":null,\"store_tax_id\":\"600003089\",\"receipt_number\":\"0201224\",\"date\":\"2026-08-27\",\"time\":\"14:20\",\"payment_method\":null,\"subtotal\":null,\"tax_total\":null,\"discount_total\":0,\"total\":20,\"items\":[],\"legibility\":\"partial\",\"notes\":\"Handwritten municipal parking receipt (Maputo) stamped 'PAGO'; ticket folded showing a duplicate entry with different date/time that is largely illegible.\"}",
+  "parsed": {
+    "doc_type": "other",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "EMME",
+    "store_branch_address": null,
+    "store_tax_id": "600003089",
+    "receipt_number": "0201224",
+    "date": "2026-08-27",
+    "time": "14:20",
+    "payment_method": null,
+    "subtotal": null,
+    "tax_total": null,
+    "discount_total": 0,
+    "total": 20,
+    "items": [],
+    "legibility": "partial",
+    "notes": "Handwritten municipal parking receipt (Maputo) stamped 'PAGO'; ticket folded showing a duplicate entry with different date/time that is largely illegible."
+  },
+  "receipt": "r12"
+}

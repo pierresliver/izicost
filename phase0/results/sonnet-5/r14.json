@@ -1,0 +1,75 @@
+{
+  "model": "claude-sonnet-5",
+  "stop_reason": "end_turn",
+  "latency_s": 7.97,
+  "usage": {
+    "input_tokens": 3340,
+    "output_tokens": 671
+  },
+  "cost_usd": 0.01339,
+  "request_id": "req_011CeeYw1yh52KrksEYT6G7M",
+  "raw_text": "{\"doc_type\":\"itemized_receipt\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"Supermercado Real\",\"store_branch_address\":\"Av. Mao Tse Tung, nº 627/9, Maputo\",\"store_tax_id\":\"400121508\",\"receipt_number\":\"100098/2026\",\"date\":\"2026-08-28\",\"time\":\"14:41\",\"payment_method\":\"cash\",\"subtotal\":3470.69,\"tax_total\":555.31,\"discount_total\":0,\"total\":4026.00,\"items\":[{\"name\":\"WHISKAS\",\"qty\":4,\"unit_price\":75.00,\"line_total\":300.00,\"category\":\"other\"},{\"name\":\"CASTANHA\",\"qty\":2,\"unit_price\":580.00,\"line_total\":1160.00,\"category\":\"grocery\"},{\"name\":\"CASTANHA 1KG\",\"qty\":2,\"unit_price\":1160.00,\"line_total\":2320.00,\"category\":\"grocery\"},{\"name\":\"Cadbury Dairy Milk Mint Cr 150g\",\"qty\":1,\"unit_price\":195.00,\"line_total\":195.00,\"category\":\"snack\"},{\"name\":\"Pao\",\"qty\":1,\"unit_price\":45.00,\"line_total\":45.00,\"category\":\"grocery\"},{\"name\":\"SACO\",\"qty\":1,\"unit_price\":6.00,\"line_total\":6.00,\"category\":\"household\"}],\"legibility\":\"good\",\"notes\":\"Payment method label 'Ned' is unclear, assumed cash.\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "Supermercado Real",
+    "store_branch_address": "Av. Mao Tse Tung, nº 627/9, Maputo",
+    "store_tax_id": "400121508",
+    "receipt_number": "100098/2026",
+    "date": "2026-08-28",
+    "time": "14:41",
+    "payment_method": "cash",
+    "subtotal": 3470.69,
+    "tax_total": 555.31,
+    "discount_total": 0,
+    "total": 4026.0,
+    "items": [
+      {
+        "name": "WHISKAS",
+        "qty": 4,
+        "unit_price": 75.0,
+        "line_total": 300.0,
+        "category": "other"
+      },
+      {
+        "name": "CASTANHA",
+        "qty": 2,
+        "unit_price": 580.0,
+        "line_total": 1160.0,
+        "category": "grocery"
+      },
+      {
+        "name": "CASTANHA 1KG",
+        "qty": 2,
+        "unit_price": 1160.0,
+        "line_total": 2320.0,
+        "category": "grocery"
+      },
+      {
+        "name": "Cadbury Dairy Milk Mint Cr 150g",
+        "qty": 1,
+        "unit_price": 195.0,
+        "line_total": 195.0,
+        "category": "snack"
+      },
+      {
+        "name": "Pao",
+        "qty": 1,
+        "unit_price": 45.0,
+        "line_total": 45.0,
+        "category": "grocery"
+      },
+      {
+        "name": "SACO",
+        "qty": 1,
+        "unit_price": 6.0,
+        "line_total": 6.0,
+        "category": "household"
+      }
+    ],
+    "legibility": "good",
+    "notes": "Payment method label 'Ned' is unclear, assumed cash."
+  },
+  "receipt": "r14"
+}

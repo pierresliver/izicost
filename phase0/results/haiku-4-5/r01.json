@@ -1,0 +1,40 @@
+{
+  "model": "claude-haiku-4-5",
+  "stop_reason": "end_turn",
+  "latency_s": 11.18,
+  "usage": {
+    "input_tokens": 2949,
+    "output_tokens": 250
+  },
+  "cost_usd": 0.004199,
+  "request_id": "req_011CeeYcAPBa6Abx9JxhSC51",
+  "raw_text": "{\"doc_type\": \"itemized_receipt\", \"country\": \"ZA\", \"currency\": \"ZAR\", \"store_name\": \"The Parks Shop\", \"store_branch_address\": \"Skukuza Rest Camp, Kruger National Park, Mpumalanga\", \"store_tax_id\": \"4190262198\", \"receipt_number\": \"003385635\", \"date\": \"2026-08-26\", \"time\": \"09:08\", \"payment_method\": \"cash\", \"subtotal\": 46.96, \"tax_total\": 7.04, \"discount_total\": 0, \"total\": 54.00, \"items\": [{\"name\": \"Hilliard Big Krn Bites Ton 120g\", \"qty\": 2, \"unit_price\": 27.00, \"line_total\": 54.00, \"category\": \"snack\"}], \"legibility\": \"good\", \"notes\": \"VAT Summary shows Standard 15.0% rate; change R146.00 indicates R200.00 cash payment.\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "country": "ZA",
+    "currency": "ZAR",
+    "store_name": "The Parks Shop",
+    "store_branch_address": "Skukuza Rest Camp, Kruger National Park, Mpumalanga",
+    "store_tax_id": "4190262198",
+    "receipt_number": "003385635",
+    "date": "2026-08-26",
+    "time": "09:08",
+    "payment_method": "cash",
+    "subtotal": 46.96,
+    "tax_total": 7.04,
+    "discount_total": 0,
+    "total": 54.0,
+    "items": [
+      {
+        "name": "Hilliard Big Krn Bites Ton 120g",
+        "qty": 2,
+        "unit_price": 27.0,
+        "line_total": 54.0,
+        "category": "snack"
+      }
+    ],
+    "legibility": "good",
+    "notes": "VAT Summary shows Standard 15.0% rate; change R146.00 indicates R200.00 cash payment."
+  },
+  "receipt": "r01"
+}

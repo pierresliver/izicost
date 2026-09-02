@@ -1,0 +1,82 @@
+{
+  "model": "claude-sonnet-5",
+  "stop_reason": "end_turn",
+  "latency_s": 6.42,
+  "usage": {
+    "input_tokens": 4296,
+    "output_tokens": 562
+  },
+  "cost_usd": 0.014212,
+  "request_id": "req_011Ceee6YxMW4UecCMCqHRLA",
+  "raw_text": "{\"doc_type\":\"itemized_receipt\",\"store_type\":\"supermarket\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"Supermercado Real\",\"store_branch_address\":\"Av. Mao Tse Tung, nº 627/9, Maputo\",\"store_tax_id\":\"400121508\",\"receipt_number\":\"100098/2026\",\"date\":\"2026-08-28\",\"time\":\"14:41\",\"payment_method\":\"card\",\"subtotal\":null,\"tax_total\":555.31,\"discount_total\":0,\"total\":4026.00,\"items\":[{\"name\":\"WHISKAS\",\"qty\":4,\"unit_price\":75.00,\"line_total\":300.00,\"category\":\"pet\",\"subcategory\":\"pet_food\"},{\"name\":\"CASTANHA\",\"qty\":2,\"unit_price\":580.00,\"line_total\":1160.00,\"category\":\"food\",\"subcategory\":\"other_food\"},{\"name\":\"CASTANHA 1KG\",\"qty\":2,\"unit_price\":1160.00,\"line_total\":2320.00,\"category\":\"food\",\"subcategory\":\"other_food\"},{\"name\":\"Cadbury Dairy Milk Mint Cr 150g\",\"qty\":1,\"unit_price\":195.00,\"line_total\":195.00,\"category\":\"food\",\"subcategory\":\"snacks_sweets\"},{\"name\":\"Pao\",\"qty\":1,\"unit_price\":45.00,\"line_total\":45.00,\"category\":\"food\",\"subcategory\":\"bakery_bread\"},{\"name\":\"SACO\",\"qty\":1,\"unit_price\":6.00,\"line_total\":6.00,\"category\":\"household\",\"subcategory\":\"bags_packaging\"}],\"legibility\":\"good\",\"notes\":\"Payment method 'Ned' indicates card payment via Nedbank terminal.\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "store_type": "supermarket",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "Supermercado Real",
+    "store_branch_address": "Av. Mao Tse Tung, nº 627/9, Maputo",
+    "store_tax_id": "400121508",
+    "receipt_number": "100098/2026",
+    "date": "2026-08-28",
+    "time": "14:41",
+    "payment_method": "card",
+    "subtotal": null,
+    "tax_total": 555.31,
+    "discount_total": 0,
+    "total": 4026.0,
+    "items": [
+      {
+        "name": "WHISKAS",
+        "qty": 4,
+        "unit_price": 75.0,
+        "line_total": 300.0,
+        "category": "pet",
+        "subcategory": "pet_food"
+      },
+      {
+        "name": "CASTANHA",
+        "qty": 2,
+        "unit_price": 580.0,
+        "line_total": 1160.0,
+        "category": "food",
+        "subcategory": "other_food"
+      },
+      {
+        "name": "CASTANHA 1KG",
+        "qty": 2,
+        "unit_price": 1160.0,
+        "line_total": 2320.0,
+        "category": "food",
+        "subcategory": "other_food"
+      },
+      {
+        "name": "Cadbury Dairy Milk Mint Cr 150g",
+        "qty": 1,
+        "unit_price": 195.0,
+        "line_total": 195.0,
+        "category": "food",
+        "subcategory": "snacks_sweets"
+      },
+      {
+        "name": "Pao",
+        "qty": 1,
+        "unit_price": 45.0,
+        "line_total": 45.0,
+        "category": "food",
+        "subcategory": "bakery_bread"
+      },
+      {
+        "name": "SACO",
+        "qty": 1,
+        "unit_price": 6.0,
+        "line_total": 6.0,
+        "category": "household",
+        "subcategory": "bags_packaging"
+      }
+    ],
+    "legibility": "good",
+    "notes": "Payment method 'Ned' indicates card payment via Nedbank terminal."
+  },
+  "receipt": "r14_SupermercadoReal.jpeg"
+}

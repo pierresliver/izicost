@@ -1,0 +1,32 @@
+{
+  "model": "claude-sonnet-5",
+  "stop_reason": "end_turn",
+  "latency_s": 4.39,
+  "usage": {
+    "input_tokens": 3340,
+    "output_tokens": 193
+  },
+  "cost_usd": 0.00861,
+  "request_id": "req_011CeeYwc44AM1hpLwWGMn45",
+  "raw_text": "{\"doc_type\":\"handwritten\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"EMME\",\"store_branch_address\":null,\"store_tax_id\":\"600003089\",\"receipt_number\":\"000598\",\"date\":\"2026-08-28\",\"time\":\"11:42\",\"payment_method\":\"cash\",\"subtotal\":null,\"tax_total\":null,\"discount_total\":0,\"total\":null,\"items\":[],\"legibility\":\"partial\",\"notes\":\"This is a municipal parking (estacionamento) receipt with the Valor field left blank and license plate MME 7973 handwritten in the Matricula field.\"}",
+  "parsed": {
+    "doc_type": "handwritten",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "EMME",
+    "store_branch_address": null,
+    "store_tax_id": "600003089",
+    "receipt_number": "000598",
+    "date": "2026-08-28",
+    "time": "11:42",
+    "payment_method": "cash",
+    "subtotal": null,
+    "tax_total": null,
+    "discount_total": 0,
+    "total": null,
+    "items": [],
+    "legibility": "partial",
+    "notes": "This is a municipal parking (estacionamento) receipt with the Valor field left blank and license plate MME 7973 handwritten in the Matricula field."
+  },
+  "receipt": "r15"
+}

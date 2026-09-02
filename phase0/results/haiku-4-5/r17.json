@@ -1,0 +1,96 @@
+{
+  "model": "claude-haiku-4-5",
+  "stop_reason": "end_turn",
+  "latency_s": 5.12,
+  "usage": {
+    "input_tokens": 2949,
+    "output_tokens": 451
+  },
+  "cost_usd": 0.005204,
+  "request_id": "req_011CeeYioZF214axAWAu219X",
+  "raw_text": "{\"doc_type\":\"bar_tab\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"COMPLEXO PIRIPIRI\",\"store_branch_address\":\"AV. 24 DE JULHO, Nº 22\",\"store_tax_id\":null,\"receipt_number\":null,\"date\":\"2026-08-28\",\"time\":\"14:05\",\"payment_method\":null,\"subtotal\":null,\"tax_total\":null,\"discount_total\":0,\"total\":6170.00,\"items\":[{\"name\":\"Txilar Copo grande\",\"qty\":4,\"unit_price\":190.00,\"line_total\":760.00,\"category\":\"drink\"},{\"name\":\"Castle Lite Grf\",\"qty\":2,\"unit_price\":180.00,\"line_total\":360.00,\"category\":\"alcohol\"},{\"name\":\"Sprite Grf\",\"qty\":3,\"unit_price\":80.00,\"line_total\":240.00,\"category\":\"drink\"},{\"name\":\"Cafe expresso Delta\",\"qty\":1,\"unit_price\":90.00,\"line_total\":90.00,\"category\":\"drink\"},{\"name\":\"Bissois\",\"qty\":1,\"unit_price\":290.00,\"line_total\":290.00,\"category\":\"restaurant\"},{\"name\":\"Chamussas de Camarao\",\"qty\":1,\"unit_price\":290.00,\"line_total\":290.00,\"category\":\"snack\"},{\"name\":\"Camarao Pequeno\",\"qty\":1,\"unit_price\":990.00,\"line_total\":990.00,\"category\":\"restaurant\"},{\"name\":\"Camarao Pequeno\",\"qty\":2,\"unit_price\":990.00,\"line_total\":1980.00,\"category\":\"restaurant\"},{\"name\":\"Espetada de Marisco\",\"qty\":1,\"unit_price\":1170.00,\"line_total\":1170.00,\"category\":\"restaurant\"}],\"legibility\":\"good\",\"notes\":\"Bar tab; no payment method recorded.\"}",
+  "parsed": {
+    "doc_type": "bar_tab",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "COMPLEXO PIRIPIRI",
+    "store_branch_address": "AV. 24 DE JULHO, Nº 22",
+    "store_tax_id": null,
+    "receipt_number": null,
+    "date": "2026-08-28",
+    "time": "14:05",
+    "payment_method": null,
+    "subtotal": null,
+    "tax_total": null,
+    "discount_total": 0,
+    "total": 6170.0,
+    "items": [
+      {
+        "name": "Txilar Copo grande",
+        "qty": 4,
+        "unit_price": 190.0,
+        "line_total": 760.0,
+        "category": "drink"
+      },
+      {
+        "name": "Castle Lite Grf",
+        "qty": 2,
+        "unit_price": 180.0,
+        "line_total": 360.0,
+        "category": "alcohol"
+      },
+      {
+        "name": "Sprite Grf",
+        "qty": 3,
+        "unit_price": 80.0,
+        "line_total": 240.0,
+        "category": "drink"
+      },
+      {
+        "name": "Cafe expresso Delta",
+        "qty": 1,
+        "unit_price": 90.0,
+        "line_total": 90.0,
+        "category": "drink"
+      },
+      {
+        "name": "Bissois",
+        "qty": 1,
+        "unit_price": 290.0,
+        "line_total": 290.0,
+        "category": "restaurant"
+      },
+      {
+        "name": "Chamussas de Camarao",
+        "qty": 1,
+        "unit_price": 290.0,
+        "line_total": 290.0,
+        "category": "snack"
+      },
+      {
+        "name": "Camarao Pequeno",
+        "qty": 1,
+        "unit_price": 990.0,
+        "line_total": 990.0,
+        "category": "restaurant"
+      },
+      {
+        "name": "Camarao Pequeno",
+        "qty": 2,
+        "unit_price": 990.0,
+        "line_total": 1980.0,
+        "category": "restaurant"
+      },
+      {
+        "name": "Espetada de Marisco",
+        "qty": 1,
+        "unit_price": 1170.0,
+        "line_total": 1170.0,
+        "category": "restaurant"
+      }
+    ],
+    "legibility": "good",
+    "notes": "Bar tab; no payment method recorded."
+  },
+  "receipt": "r17"
+}

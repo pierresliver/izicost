@@ -1,0 +1,54 @@
+{
+  "model": "claude-sonnet-5",
+  "stop_reason": "end_turn",
+  "latency_s": 10.03,
+  "usage": {
+    "input_tokens": 3340,
+    "output_tokens": 846
+  },
+  "cost_usd": 0.01514,
+  "request_id": "req_011CeeYrNRNHAXERnCfAeeHp",
+  "raw_text": "{\"doc_type\":\"itemized_receipt\",\"country\":\"MZ\",\"currency\":\"MZN\",\"store_name\":\"Woolworths\",\"store_branch_address\":\"Av. Marginal 9519\",\"store_tax_id\":\"400354162\",\"receipt_number\":\"MMM/9613/260828/00000007 M05\",\"date\":\"2026-08-28\",\"time\":null,\"payment_method\":\"cash\",\"subtotal\":3206.90,\"tax_total\":513.10,\"discount_total\":0,\"total\":3720.00,\"items\":[{\"name\":\"2PK WAFFLE TEA\",\"qty\":1,\"unit_price\":1400.00,\"line_total\":1400.00,\"category\":\"grocery\"},{\"name\":\"4pk Pleather pl\",\"qty\":1,\"unit_price\":1160.00,\"line_total\":1160.00,\"category\":\"clothing\"},{\"name\":\"4pk Pleather pl\",\"qty\":1,\"unit_price\":1160.00,\"line_total\":1160.00,\"category\":\"clothing\"}],\"legibility\":\"partial\",\"notes\":\"Cash and change amounts are slightly ambiguous due to overlapping printed numbers (CASH 4020.00, NMT 4).\"}",
+  "parsed": {
+    "doc_type": "itemized_receipt",
+    "country": "MZ",
+    "currency": "MZN",
+    "store_name": "Woolworths",
+    "store_branch_address": "Av. Marginal 9519",
+    "store_tax_id": "400354162",
+    "receipt_number": "MMM/9613/260828/00000007 M05",
+    "date": "2026-08-28",
+    "time": null,
+    "payment_method": "cash",
+    "subtotal": 3206.9,
+    "tax_total": 513.1,
+    "discount_total": 0,
+    "total": 3720.0,
+    "items": [
+      {
+        "name": "2PK WAFFLE TEA",
+        "qty": 1,
+        "unit_price": 1400.0,
+        "line_total": 1400.0,
+        "category": "grocery"
+      },
+      {
+        "name": "4pk Pleather pl",
+        "qty": 1,
+        "unit_price": 1160.0,
+        "line_total": 1160.0,
+        "category": "clothing"
+      },
+      {
+        "name": "4pk Pleather pl",
+        "qty": 1,
+        "unit_price": 1160.0,
+        "line_total": 1160.0,
+        "category": "clothing"
+      }
+    ],
+    "legibility": "partial",
+    "notes": "Cash and change amounts are slightly ambiguous due to overlapping printed numbers (CASH 4020.00, NMT 4)."
+  },
+  "receipt": "r08"
+}
