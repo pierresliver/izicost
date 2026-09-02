@@ -295,9 +295,42 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   Me: guest → "Create account" (email+password, keeps data, IziCamera pattern), sign in, sign out, EN/PT switch,
   privacy statement, replay intro. Fully bilingual (English string is the key; PT dictionary).
 - ✅ Code review by a second agent applied (number inputs, language init, navigation after save, function auth).
-- 🔨 Local APK build (`scripts/build-apk.ps1`, JDK 22 + D:\Android\Sdk, no EAS): first build in progress.
-  PS's Expo Go is v54 and the project is SDK 57, so testing happens with the APK.
-- Next: PS tests on the phone → fix what he finds → Phase 2 (reports/charts) → Phase 3 (community prices).
+- ✅ Local APK build 1 (`scripts/build-apk.ps1`, JDK 22 + D:\Android\Sdk, 48 min first time, then fast):
+  `builds/izicost-v0.1.0-2026-09-02-1746.apk` (101 MB; next builds ARM-only ≈ 40% smaller). PS's Expo Go is
+  v54 and the project is SDK 57, so testing happens with the APK.
+
+**Same evening — "don't hold anything back" build (Phases 1.5–4 in parallel, 4 builder agents + review):**
+- ✅ **Scanning:** full-screen camera (receipt frame, torch, shutter, per-shot "sharp?" review), up to 4 photos per
+  long receipt (function reads them as one), gallery multi-select, **offline queue** (photos kept on the phone,
+  auto-retry when online, badge + Retry now), haptics, multi-photo viewer on Confirm and receipt detail.
+  Daily scan cap (40/user/day, `scan_events` table) in the function.
+- ✅ **Phase 2 reports:** Home dashboard (month total + vs last month, 6-month bars, category ring, top stores,
+  weekly recap card, due-soon recurring items, inflation teaser), Reports hub (by month / categories / stores /
+  budgets / inflation / search / CSV export), budgets with "left per day" rings (80%/100% colours), weekly
+  recap notification (Sunday 18:00, asked politely after the first receipt). Migration 002.
+- ✅ **Phase 3 community prices:** migration 003 — `products` (fingerprint `product_key`, size parsing),
+  `price_points` with **no user or receipt id**, trigger copies anonymised price points on save (skips
+  restaurants/parking/utilities), `community_prices` view with **k-anonymity ≥2 reports in 60 days**, cities table,
+  quick-add RPC (30/day, separate log table that never joins to prices), price reports, price alerts, nearby
+  stores (haversine). Prices tab: search, Near me / My city / By city / Anywhere, freshness badges; product page:
+  cheapest now, per store / per city, 90-day trend, your last price, report wrong price, set alert; market
+  quick-add screen. GPS pin of a branch on first scan (migration 004, only fills empty coordinates).
+- ✅ **Phase 4:** shopping basket (autocomplete from the catalogue, qty stepper, tick/delete) → "Where is it
+  cheapest?" ranked store cards (items found, total, distance, "you save X" pill) + **split-basket suggestion**
+  (2 stores) + cheapest-per-item + missing-items; follows the Prices scope (Near me / My city / By city / Anywhere);
+  price alerts checked on Prices-tab focus (10-min throttle, banner, never repeats a hit), "My alerts" screen,
+  "Add to basket" on the product page. Migration 005 (`shopping_lists`, `shopping_list_items`,
+  `price_alert_hits`, RPCs `basket_quote`, `check_price_alerts`, all reading only the anonymised view).
+- ✅ Security/code review by a separate agent, fixes applied the same evening: raw `price_points` table was
+  readable by any signed-in user (bypassing the ≥2-reports rule) → now readable ONLY through the owner-run
+  `community_prices` view + definer trend RPC, verified from a guest session; migration 003 made re-runnable;
+  duplicate-line and 400-lines/day flood guards in the price-point trigger; `receipt_items` policy now checks
+  the parent receipt belongs to the caller; clients can no longer set store coordinates/city; quick-add input
+  caps; read RPCs revoked from anon; daily-cap env guard + CORS in the function; GPS only requested when a
+  branch has no coordinates and "Not now" respected for 7 days; corrected line totals recompute unit price;
+  unreadable dates fall back to today instead of hiding the receipt; cancelled scans delete their uploads;
+  CSV export neutralises formula injection. Remaining known limits: k-anonymity counts reports, not people;
+  price alerts stored but only checked in-app (no push); `price_reports` has no rate limit yet.
 
 **Security — in place (2026-09-02):** AI key only on the server function, never in the app; the app ships only
 the public URL + publishable key (grant nothing without a session); row-level security on every table (a user

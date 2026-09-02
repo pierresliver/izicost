@@ -117,10 +117,16 @@ ${CATEGORY_TEXT}
 - legibility: your honest read of how readable the photo was.
 - notes: anything odd (garbled quantity, stamp over text, stapled slip, etc.), 1 sentence max.`;
 
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+  new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
 
   const anthropicKey = Deno.env.get("ANTHROPIC_API_KEY");
@@ -133,19 +139,37 @@ Deno.serve(async (req) => {
   if (userErr || !userData.user) return json({ error: "not signed in" }, 401);
   const uid = userData.user.id;
 
-  let body: { image_path?: string };
+  // One receipt = one or more photos (long receipts are shot in parts, top to bottom).
+  let body: { image_path?: string; image_paths?: string[] };
   try { body = await req.json(); } catch { return json({ error: "bad JSON body" }, 400); }
-  const imagePath = body.image_path ?? "";
-  if (!imagePath.startsWith(`${uid}/`) || imagePath.includes("..")) return json({ error: "image_path must be inside your folder" }, 403);
+  const imagePaths = (body.image_paths ?? (body.image_path ? [body.image_path] : [])).slice(0, 4);
+  if (!imagePaths.length) return json({ error: "image_path(s) required" }, 400);
+  for (const p of imagePaths) {
+    if (!p.startsWith(`${uid}/`) || p.includes("..")) return json({ error: "image_path must be inside your folder" }, 403);
+  }
 
-  // Download the photo with the service role (bucket is private).
-  const { data: blob, error: dlErr } = await admin.storage.from("receipts").download(imagePath);
-  if (dlErr || !blob) return json({ error: `cannot read photo: ${dlErr?.message}` }, 404);
-  const bytes = new Uint8Array(await blob.arrayBuffer());
-  let bin = "";
-  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  const b64 = btoa(bin);
-  const mediaType = imagePath.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
+  // Daily cap per user (abuse / cost protection). Guests and accounts get the same cap for now.
+  const DAILY_CAP = Number(Deno.env.get("DAILY_SCAN_CAP")) || 40; // a mistyped secret must not disable the cap
+  const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  const { count: scansToday } = await admin
+    .from("scan_events").select("id", { count: "exact", head: true })
+    .eq("user_id", uid).gte("created_at", since);
+  if ((scansToday ?? 0) >= DAILY_CAP) return json({ error: `daily scan limit reached (${DAILY_CAP} per day)` }, 429);
+
+  // Download the photo(s) with the service role (bucket is private).
+  const imageBlocks: unknown[] = [];
+  for (const imagePath of imagePaths) {
+    const { data: blob, error: dlErr } = await admin.storage.from("receipts").download(imagePath);
+    if (dlErr || !blob) return json({ error: `cannot read photo: ${dlErr?.message}` }, 404);
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    let bin = "";
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    const mediaType = imagePath.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
+    imageBlocks.push({ type: "image", source: { type: "base64", media_type: mediaType, data: btoa(bin) } });
+  }
+  const userText = imagePaths.length > 1
+    ? `These ${imagePaths.length} photos are consecutive parts of ONE receipt, top to bottom (they may overlap). Extract it as a single receipt; do not duplicate items that appear in the overlap.`
+    : "Extract this receipt.";
 
   const t0 = Date.now();
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
@@ -161,19 +185,24 @@ Deno.serve(async (req) => {
       system: SYSTEM,
       messages: [{
         role: "user",
-        content: [
-          { type: "image", source: { type: "base64", media_type: mediaType, data: b64 } },
-          { type: "text", text: "Extract this receipt." },
-        ],
+        content: [...imageBlocks, { type: "text", text: userText }],
       }],
       output_config: { format: { type: "json_schema", schema: SCHEMA } },
     }),
   });
+  const logScan = (ok: boolean, msg?: { usage?: { input_tokens?: number; output_tokens?: number } }) =>
+    admin.from("scan_events").insert({
+      user_id: uid, image_count: imagePaths.length, model: MODEL, ok,
+      input_tokens: msg?.usage?.input_tokens ?? null, output_tokens: msg?.usage?.output_tokens ?? null,
+      latency_ms: Date.now() - t0,
+    }).then(() => {}, () => {});
   if (!resp.ok) {
     const errText = await resp.text();
+    await logScan(false);
     return json({ error: `model error ${resp.status}: ${errText.slice(0, 300)}` }, 502);
   }
   const msg = await resp.json();
+  await logScan(true, msg);
   if (msg.stop_reason === "refusal") return json({ error: "model declined this image" }, 422);
   if (msg.stop_reason === "max_tokens") return json({ error: "receipt too long for one read" }, 422);
   const text = (msg.content ?? []).find((b: { type: string }) => b.type === "text")?.text ?? "";

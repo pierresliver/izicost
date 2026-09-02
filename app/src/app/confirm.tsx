@@ -1,27 +1,25 @@
+import '@/features/scan/i18n';
+
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Brand, Spacing } from '@/constants/theme';
+import { attachExtraPhotos, removeUploaded } from '@/features/scan/api';
+import { parseNumber } from '@/lib/numbers';
+import { PhotoStrip } from '@/features/scan/components/photo-strip';
+import { PhotoViewer } from '@/features/scan/components/photo-viewer';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
 import { clearPending, takePending } from '@/lib/pending';
 import { formatMoney, saveReceipt } from '@/lib/receipts';
 import { CATEGORIES, PAYMENT_METHODS, type ExtractedItem, type Extraction } from '@/lib/types';
 
-/** Parse what a person types: "12.5", "12,5", "1.384,20", "1,384.20" all work. */
-function num(s: string): number | null {
-  let v = s.replace(/\s/g, '');
-  const lastDot = v.lastIndexOf('.');
-  const lastComma = v.lastIndexOf(',');
-  if (lastDot >= 0 && lastComma >= 0) v = lastComma > lastDot ? v.replace(/\./g, '').replace(',', '.') : v.replace(/,/g, '');
-  else v = v.replace(',', '.');
-  const n = parseFloat(v);
-  return Number.isFinite(n) ? n : null;
-}
+const num = parseNumber;
 const str = (n: number | null | undefined) => (n === null || n === undefined ? '' : String(n));
 
 /** A number field that keeps what you type (so "12." survives) and reports the parsed value. */
@@ -45,6 +43,18 @@ export default function ConfirmScreen() {
     pending ? { ...pending.extraction, items: pending.extraction.items.map((it) => ({ ...it, _id: newId() })) } : null,
   );
   const [saving, setSaving] = useState(false);
+  const [viewer, setViewer] = useState<number | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  // Leaving without saving (Cancel, back gesture, swipe-down): forget the draft and delete the
+  // uploaded photos so nothing is left behind in storage.
+  useEffect(() => {
+    return () => {
+      if (!saved && pending?.imagePaths?.length) removeUploaded(pending.imagePaths).catch(() => {});
+      clearPending();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saved]);
 
   if (!pending || !x) {
     return (
@@ -68,16 +78,20 @@ export default function ConfirmScreen() {
 
   const sum = x.items.reduce((s, it) => s + (it.line_total ?? 0), 0);
   const sumMatches = x.total !== null && Math.abs(sum - (x.discount_total ?? 0) - x.total) < 0.011;
+  const photos = pending.localUris;
 
   async function onSave() {
-    if (!x) return;
+    if (!x || !pending) return;
     setSaving(true);
     try {
       const cleaned: Extraction = {
         ...x,
         items: x.items.filter((it) => it.name.trim().length > 0).map(({ _id, ...it }) => it),
       };
-      await saveReceipt(cleaned, pending!.imagePath, pending!.raw, pending!.model);
+      const id = await saveReceipt(cleaned, pending.imagePaths[0], pending.raw, pending.model);
+      await attachExtraPhotos(id, pending.imagePaths); // no-op for a single photo
+      setSaved(true);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       clearPending();
       router.navigate('/receipts'); // pops the modal and jumps to the Receipts tab
     } catch (e) {
@@ -90,14 +104,19 @@ export default function ConfirmScreen() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <Image source={{ uri: pending.localUri }} style={styles.photo} resizeMode="contain" />
+        <View style={styles.photos}>
+          <PhotoStrip uris={photos} height={photos.length > 1 ? 170 : 230} onPress={setViewer} fillSingle />
+          <ThemedText type="small" themeColor="textSecondary" style={styles.hint}>
+            {photos.length > 1 ? `${photos.length} ${t('photos')} · ` : ''}{t('Tap a photo to enlarge it')}
+          </ThemedText>
+        </View>
         <ThemedText themeColor="textSecondary" style={styles.hint}>{t('Doubtful lines are highlighted. Tap any value to fix it.')}</ThemedText>
 
         <ThemedView type="backgroundElement" style={styles.card}>
           <Field label={t('Store')}><TextInput style={inputStyle} value={x.store_name ?? ''} onChangeText={(v) => set({ store_name: v })} /></Field>
           <Field label={t('Address')}><TextInput style={inputStyle} value={x.store_branch_address ?? ''} onChangeText={(v) => set({ store_branch_address: v })} /></Field>
           <View style={styles.twoCol}>
-            <Field label={t('Date')} flex><TextInput style={inputStyle} value={x.date ?? ''} placeholder="YYYY-MM-DD" onChangeText={(v) => set({ date: v })} /></Field>
+            <Field label={t('Date')} flex><TextInput style={inputStyle} value={x.date ?? ''} placeholder="YYYY-MM-DD" placeholderTextColor="#888" onChangeText={(v) => set({ date: v })} /></Field>
             <Field label={t('Currency')} flex><TextInput style={inputStyle} value={x.currency ?? ''} autoCapitalize="characters" onChangeText={(v) => set({ currency: v.toUpperCase() })} /></Field>
           </View>
           <View style={styles.twoCol}>
@@ -136,19 +155,23 @@ export default function ConfirmScreen() {
         </Pressable>
 
         {x.items.length > 0 ? (
-          <ThemedText themeColor="textSecondary" style={[styles.hint, sumMatches && { color: Brand.success }]}>
-            {sumMatches ? t('Items match the total.') : t('Items add up to %sum%, receipt total is %total%.', { sum: formatMoney(sum), total: formatMoney(x.total) })}
-          </ThemedText>
+          <View style={[styles.sumRow, { backgroundColor: sumMatches ? `${Brand.success}1A` : `${Brand.warning}1A` }]}>
+            <Ionicons name={sumMatches ? 'checkmark-circle' : 'alert-circle'} size={20} color={sumMatches ? Brand.success : Brand.warning} />
+            <ThemedText type="small" style={{ flex: 1, color: sumMatches ? Brand.success : undefined }}>
+              {sumMatches ? t('Items match the total.') : t('Items add up to %sum%, receipt total is %total%.', { sum: formatMoney(sum), total: formatMoney(x.total) })}
+            </ThemedText>
+          </View>
         ) : null}
 
-        <Pressable style={[styles.saveBtn, saving && { opacity: 0.6 }]} disabled={saving} onPress={onSave}>
-          <Ionicons name="checkmark-circle" color="#fff" size={22} />
+        <Pressable style={({ pressed }) => [styles.saveBtn, (pressed || saving) && { opacity: 0.7 }]} disabled={saving} onPress={onSave}>
+          <Ionicons name="checkmark-circle" color="#fff" size={24} />
           <ThemedText style={styles.saveText}>{saving ? t('Saving…') : t('Save')}</ThemedText>
         </Pressable>
         <Pressable style={styles.cancel} onPress={() => { clearPending(); router.back(); }}>
           <ThemedText themeColor="textSecondary">{t('Cancel')}</ThemedText>
         </Pressable>
       </ScrollView>
+      <PhotoViewer uris={photos} index={viewer} onClose={() => setViewer(null)} />
     </KeyboardAvoidingView>
   );
 }
@@ -172,13 +195,13 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
 
 const styles = StyleSheet.create({
   container: { padding: Spacing.three, gap: Spacing.three, paddingBottom: Spacing.six },
-  photo: { width: '100%', height: 220, borderRadius: 12, backgroundColor: '#00000010' },
+  photos: { gap: Spacing.two },
   hint: { textAlign: 'center' },
-  card: { borderRadius: 14, padding: Spacing.three, gap: Spacing.two },
+  card: { borderRadius: 16, padding: Spacing.three, gap: Spacing.two },
   lowConfidence: { borderWidth: 2, borderColor: Brand.warning },
   field: { gap: 4 },
   twoCol: { flexDirection: 'row', gap: Spacing.two },
-  input: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, fontSize: 16 },
+  input: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 16 },
   bold: { fontWeight: '700' },
   itemRow: { flexDirection: 'row', gap: 6, alignItems: 'center' },
   qty: { width: 62, textAlign: 'right' },
@@ -187,10 +210,11 @@ const styles = StyleSheet.create({
   chip: { borderWidth: 1, borderColor: Brand.primary, borderRadius: 14, paddingHorizontal: 10, paddingVertical: 4 },
   chipActive: { backgroundColor: Brand.primary },
   addBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.two },
+  sumRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, borderRadius: 12, padding: Spacing.two + 4 },
   saveBtn: {
     flexDirection: 'row', gap: Spacing.two, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: Brand.success, borderRadius: 14, paddingVertical: 14,
+    backgroundColor: Brand.success, borderRadius: 16, paddingVertical: 18,
   },
-  saveText: { color: '#fff', fontSize: 17, fontWeight: '700' },
+  saveText: { color: '#fff', fontSize: 18, fontWeight: '700' },
   cancel: { alignItems: 'center', paddingVertical: Spacing.two },
 });

@@ -42,8 +42,11 @@ function Root() {
     <ThemeProvider value={theme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="camera" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="confirm" options={{ title: t('Check what we read'), presentation: 'modal' }} />
         <Stack.Screen name="receipt/[id]" options={{ title: t('Receipt') }} />
+        <Stack.Screen name="product/[key]" options={{ title: t('Prices') }} />
+        <Stack.Screen name="quick-add" options={{ title: t('Add a market price'), presentation: 'modal' }} />
       </Stack>
     </ThemeProvider>
   );

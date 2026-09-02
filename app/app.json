@@ -41,6 +41,20 @@
           "cameraPermission": "IziCost uses the camera to scan your receipts.",
           "photosPermission": "IziCost needs your photos to import a receipt picture."
         }
+      ],
+      "expo-sharing",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "IziCost uses your location to show prices near you and to remember which shop branch you visited. It is never shared."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "IziCost uses the camera to scan your receipts.",
+          "recordAudioAndroid": false
+        }
       ]
     ],
     "experiments": {

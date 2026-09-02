@@ -47,11 +47,24 @@ async function auth() {
   console.log("auth: anonymous sign-ins enabled =", cfg.external_anonymous_users_enabled, "| email autoconfirm =", cfg.mailer_autoconfirm);
 }
 
+async function sqlFile(file) {
+  const p = path.isAbsolute(file) ? file : path.join(root, file);
+  await call("POST", api + "/database/query", { query: fs.readFileSync(p, "utf8") });
+  console.log("sql: applied", path.relative(root, p));
+}
+
+async function migrations() {
+  const dir = path.join(root, "supabase", "migrations");
+  for (const f of fs.readdirSync(dir).filter((n) => n.endsWith(".sql")).sort()) await sqlFile(path.join(dir, f));
+}
+
 (async () => {
   const what = process.argv[2] || "all";
   try {
     if (what === "schema" || what === "all") await schema();
+    if (what === "migrations" || what === "all") await migrations();
     if (what === "auth" || what === "all") await auth();
+    if (what === "sql") await sqlFile(process.argv[3]);
   } catch (e) {
     console.error("FAILED:", e.message);
     process.exit(1);

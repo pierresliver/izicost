@@ -156,7 +156,7 @@ export default function MeScreen() {
             <ThemedText type="smallBold">{t('Your privacy')}</ThemedText>
           </View>
           <ThemedText type="small" themeColor="textSecondary">{t('Your receipts, totals and reports are private to you.')}</ThemedText>
-          <ThemedText type="small" themeColor="textSecondary">{t('Community prices (coming soon) share only the price of a product at a store on a date, never who bought it or what else was in the basket.')}</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">{t('Community prices share only the price of a product at a store on a date, never who bought it or what else was in the basket. A price is shown only after at least two reports.')}</ThemedText>
         </ThemedView>
 
         <Pressable style={styles.linkBtn} onPress={async () => { await AsyncStorage.removeItem(ONBOARDING_KEY); router.replace('/'); Alert.alert(t('Introduction'), t('The introduction will show the next time the app starts.')); }}>

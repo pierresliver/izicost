@@ -9,6 +9,9 @@ i18n = (src / "lib" / "i18n.tsx").read_text(encoding="utf-8")
 
 key_re = re.compile(r"""^\s*(['"])((?:(?!\1).|\\.)*)\1\s*:""", re.M)
 pt_keys = {m.group(2) for m in key_re.finditer(i18n)}
+# feature dictionaries registered with registerTranslations({...}) in src/features/*/i18n.ts
+for f in src.glob("features/*/i18n.ts"):
+    pt_keys |= {m.group(2) for m in key_re.finditer(f.read_text(encoding="utf-8"))}
 
 call_re = re.compile(r"""\bt\((['"])((?:(?!\1).|\\.)*)\1""")
 used = set()

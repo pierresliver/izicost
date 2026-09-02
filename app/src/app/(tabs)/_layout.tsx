@@ -23,6 +23,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="prices"
+        options={{
+          title: t('Prices'),
+          tabBarIcon: ({ color, size }) => <Ionicons name="pricetags" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="scan"
         options={{
           title: t('Scan'),

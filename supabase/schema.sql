@@ -79,12 +79,19 @@ create policy "own receipts" on public.receipts
 drop policy if exists "own receipt items" on public.receipt_items;
 create policy "own receipt items" on public.receipt_items
   for all to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = auth.uid())
+  with check (
+    user_id = auth.uid()
+    -- the parent receipt must be the caller's too (no attaching lines to someone else's receipt)
+    and exists (select 1 from public.receipts r where r.id = receipt_id and r.user_id = auth.uid())
+  );
 
 drop policy if exists "stores readable" on public.stores;
 create policy "stores readable" on public.stores for select to authenticated using (true);
 drop policy if exists "stores insertable" on public.stores;
-create policy "stores insertable" on public.stores for insert to authenticated with check (true);
+-- clients may create a branch but never with coordinates or a city: those come from the server side
+create policy "stores insertable" on public.stores for insert to authenticated
+  with check (lat is null and lng is null and city is null and length(name) <= 120);
 
 -- ── Private storage bucket for receipt photos: <user_id>/<file>.jpg ────────────
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)

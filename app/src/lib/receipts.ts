@@ -2,6 +2,9 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import * as ImageManipulator from 'expo-image-manipulator';
 
+import { captureLocation } from '@/features/prices/location';
+
+import { todayIso } from './numbers';
 import { ensureSession, supabase } from './supabase';
 import type { Extraction, ReceiptItemRow, ReceiptRow } from './types';
 
@@ -50,18 +53,36 @@ async function upsertStore(x: Extraction): Promise<string | null> {
   const key = nameKey(x.store_name);
   const taxId = x.store_tax_id ? x.store_tax_id.replace(/\D/g, '') : null;
   const address = x.store_branch_address?.trim() || null;
-  let q = supabase.from('stores').select('id').eq('name_key', key);
-  q = taxId ? q.eq('tax_id', taxId) : q.is('tax_id', null);
-  q = address ? q.eq('branch_address', address) : q.is('branch_address', null);
-  const { data: found } = await q.limit(1).maybeSingle();
-  if (found?.id) return found.id;
+  const lookup = () => {
+    let q = supabase.from('stores').select('id, lat').eq('name_key', key);
+    q = taxId ? q.eq('tax_id', taxId) : q.is('tax_id', null);
+    q = address ? q.eq('branch_address', address) : q.is('branch_address', null);
+    return q.limit(1).maybeSingle();
+  };
+  const { data: found } = await lookup();
+  if (found?.id) { if (found.lat === null) pinStoreLocation(found.id); return found.id; }
   const { data: created, error } = await supabase
     .from('stores')
-    .insert({ name: x.store_name.trim(), name_key: key, branch_address: address, tax_id: taxId, store_type: x.store_type || null, country: x.country || null })
+    .insert({ name: x.store_name.trim().slice(0, 120), name_key: key, branch_address: address, tax_id: taxId, store_type: x.store_type || null, country: x.country || null })
     .select('id')
     .single();
-  if (error) return null; // a store row is nice-to-have; never block saving the receipt
+  if (error) {
+    // Another phone may have created the same branch a moment ago: look again.
+    const { data: again } = await lookup();
+    return again?.id ?? null; // a store row is nice-to-have; never block saving the receipt
+  }
+  pinStoreLocation(created.id);
   return created.id;
+}
+
+/**
+ * Best effort, in the background: the first scan at a branch pins it to the phone's GPS position
+ * (only fills empty coordinates; server-side function refuses to move a store). Powers "Near me".
+ */
+function pinStoreLocation(storeId: string): void {
+  captureLocation()
+    .then((pos) => (pos ? supabase.rpc('set_store_location', { p_store: storeId, p_lat: pos.lat, p_lng: pos.lng }) : null))
+    .catch(() => {});
 }
 
 /** Save a confirmed receipt and its lines. Returns the new receipt id. */
@@ -81,7 +102,8 @@ export async function saveReceipt(x: Extraction, imagePath: string, raw: Extract
       country: x.country || null,
       currency: x.currency || null,
       receipt_number: x.receipt_number,
-      purchased_on: x.date && /^\d{4}-\d{2}-\d{2}$/.test(x.date) ? x.date : null,
+      // an unreadable date must not make the receipt vanish from every report: fall back to today
+      purchased_on: x.date && /^\d{4}-\d{2}-\d{2}$/.test(x.date) && !Number.isNaN(Date.parse(x.date)) ? x.date : todayIso(),
       purchased_at_time: x.time && /^\d{2}:\d{2}/.test(x.time) ? x.time.slice(0, 5) : null,
       subtotal: x.subtotal,
       tax_total: x.tax_total,
@@ -107,7 +129,8 @@ export async function saveReceipt(x: Extraction, imagePath: string, raw: Extract
       name_as_printed: it.name,
       product_name: it.name,
       qty: it.qty,
-      unit_price: it.unit_price,
+      // the user may have corrected the line total on the confirm screen: keep unit price consistent
+      unit_price: it.qty && it.qty > 0 && it.line_total != null ? Math.round((it.line_total / it.qty) * 100) / 100 : it.unit_price,
       line_total: it.line_total,
       category: it.category,
       subcategory: it.subcategory,
@@ -143,7 +166,9 @@ export async function getReceipt(id: string): Promise<{ receipt: ReceiptRow & { 
 export async function deleteReceipt(id: string, imagePath: string | null): Promise<void> {
   const { error } = await supabase.from('receipts').delete().eq('id', id);
   if (error) throw new Error(error.message);
-  if (imagePath) await supabase.storage.from('receipts').remove([imagePath]);
+  // image_path holds one path, or several joined by "|" for multi-photo receipts
+  const paths = (imagePath ?? '').split('|').map((p) => p.trim()).filter(Boolean);
+  if (paths.length) await supabase.storage.from('receipts').remove(paths);
 }
 
 export async function signedImageUrl(imagePath: string): Promise<string | null> {
