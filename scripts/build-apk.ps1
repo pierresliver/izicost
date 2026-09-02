@@ -32,9 +32,9 @@ if ($needPrebuild) {
 
 # Test builds for real phones only (drops the x86 emulator ABIs: ~40% smaller). prebuild resets this file.
 $gp = Join-Path $app 'android\gradle.properties'
-if (-not (Select-String -Path $gp -Pattern 'reactNativeArchitectures=armeabi' -Quiet)) {
-  Add-Content -Path $gp -Value "`nreactNativeArchitectures=armeabi-v7a,arm64-v8a" -Encoding ascii
-}
+$gpText = Get-Content $gp -Raw
+$gpText = [regex]::Replace($gpText, '(?m)^reactNativeArchitectures=.*$', 'reactNativeArchitectures=armeabi-v7a,arm64-v8a')
+[System.IO.File]::WriteAllText($gp, $gpText, (New-Object System.Text.UTF8Encoding($false)))
 
 Write-Host '>> gradle assembleRelease...' -ForegroundColor Cyan
 & 'android\gradlew.bat' -p android assembleRelease

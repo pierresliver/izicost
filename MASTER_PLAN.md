@@ -321,6 +321,8 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   price alerts checked on Prices-tab focus (10-min throttle, banner, never repeats a hit), "My alerts" screen,
   "Add to basket" on the product page. Migration 005 (`shopping_lists`, `shopping_list_items`,
   `price_alert_hits`, RPCs `basket_quote`, `check_price_alerts`, all reading only the anonymised view).
+- ✅ **Build 2:** `builds/izicost-v0.2.0-2026-09-02-1842.apk` (all of the above; 25-min build). Basket review fixes
+  (commit 91da570) landed after its bundle → they ship in build 3.
 - ✅ Security/code review by a separate agent, fixes applied the same evening: raw `price_points` table was
   readable by any signed-in user (bypassing the ≥2-reports rule) → now readable ONLY through the owner-run
   `community_prices` view + definer trend RPC, verified from a guest session; migration 003 made re-runnable;
