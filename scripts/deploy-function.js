@@ -1,5 +1,6 @@
-// Publishes the extract-receipt Edge Function and its secret to the Supabase project.
-//   node scripts/deploy-function.js
+// Publishes the Edge Functions and their secret to the Supabase project.
+//   node scripts/deploy-function.js                      -> every function under supabase/functions
+//   node scripts/deploy-function.js parse-shopping-list  -> just that one
 // Reads SUPABASE_ACCESS_TOKEN + SUPABASE_URL from passwords/supabase.txt and the Anthropic key
 // from phase0/key1.txt (or ANTHROPIC_API_KEY=... in passwords/supabase.txt). Prints status only.
 const fs = require("fs");
@@ -42,6 +43,12 @@ try {
 } finally {
   fs.unlinkSync(tmp);
 }
-// 2) the function itself (verify_jwt comes from supabase/config.toml)
-run(["functions", "deploy", "extract-receipt", "--project-ref", ref]);
+// 2) the functions themselves (verify_jwt comes from supabase/config.toml)
+const fnDir = path.join(root, "supabase", "functions");
+const all = fs.readdirSync(fnDir).filter((n) => fs.existsSync(path.join(fnDir, n, "index.ts")));
+const wanted = process.argv.slice(2).filter((a) => !a.startsWith("-"));
+for (const name of wanted.length ? wanted : all) {
+  if (!all.includes(name)) { console.error("No such function: " + name + " (have: " + all.join(", ") + ")"); process.exit(1); }
+  run(["functions", "deploy", name, "--project-ref", ref]);
+}
 console.log("deploy: done");

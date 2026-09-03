@@ -15,8 +15,8 @@ for f in src.glob("features/*/i18n.ts"):
 
 call_re = re.compile(r"""\bt\((['"])((?:(?!\1).|\\.)*)\1""")
 used = set()
-for f in src.rglob("*.tsx"):
-    if f.name == "i18n.tsx":
+for f in list(src.rglob("*.tsx")) + list(src.rglob("*.ts")):
+    if f.name == "i18n.tsx" or (f.name == "i18n.ts" and f.parent.parent.name == "features"):
         continue
     text = f.read_text(encoding="utf-8")
     used |= {m.group(2) for m in call_re.finditer(text)}

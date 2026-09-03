@@ -16,6 +16,8 @@ import { t, useLang } from '@/lib/i18n';
 import { parseNumber } from '@/lib/numbers';
 
 const CURRENCIES = ['MZN', 'ZAR', 'USD'];
+/** Off for launch — see supabase/migrations/008_disable_quick_add.sql (the RPC is revoked server-side too). */
+const QUICK_ADD_ENABLED = false;
 
 export default function QuickAddScreen() {
   useLang();
@@ -46,6 +48,22 @@ export default function QuickAddScreen() {
   const priceNum = parseNumber(price) ?? NaN;
   const qtyNum = parseNumber(qty) || 1;
   const valid = name.trim().length >= 2 && Number.isFinite(priceNum) && priceNum > 0 && store.trim().length >= 2 && !!city;
+
+  // Switched off for launch (see supabase/migrations/008_disable_quick_add.sql): the screen is not linked
+  // from anywhere, but a deep link (izicost://quick-add) could still open it, so say so instead of failing.
+  if (!QUICK_ADD_ENABLED) {
+    return (
+      <ThemedView style={[styles.container, { alignItems: 'center', justifyContent: 'center', gap: Spacing.two }]}>
+        <Stack.Screen options={{ title: t('Add a market price') }} />
+        <Ionicons name="time-outline" size={40} color={Brand.primary} />
+        <ThemedText type="smallBold" style={{ fontSize: 17, textAlign: 'center' }}>{t('Market prices are coming later')}</ThemedText>
+        <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'center' }}>
+          {t('For now, community prices come only from scanned receipts, which are hard to fake. Scan a receipt to add prices.')}
+        </ThemedText>
+        <Pressable onPress={() => router.back()} style={{ paddingVertical: Spacing.two }}><ThemedText style={{ color: Brand.primary, fontWeight: '700' }}>{t('Close')}</ThemedText></Pressable>
+      </ThemedView>
+    );
+  }
 
   async function save() {
     if (!valid || !city) { Alert.alert(t('Check the form'), t('Product, price, market and city are required.')); return; }

@@ -67,6 +67,14 @@ export async function addItem(listId: string, x: { name: string; productId?: str
   return toItem(data as unknown as RawItem);
 }
 
+/** Home screen: how many unticked items are waiting, without creating a list for a brand-new user. */
+export async function countOpenItems(): Promise<number> {
+  const uid = await ensureSession();
+  const { count, error } = await supabase.from('shopping_list_items').select('id', { count: 'exact', head: true }).eq('user_id', uid).eq('checked', false);
+  if (error) throw new Error(error.message);
+  return count ?? 0;
+}
+
 /** Product page shortcut: add to the default list. */
 export async function addToBasket(name: string, productId?: string | null): Promise<BasketItem> {
   const list = await getDefaultList();

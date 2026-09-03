@@ -3,6 +3,10 @@
 import { registerTranslations } from '@/lib/i18n';
 
 registerTranslations({
+  // quick-add switched off for launch
+  'Market prices are coming later': 'Os preços de mercado chegam mais tarde',
+  'For now, community prices come only from scanned receipts, which are hard to fake. Scan a receipt to add prices.':
+    'Por agora, os preços da comunidade vêm apenas de recibos digitalizados, difíceis de falsificar. Digitalize um recibo para adicionar preços.',
   // scope & search
   'Near me': 'Perto de mim',
   'My city': 'A minha cidade',

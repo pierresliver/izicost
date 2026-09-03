@@ -163,6 +163,12 @@ export async function getReceipt(id: string): Promise<{ receipt: ReceiptRow & { 
   return { receipt, items: items ?? [] };
 }
 
+/** Fix the category of one saved line (the receipt detail screen). Prices are never edited here. */
+export async function updateItemCategory(itemId: string, category: string, subcategory: string | null): Promise<void> {
+  const { error } = await supabase.from('receipt_items').update({ category, subcategory }).eq('id', itemId);
+  if (error) throw new Error(error.message);
+}
+
 export async function deleteReceipt(id: string, imagePath: string | null): Promise<void> {
   const { error } = await supabase.from('receipts').delete().eq('id', id);
   if (error) throw new Error(error.message);

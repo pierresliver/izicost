@@ -15,10 +15,10 @@ export const ONBOARDING_KEY = 'izicost.onboardingSeen';
 type Card = { icon: keyof typeof Ionicons.glyphMap; title: string; body: string; color: string };
 
 const CARDS: Card[] = [
-  { icon: 'camera', color: Brand.primary, title: 'Snap the receipt', body: 'Take one photo. IziCost reads the store, the date and every item and price in about ten seconds.' },
-  { icon: 'checkmark-done-circle', color: Brand.success, title: 'Check it in one tap', body: 'We show you what we read next to the photo. Anything doubtful is highlighted. Fix it if needed, then tap Save.' },
-  { icon: 'pie-chart', color: '#2F6DB5', title: 'See where your money goes', body: 'Spending by month, store and category, with every receipt photo kept safely. Private to you, always.' },
-  { icon: 'people', color: '#B5542F', title: 'Find where things are cheapest', body: 'Prices from all users are pooled anonymously, so you can see where each product costs less near you or in any city. Only prices are shared, never who you are or what you spent.' },
+  { icon: 'mic', color: Brand.primary, title: 'Say what you need', body: 'Speak or type your shopping list. IziCost turns it into a basket in seconds.' },
+  { icon: 'storefront', color: Brand.success, title: 'See where it is cheapest', body: 'We compare real prices from receipts across the stores near you or in any city, and show which shop sells the whole basket cheapest.' },
+  { icon: 'camera', color: '#2F6DB5', title: 'Scan receipts to keep prices fresh', body: 'One photo reads every item and price in about ten seconds. Your spending reports stay private; only prices are shared, anonymously.' },
+  { icon: 'people', color: '#B5542F', title: 'Better together', body: 'Every receipt anyone scans makes the prices fresher for everyone. Invite your friends and family, and only prices are ever shared, never who you are or what you spent.' },
 ];
 
 export function Onboarding({ onDone }: { onDone: () => void }) {

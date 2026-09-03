@@ -2,3 +2,6 @@ project_id = "ehomstenpqngybtemtad"
 
 [functions.extract-receipt]
 verify_jwt = true
+
+[functions.parse-shopping-list]
+verify_jwt = true

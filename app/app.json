@@ -55,6 +55,13 @@
           "cameraPermission": "IziCost uses the camera to scan your receipts.",
           "recordAudioAndroid": false
         }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "IziCost uses the microphone so you can say your shopping list instead of typing it.",
+          "speechRecognitionPermission": "IziCost uses speech recognition to turn what you say into a shopping list."
+        }
       ]
     ],
     "experiments": {

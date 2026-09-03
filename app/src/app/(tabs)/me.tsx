@@ -10,6 +10,7 @@ import { ONBOARDING_KEY } from '@/components/onboarding';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Brand, Spacing } from '@/constants/theme';
+import { shareApp } from '@/features/share/share';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
 import { ensureSession, supabase } from '@/lib/supabase';
@@ -147,6 +148,18 @@ export default function MeScreen() {
               </Pressable>
             ))}
           </View>
+        </ThemedView>
+
+        {/* Invite */}
+        <ThemedView type="backgroundElement" style={styles.card}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Ionicons name="share-social" size={20} color={Brand.primary} />
+            <ThemedText type="smallBold">{t('Invite friends and family')}</ThemedText>
+          </View>
+          <ThemedText type="small" themeColor="textSecondary">{t('IziCost gets better with every person who scans: more stores, fresher prices, better bargains for everyone.')}</ThemedText>
+          <Pressable style={styles.primaryBtn} onPress={shareApp}>
+            <ThemedText style={styles.primaryBtnText}>{t('Share')}</ThemedText>
+          </Pressable>
         </ThemedView>
 
         {/* Privacy */}

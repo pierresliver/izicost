@@ -535,7 +535,9 @@ grant select on public.community_prices to authenticated;
 revoke all on public.price_points, public.products, public.cities, public.price_reports, public.price_alerts, public.community_prices from anon;
 
 revoke execute on function public.quick_add_price(text, numeric, text, text, text, numeric, text) from public, anon;
-grant execute on function public.quick_add_price(text, numeric, text, text, text, numeric, text) to authenticated;
+-- quick-add is OFF for launch (008_disable_quick_add.sql); the grant below is intentionally commented out so
+-- re-running this file does not re-enable it. Re-enable later with:
+-- grant execute on function public.quick_add_price(text, numeric, text, text, text, numeric, text) to authenticated;
 revoke execute on function public.upsert_product(text, text, text) from public, anon, authenticated;
 
 -- Hygiene: read RPCs and helpers are for signed-in users only.

@@ -1,32 +1,41 @@
-// Home dashboard: this month, budgets, weekly recap, 6-month bars, category ring, top stores, insights.
+// Home: bargain-first. "What do you need to buy?" (say it or type it) → cheapest store, then the
+// scan card that feeds the price pool, then the private spending dashboard underneath.
+import '@/features/basket/i18n';
+import '@/features/home/i18n';
 import '@/features/reports/i18n';
 
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Brand, Spacing } from '@/constants/theme';
+import { countOpenItems } from '@/features/basket/api';
+import { BASKET_HREF, BASKET_QUOTE_HREF } from '@/features/basket/routes';
 import { loadDashboard, type Dashboard } from '@/features/reports/api';
 import { budgetStatus, listBudgets, type Budget } from '@/features/reports/budgets';
 import { BarChart, RingChart } from '@/features/reports/charts';
 import { monthLong, monthShort } from '@/features/reports/dates';
-import { BudgetRings, HeadlineCard, OnboardingCard, WeeklyCard } from '@/features/reports/home-cards';
+import { BudgetRings, HeadlineCard, WeeklyCard } from '@/features/reports/home-cards';
 import { DueSoonCard, InflationTeaser, RecapAskCard } from '@/features/reports/home-insights';
 import { detectRecurring, fetchHistory, personalInflation, type Recurring } from '@/features/reports/insights';
 import { enableWeeklyRecap, getRecapPref, rescheduleWeeklyRecap, setRecapPref, type RecapPref } from '@/features/reports/notifications';
 import { assignColors, useChartPalette } from '@/features/reports/palette';
 import { Card, ErrorText, Row, SectionTitle, styles as ui } from '@/features/reports/ui';
+import { shareApp } from '@/features/share/share';
+import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
 import { supabaseConfigured } from '@/lib/supabase';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const theme = useTheme();
   const { lang } = useLang();
   const p = useChartPalette();
   const [d, setD] = useState<Dashboard | null>(null);
+  const [basketCount, setBasketCount] = useState(0);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [recurring, setRecurring] = useState<Recurring[]>([]);
   const [inflationPct, setInflationPct] = useState<number | null>(null);
@@ -37,8 +46,10 @@ export default function HomeScreen() {
   const load = useCallback(async () => {
     if (!supabaseConfigured) { setError('Supabase is not configured (app/.env missing).'); return; }
     try {
-      const [dash, b, pref] = await Promise.all([loadDashboard(), listBudgets().catch(() => [] as Budget[]), getRecapPref()]);
-      setD(dash); setBudgets(b); setRecapPrefState(pref); setError(null);
+      const [dash, b, pref, n] = await Promise.all([
+        loadDashboard(), listBudgets().catch(() => [] as Budget[]), getRecapPref(), countOpenItems().catch(() => 0),
+      ]);
+      setD(dash); setBudgets(b); setRecapPrefState(pref); setBasketCount(n); setError(null);
       rescheduleWeeklyRecap(dash.week.current, dash.week.currentCount, dash.currency);
       if (dash.receiptsAllTime > 0) {
         fetchHistory().then((h) => { setRecurring(detectRecurring(h)); setInflationPct(personalInflation(h).overallPct); }).catch(() => {});
@@ -62,6 +73,7 @@ export default function HomeScreen() {
 
   const go = (path: string) => router.push(path as Href);
   const monthName = d ? monthLong(d.months[5].ym, lang) : '';
+  const hasReceipts = !!d && d.receiptsAllTime > 0;
 
   async function onRecapYes() {
     const ok = await enableWeeklyRecap();
@@ -73,18 +85,66 @@ export default function HomeScreen() {
   return (
     <ScrollView contentContainerStyle={ui.screen} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} />}>
       <ErrorText error={error} />
-      {d && d.receiptsAllTime === 0 ? <OnboardingCard onScan={() => router.navigate('/scan')} /> : null}
-      {d && d.receiptsAllTime > 0 ? <HeadlineCard d={d} monthName={monthName} overall={overall} onBudget={() => go('/reports/budgets')} /> : null}
+
+      {/* 1. The promise: tell us what you need, we find the cheapest store */}
+      <View style={s.hero}>
+        <ThemedText style={s.heroTitle}>{t('What do you need to buy?')}</ThemedText>
+        <ThemedText style={s.heroSub}>{t('Say it or type it. We show you which store sells it all cheapest, near you or in any city.')}</ThemedText>
+        <View style={s.heroRow}>
+          <Pressable onPress={() => router.push(BASKET_HREF)} style={({ pressed }) => [s.fakeInput, pressed && { opacity: 0.9 }]} accessibilityRole="button" accessibilityLabel={t('Type your list')}>
+            <Ionicons name="create-outline" size={20} color={Brand.primary} />
+            <ThemedText style={{ color: '#4B5563', fontSize: 16, flex: 1 }} numberOfLines={1}>{t('Type your list')}</ThemedText>
+          </Pressable>
+          <Pressable onPress={() => router.push({ pathname: BASKET_HREF as string, params: { voice: '1' } } as Href)} style={({ pressed }) => [s.micBtn, pressed && { opacity: 0.85 }]} accessibilityRole="button" accessibilityLabel={t('Say your list')}>
+            <Ionicons name="mic" size={28} color={Brand.primary} />
+          </Pressable>
+        </View>
+        {basketCount > 0 ? (
+          <Pressable onPress={() => router.push(BASKET_QUOTE_HREF)} style={({ pressed }) => [s.basketPill, pressed && { opacity: 0.85 }]}>
+            <Ionicons name="basket" size={18} color="#fff" />
+            <ThemedText style={{ color: '#fff', fontWeight: '700', flex: 1 }}>{basketCount === 1 ? t('1 item in your basket') : t('%n% items in your basket', { n: basketCount })}</ThemedText>
+            <ThemedText style={{ color: '#fff', fontWeight: '700' }}>{t('Compare stores now')}</ThemedText>
+            <Ionicons name="chevron-forward" size={16} color="#fff" />
+          </Pressable>
+        ) : null}
+      </View>
+
+      {/* 2. The engine: scanning feeds the price pool (and the private reports) */}
+      <Card onPress={() => router.navigate('/scan')}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
+          <View style={s.scanIcon}><Ionicons name="camera" size={26} color="#fff" /></View>
+          <View style={{ flex: 1, gap: 2 }}>
+            <ThemedText style={{ fontSize: 17, fontWeight: '700' }}>{t('Keep prices fresh')}</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">{t('Scan your receipts: every one adds anonymous prices for everyone and tracks your own spending, privately.')}</ThemedText>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
+        </View>
+      </Card>
+
+      <View style={{ flexDirection: 'row', gap: Spacing.two }}>
+        <Pressable onPress={() => router.navigate('/prices')} style={({ pressed }) => [s.smallCard, { backgroundColor: theme.backgroundElement }, pressed && { opacity: 0.85 }]}>
+          <Ionicons name="pricetags" size={20} color={Brand.primary} />
+          <ThemedText type="smallBold" style={{ flex: 1 }}>{t('Browse community prices')}</ThemedText>
+        </Pressable>
+        <Pressable onPress={shareApp} style={({ pressed }) => [s.smallCard, { backgroundColor: theme.backgroundElement }, pressed && { opacity: 0.85 }]}>
+          <Ionicons name="share-social" size={20} color={Brand.primary} />
+          <ThemedText type="smallBold" style={{ flex: 1 }}>{t('Invite friends')}</ThemedText>
+        </Pressable>
+      </View>
+
+      {/* 3. Private spending, only once there is something to show */}
+      {hasReceipts ? <SectionTitle action={t('All reports')} onAction={() => go('/reports')}>{t('Your spending')}</SectionTitle> : null}
+      {hasReceipts && d ? <HeadlineCard d={d} monthName={monthName} overall={overall} onBudget={() => go('/reports/budgets')} /> : null}
       {!d && !error ? <Card><ThemedText themeColor="textSecondary">{t('Loading…')}</ThemedText></Card> : null}
 
       {d ? <BudgetRings statuses={perCategory} currency={d.currency} onPress={() => go('/reports/budgets')} /> : null}
-      {d && d.receiptsAllTime > 0 ? <WeeklyCard d={d} /> : null}
-      {d && d.receiptsAllTime > 0 && recapPref === null ? (
+      {hasReceipts && d ? <WeeklyCard d={d} /> : null}
+      {hasReceipts && recapPref === null ? (
         <RecapAskCard onYes={onRecapYes} onNo={async () => { await setRecapPref('off'); setRecapPrefState('off'); }} />
       ) : null}
       <DueSoonCard items={recurring} />
 
-      {d && d.receiptsAllTime > 0 ? (
+      {hasReceipts && d ? (
         <Card>
           <SectionTitle action={t('By month')} onAction={() => go(`/reports/month?ym=${d.months[5].ym}`)}>{t('Last 6 months')}</SectionTitle>
           <BarChart
@@ -99,7 +159,7 @@ export default function HomeScreen() {
         <Card>
           <SectionTitle action={t('See all')} onAction={() => go('/reports/categories')}>{t('By category')}</SectionTitle>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
-            <RingChart segments={ring.segments} size={140} thickness={20} onPressSegment={(s) => s.key !== 'Other' && go(`/reports/category?category=${encodeURIComponent(s.key)}`)}>
+            <RingChart segments={ring.segments} size={140} thickness={20} onPressSegment={(seg) => seg.key !== 'Other' && go(`/reports/category?category=${encodeURIComponent(seg.key)}`)}>
               <ThemedText type="smallBold" style={{ fontSize: 15 }}>{formatMoney(d.thisMonth.total, d.currency)}</ThemedText>
             </RingChart>
             <View style={{ flex: 1 }}>
@@ -115,26 +175,25 @@ export default function HomeScreen() {
       {d && d.byStore.length > 0 ? (
         <Card>
           <SectionTitle action={t('See all')} onAction={() => go('/reports/stores')}>{t('Top stores')}</SectionTitle>
-          {d.byStore.map((s) => (
-            <Row key={s.name} title={s.name} subtitle={`${s.count} ${t('receipts')}`} right={formatMoney(s.total)} onPress={() => go(`/reports/store?name=${encodeURIComponent(s.name)}`)} />
+          {d.byStore.map((st) => (
+            <Row key={st.name} title={st.name} subtitle={`${st.count} ${t('receipts')}`} right={formatMoney(st.total)} onPress={() => go(`/reports/store?name=${encodeURIComponent(st.name)}`)} />
           ))}
         </Card>
       ) : null}
 
       <InflationTeaser pct={inflationPct} onPress={() => go('/reports/inflation')} />
-
-      {d && d.receiptsAllTime > 0 ? (
-        <>
-          <Pressable style={ui.primaryBtn} onPress={() => go('/reports')}>
-            <Ionicons name="stats-chart" color="#fff" size={20} />
-            <ThemedText style={ui.primaryBtnText}>{t('All reports')}</ThemedText>
-          </Pressable>
-          <Pressable style={[ui.primaryBtn, { backgroundColor: 'transparent', borderWidth: 2, borderColor: Brand.primary, paddingVertical: 12 }]} onPress={() => router.navigate('/scan')}>
-            <Ionicons name="camera" color={Brand.primary} size={20} />
-            <ThemedText style={[ui.primaryBtnText, { color: Brand.primary }]}>{t('Scan a receipt')}</ThemedText>
-          </Pressable>
-        </>
-      ) : null}
     </ScrollView>
   );
 }
+
+const s = StyleSheet.create({
+  hero: { backgroundColor: Brand.primary, borderRadius: 20, padding: Spacing.three, gap: Spacing.two },
+  heroTitle: { color: '#fff', fontSize: 24, lineHeight: 30, fontWeight: '800' },
+  heroSub: { color: '#E6F4EE', fontSize: 14, lineHeight: 20 },
+  heroRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, marginTop: Spacing.one },
+  fakeInput: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: '#fff', borderRadius: 14, paddingHorizontal: 14, height: 52 },
+  micBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
+  basketPill: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: Brand.primaryDark, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12, marginTop: Spacing.one },
+  scanIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: Brand.primary, alignItems: 'center', justifyContent: 'center' },
+  smallCard: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.two, borderRadius: 14, padding: Spacing.two + 4 },
+});

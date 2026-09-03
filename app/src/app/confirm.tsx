@@ -3,7 +3,7 @@ import '@/features/scan/i18n';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -44,17 +44,20 @@ export default function ConfirmScreen() {
   );
   const [saving, setSaving] = useState(false);
   const [viewer, setViewer] = useState<number | null>(null);
-  const [saved, setSaved] = useState(false);
+  // A ref, not state: the unmount cleanup below must see the latest value. (With state in the
+  // dependency list the cleanup re-ran on setSaved(true) with the stale `false` and deleted the
+  // photos of every receipt that had just been saved.)
+  const savedRef = useRef(false);
 
   // Leaving without saving (Cancel, back gesture, swipe-down): forget the draft and delete the
-  // uploaded photos so nothing is left behind in storage.
+  // uploaded photos so nothing is left behind in storage. Runs once, on unmount only.
   useEffect(() => {
     return () => {
-      if (!saved && pending?.imagePaths?.length) removeUploaded(pending.imagePaths).catch(() => {});
+      if (!savedRef.current && pending?.imagePaths?.length) removeUploaded(pending.imagePaths).catch(() => {});
       clearPending();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [saved]);
+  }, []);
 
   if (!pending || !x) {
     return (
@@ -90,7 +93,7 @@ export default function ConfirmScreen() {
       };
       const id = await saveReceipt(cleaned, pending.imagePaths[0], pending.raw, pending.model);
       await attachExtraPhotos(id, pending.imagePaths); // no-op for a single photo
-      setSaved(true);
+      savedRef.current = true;
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       clearPending();
       router.navigate('/receipts'); // pops the modal and jumps to the Receipts tab

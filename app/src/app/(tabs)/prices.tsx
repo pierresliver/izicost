@@ -124,9 +124,9 @@ export default function PricesScreen() {
           <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'center' }}>
             {t('Every receipt you scan adds anonymous price tags to the pool — product, store, city, date and price, never who bought it. A price shows once at least two reports exist in the last 60 days.')}
           </ThemedText>
-          <Pressable onPress={() => router.push('/quick-add')} style={styles.emptyBtn}>
-            <Ionicons name="add-circle-outline" size={18} color={Brand.primary} />
-            <ThemedText type="smallBold" style={{ color: Brand.primary }}>{t('Add a market price')}</ThemedText>
+          <Pressable onPress={() => router.navigate('/scan')} style={styles.emptyBtn}>
+            <Ionicons name="camera-outline" size={18} color={Brand.primary} />
+            <ThemedText type="smallBold" style={{ color: Brand.primary }}>{t('Scan a receipt')}</ThemedText>
           </Pressable>
         </>
       )}
@@ -146,10 +146,8 @@ export default function PricesScreen() {
           <ProductResultCard row={item} onPress={() => router.push({ pathname: '/product/[key]', params: { key: item.product_key } })} />
         )}
       />
-      <Pressable onPress={() => router.push('/quick-add')} style={styles.fab} accessibilityLabel={t('Add a market price')}>
-        <Ionicons name="add" size={22} color="#fff" />
-        <ThemedText type="smallBold" style={{ color: '#fff' }}>{t('Add price')}</ThemedText>
-      </Pressable>
+      {/* Market quick-add is hidden for launch: an unchecked entry point lets one person poison the pool.
+          The screen and RPC stay (app/quick-add.tsx) for when trust rules exist (new-account weighting, medians). */}
       <CityPicker
         visible={picker !== null}
         title={picker === 'my' ? t('Your city') : t('Choose a city')}
@@ -162,7 +160,7 @@ export default function PricesScreen() {
 }
 
 const styles = StyleSheet.create({
-  list: { padding: Spacing.three, gap: Spacing.two, paddingBottom: 110 },
+  list: { padding: Spacing.three, gap: Spacing.two, paddingBottom: Spacing.six },
   basketCard: { flexDirection: 'row', alignItems: 'stretch', borderRadius: 16, overflow: 'hidden' },
   basketMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: 12 },
   basketIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: Brand.primary, alignItems: 'center', justifyContent: 'center' },
@@ -173,9 +171,4 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', gap: Spacing.two, paddingHorizontal: Spacing.three, paddingTop: Spacing.four },
   emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(11,110,79,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.one },
   emptyBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: Spacing.two, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12, borderWidth: 1.5, borderColor: Brand.primary },
-  fab: {
-    position: 'absolute', right: Spacing.three, bottom: Spacing.three, flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: Brand.primary, borderRadius: 999, paddingVertical: 12, paddingLeft: 12, paddingRight: 18,
-    shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 6,
-  },
 });

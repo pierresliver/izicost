@@ -334,6 +334,39 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   CSV export neutralises formula injection. Remaining known limits: k-anonymity counts reports, not people;
   price alerts stored but only checked in-app (no push); `price_reports` has no rate limit yet.
 
+**Day 2 (2026-09-03) — PS's build-2 findings + refocus on bargains:**
+- 🐞 **Photos gone on every saved receipt (fixed):** the Confirm screen's "delete uploads when the user cancels"
+  cleanup also fired right after a successful save (it re-ran whenever the `saved` flag changed), so every photo
+  was deleted seconds after saving. Verified in the DB: storage bucket empty, 5 receipts pointing at missing files.
+  Fixed with a ref + unmount-only effect. Photos of receipts saved with build 1/2 cannot be recovered; the detail
+  screen now says so instead of showing a blank space.
+- ✅ Receipt detail: tap an item → change its **category** (chips), saved immediately. Prices stay read-only.
+- ✅ **Market quick-add switched off** (PS: a troll could poison the pool): buttons removed from the Prices tab,
+  the screen shows "coming later" if opened by deep link, and **migration 008 revokes the RPC** server-side (003's
+  grant commented out so re-running it cannot re-enable it). Bring back later with trust rules (ignore brand-new
+  accounts, medians — the community view already uses medians).
+- ✅ **Invite friends**: phone share sheet (WhatsApp etc.) from Home and Me, message in the user's language.
+  `APP_LINK` in `app/src/features/share/share.ts` is empty until there is a download page / Play listing.
+- ✅ **Voice shopping list** (PS idea): mic on Home and in My basket → phone's own speech recogniser
+  (`expo-speech-recognition`, pt-PT / en-ZA, free) → Edge Function `parse-shopping-list` (Sonnet 5, effort low,
+  ~3–5 s, structured items name/qty/size, 60/day cap via `assist_events`, migration 007) → matched to the
+  catalogue → review sheet → "Add N items and compare" → straight to *Where is it cheapest?*. Offline fallback
+  splits the sentence locally. Tested from the PC: "dois quilos de arroz, leite, uma dúzia de ovos e três pães"
+  → arroz [2kg], leite, 12× ovos, 3× pão; chit-chat → empty list.
+- ✅ **Home is now bargain-first** (PS decision: the main promise is *where to buy cheaper*, expenditure is the
+  private reward that makes people scan): hero "What do you need to buy?" (type / speak) + basket pill →
+  scan card ("keeps prices fresh, tracks your spending") → community prices / invite → spending dashboard below.
+  Intro cards reordered: say what you need → see where it is cheapest → scan to keep prices fresh → better together.
+- ⚠️ Cold-start risk noted: with the ≥2-reports rule, a brand-new city shows no bargains. Needs a seeding plan
+  (tester group scanning before launch, promotion flyers, always show the user's own prices) — decision pending.
+- ✅ Checks: typecheck clean; `expo lint` set up (eslint + eslint-config-expo added; today's files clean, 16
+  pre-existing "setState in effect" style warnings left in older files); translation audit 0 missing (now also
+  scans .ts files); review agent's 11 findings fixed (offline splitter, cancel-during-parse race, sheet never
+  hangs, half-added lists, function fetch guard, FK on assist_events); security script: function refuses callers
+  without a session, RLS blocks cross-user category edits/reads, quick-add RPC refused, assist_events hidden.
+  extract-receipt smoke test still passes after the redeploy.
+- Build 3 not made yet (PS: no builds without explicit consent). It needs `expo prebuild` (new native module).
+
 **Security — in place (2026-09-02):** AI key only on the server function, never in the app; the app ships only
 the public URL + publishable key (grant nothing without a session); row-level security on every table (a user
 can only read/write rows where `user_id = auth.uid()`, enforced by the database, not the app); private photo
