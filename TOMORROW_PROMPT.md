@@ -12,7 +12,7 @@ Rule: **never start an APK build without my explicit yes in this session.** Buil
 
 Today:
 1. I will give you my findings from testing build 3. Fix them all. Ask for screenshots if something is unclear.
-2. When the fixes are done, ask me before making build 4 (scriptsuild-apk.ps1); copy it to builds\ and tell me the file name.
+2. When the fixes are done, ask me before making build 4 (scripts\build-apk.ps1); copy it to builds\ and tell me the file name.
 3. Visual polish pass, screen by screen: consistent spacing, brand green, clean cards, dark mode correct, nice empty states. The app must look better than the competitor apps in research/COMPETITOR_RESEARCH.md section 3.
 4. Seeding plan for the price pool (community prices now show from the first report, but a new city still starts empty): tester group, promotion flyers, etc.
 5. Price-drop push notifications while the app is closed (stage B: scheduled server job + push tokens) — PS: "we need to do it". Then more dashboard life (budget rings more prominent, weekly line as a moving bar) — PS wants the dashboard fun, dynamic and interactive.
