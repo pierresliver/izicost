@@ -1,4 +1,5 @@
-// Bottom sheet for "say your list": listening -> making the list -> review -> add to basket.
+// Bottom sheet for "say your list": listening (with a PT / EN switch) -> paused (Add more / Done) ->
+// making the list -> review -> add to basket.
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo } from 'react';
 import { ActivityIndicator, Animated, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -6,31 +7,36 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { Brand, Spacing } from '@/constants/theme';
+import { Segmented } from '@/features/prices/components/segmented';
 import { useTheme } from '@/hooks/use-theme';
 import { t } from '@/lib/i18n';
 
 import type { MatchedItem } from '../parse';
+import type { VoiceLang } from '../voice';
 
-export type VoicePhase = 'listening' | 'parsing' | 'review' | 'error';
+export type VoicePhase = 'listening' | 'paused' | 'parsing' | 'review' | 'error';
 
 type Props = {
   visible: boolean;
   phase: VoicePhase;
   transcript: string;
+  lang: VoiceLang;
+  onLang: (l: VoiceLang) => void;
   items: MatchedItem[];
   /** Human message for the error phase. */
   error: string | null;
   /** The server could not answer; the list came from the simple local splitter. */
   fallback: boolean;
   busy: boolean;
-  onStop: () => void;
+  onDone: () => void;
+  onMore: () => void;
   onCancel: () => void;
   onRetry: () => void;
   onRemove: (index: number) => void;
   onConfirm: () => void;
 };
 
-export function VoiceSheet({ visible, phase, transcript, items, error, fallback, busy, onStop, onCancel, onRetry, onRemove, onConfirm }: Props) {
+export function VoiceSheet({ visible, phase, transcript, lang, onLang, items, error, fallback, busy, onDone, onMore, onCancel, onRetry, onRemove, onConfirm }: Props) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const pulse = useMemo(() => new Animated.Value(1), []);
@@ -45,30 +51,51 @@ export function VoiceSheet({ visible, phase, transcript, items, error, fallback,
     return () => loop.stop();
   }, [visible, phase, pulse]);
 
+  const langSwitch = (
+    <View style={{ width: 200, alignSelf: 'center' }}>
+      <Segmented<VoiceLang> options={[{ key: 'pt', label: 'Português' }, { key: 'en', label: 'English' }]} value={lang} onChange={onLang} />
+    </View>
+  );
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onCancel} statusBarTranslucent>
       <Pressable style={styles.backdrop} onPress={phase === 'listening' ? undefined : onCancel} />
       <View style={[styles.sheet, { backgroundColor: theme.background, paddingBottom: insets.bottom + Spacing.three }]}>
         <View style={[styles.handle, { backgroundColor: theme.backgroundSelected }]} />
 
-        {phase === 'listening' ? (
+        {phase === 'listening' || phase === 'paused' ? (
           <View style={styles.center}>
-            <Animated.View style={[styles.micRing, { transform: [{ scale: pulse }] }]}>
-              <View style={styles.mic}><Ionicons name="mic" size={40} color="#fff" /></View>
-            </Animated.View>
-            <ThemedText style={styles.title}>{t('Listening…')}</ThemedText>
+            {langSwitch}
+            {phase === 'listening' ? (
+              <Animated.View style={[styles.micRing, { transform: [{ scale: pulse }] }]}>
+                <View style={styles.mic}><Ionicons name="mic" size={40} color="#fff" /></View>
+              </Animated.View>
+            ) : (
+              <View style={[styles.mic, { backgroundColor: theme.backgroundSelected }]}><Ionicons name="pause" size={36} color={theme.textSecondary} /></View>
+            )}
+            <ThemedText style={styles.title}>{phase === 'listening' ? t('Listening…') : t('Paused')}</ThemedText>
             <ThemedText themeColor="textSecondary" style={{ textAlign: 'center' }}>
-              {t('Say your list, e.g. “two kilos of rice, milk, a dozen eggs”.')}
+              {phase === 'listening'
+                ? t('Say your whole list, one item after another. Tap Done when you finish.')
+                : t('The phone stopped listening. Tap Add more to continue, or Done to make the list.')}
             </ThemedText>
             <View style={[styles.transcript, { backgroundColor: theme.backgroundElement }]}>
-              <ThemedText style={{ textAlign: 'center', fontSize: 17, lineHeight: 24 }} numberOfLines={4}>
-                {transcript || '…'}
+              <ThemedText style={{ textAlign: 'center', fontSize: 17, lineHeight: 24 }} numberOfLines={6}>
+                {transcript || (phase === 'listening' ? t('e.g. “dois quilos de arroz, leite, uma dúzia de ovos”') : '…')}
               </ThemedText>
             </View>
-            <Pressable onPress={onStop} style={({ pressed }) => [styles.primary, pressed && { opacity: 0.85 }]}>
-              <Ionicons name="checkmark" size={20} color="#fff" />
-              <ThemedText style={styles.primaryText}>{t('Done')}</ThemedText>
-            </Pressable>
+            <View style={styles.rowBtns}>
+              {phase === 'paused' ? (
+                <Pressable onPress={onMore} style={({ pressed }) => [styles.secondary, { borderColor: Brand.primary }, pressed && { opacity: 0.85 }]}>
+                  <Ionicons name="mic" size={20} color={Brand.primary} />
+                  <ThemedText style={[styles.primaryText, { color: Brand.primary }]}>{t('Add more')}</ThemedText>
+                </Pressable>
+              ) : null}
+              <Pressable onPress={onDone} disabled={!transcript.trim() && phase === 'paused'} style={({ pressed }) => [styles.primary, { flex: 1 }, (pressed || (!transcript.trim() && phase === 'paused')) && { opacity: 0.7 }]}>
+                <Ionicons name="checkmark" size={20} color="#fff" />
+                <ThemedText style={styles.primaryText}>{t('Done')}</ThemedText>
+              </Pressable>
+            </View>
             <Pressable onPress={onCancel} style={styles.link}><ThemedText themeColor="textSecondary">{t('Cancel')}</ThemedText></Pressable>
           </View>
         ) : null}
@@ -122,6 +149,7 @@ export function VoiceSheet({ visible, phase, transcript, items, error, fallback,
 
         {phase === 'error' ? (
           <View style={styles.center}>
+            {langSwitch}
             <View style={[styles.mic, { backgroundColor: Brand.warning }]}><Ionicons name="mic-off" size={36} color="#fff" /></View>
             <ThemedText style={styles.title}>{t('Could not hear a list')}</ThemedText>
             <ThemedText themeColor="textSecondary" style={{ textAlign: 'center' }}>{error}</ThemedText>
@@ -147,9 +175,10 @@ const styles = StyleSheet.create({
   title: { fontSize: 20, lineHeight: 26, fontWeight: '700', textAlign: 'center' },
   transcript: { alignSelf: 'stretch', borderRadius: 14, padding: Spacing.three, minHeight: 64, justifyContent: 'center' },
   primary: { alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.two, backgroundColor: Brand.primary, borderRadius: 14, paddingVertical: 14 },
+  secondary: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.two, borderWidth: 2, borderRadius: 14, paddingVertical: 12 },
   primaryText: { color: '#fff', fontSize: 17, fontWeight: '700' },
   link: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.two, paddingHorizontal: Spacing.two },
-  rowBtns: { flexDirection: 'row', justifyContent: 'center', gap: Spacing.three },
+  rowBtns: { alignSelf: 'stretch', flexDirection: 'row', justifyContent: 'center', gap: Spacing.two },
   note: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, borderRadius: 12, padding: Spacing.two },
   item: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, borderRadius: 12, padding: Spacing.two, paddingRight: 12 },
   qtyBadge: { minWidth: 30, height: 30, borderRadius: 15, paddingHorizontal: 8, backgroundColor: Brand.primary, alignItems: 'center', justifyContent: 'center' },

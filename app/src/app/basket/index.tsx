@@ -18,7 +18,7 @@ import { VoiceSheet, type VoicePhase } from '@/features/basket/components/voice-
 import '@/features/basket/i18n';
 import { parseShoppingList, ParseLimitError, type MatchedItem } from '@/features/basket/parse';
 import { ALERTS_HREF, BASKET_QUOTE_HREF } from '@/features/basket/routes';
-import { useVoiceInput, type VoiceError } from '@/features/basket/voice';
+import { loadVoiceLang, saveVoiceLang, useVoiceInput, type VoiceError, type VoiceLang } from '@/features/basket/voice';
 import { sizeLabel } from '@/features/prices/format';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
@@ -38,6 +38,8 @@ export default function BasketScreen() {
 
   // voice flow
   const [sheet, setSheet] = useState<VoicePhase | null>(null);
+  const [voiceLang, setVoiceLang] = useState<VoiceLang>(lang);
+  useEffect(() => { loadVoiceLang(lang).then(setVoiceLang); }, [lang]);
   const [parsed, setParsed] = useState<MatchedItem[]>([]);
   const [parseFallback, setParseFallback] = useState(false);
   const [voiceMsg, setVoiceMsg] = useState<string | null>(null);
@@ -68,7 +70,7 @@ export default function BasketScreen() {
     const session = sessionRef.current;
     setSheet('parsing');
     try {
-      const { items: found, fallback } = await parseShoppingList(transcript, lang);
+      const { items: found, fallback } = await parseShoppingList(transcript, voiceLang);
       if (session !== sessionRef.current) return; // cancelled meanwhile
       setParseFallback(fallback);
       if (!found.length) { setVoiceMsg(t('No products were recognised in what you said. Try again, a little slower.')); setSheet('error'); return; }
@@ -79,7 +81,7 @@ export default function BasketScreen() {
       setVoiceMsg(e instanceof ParseLimitError ? t('You have used today’s voice lists. Type your items instead.') : String((e as Error).message ?? e));
       setSheet('error');
     }
-  }, [lang]);
+  }, [voiceLang]);
   // Recogniser errors surface in the sheet with a plain-language message (never after a cancel: the
   // hook swallows 'aborted', and the sheet is already closed).
   const onVoiceError = useCallback((code: VoiceError) => {
@@ -92,7 +94,7 @@ export default function BasketScreen() {
     };
     setVoiceMsg(messages[code]); setSheet('error');
   }, []);
-  const voice = useVoiceInput(lang, onTranscript, onVoiceError);
+  const voice = useVoiceInput(onTranscript, onVoiceError);
   const { start: voiceStart, cancel: voiceCancel } = voice;
 
   const startVoice = useCallback(() => {
@@ -100,8 +102,16 @@ export default function BasketScreen() {
     sessionRef.current += 1;
     setParsed([]); setVoiceMsg(null); setParseFallback(false);
     setSheet('listening');
-    voiceStart();
-  }, [voiceStart]);
+    voiceStart(voiceLang);
+  }, [voiceStart, voiceLang]);
+
+  // The spoken language is the user's choice, remembered; switching while listening restarts the recogniser and keeps the text.
+  function changeVoiceLang(l: VoiceLang) {
+    setVoiceLang(l); saveVoiceLang(l);
+    if (sheet === 'listening') voice.resume(l);
+  }
+  // While the sheet is in its listening state, show 'paused' when the phone stopped on its own.
+  const phase: VoicePhase = sheet === 'listening' && voice.status === 'paused' ? 'paused' : (sheet ?? 'listening');
 
   // Opened from the Home screen's microphone: start listening straight away.
   useEffect(() => {
@@ -231,8 +241,8 @@ export default function BasketScreen() {
         </Pressable>
       </View>
       <VoiceSheet
-        visible={sheet !== null} phase={sheet ?? 'listening'} transcript={voice.transcript} items={parsed} error={voiceMsg} fallback={parseFallback} busy={addingAll}
-        onStop={voice.stop} onCancel={cancelVoice} onRetry={startVoice}
+        visible={sheet !== null} phase={phase} transcript={voice.transcript} lang={voiceLang} onLang={changeVoiceLang} items={parsed} error={voiceMsg} fallback={parseFallback} busy={addingAll}
+        onDone={voice.finish} onMore={() => voice.resume()} onCancel={cancelVoice} onRetry={startVoice}
         onRemove={(i) => setParsed((cur) => cur.filter((_, j) => j !== i))} onConfirm={addAllParsed}
       />
     </ThemedView>

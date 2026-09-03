@@ -59,6 +59,11 @@ registerTranslations({
   'Tap the microphone and say your list, or type it above. Then we show you which store sells it all cheapest.':
     'Toque no microfone e diga a sua lista, ou escreva-a em cima. Depois mostramos-lhe que loja vende tudo mais barato.',
   'Listening…': 'A ouvir…',
+  'Paused': 'Em pausa',
+  'Say your whole list, one item after another. Tap Done when you finish.': 'Diga a lista toda, um artigo a seguir ao outro. Toque em Terminar quando acabar.',
+  'The phone stopped listening. Tap Add more to continue, or Done to make the list.': 'O telemóvel parou de ouvir. Toque em Adicionar mais para continuar, ou em Terminar para fazer a lista.',
+  'e.g. “dois quilos de arroz, leite, uma dúzia de ovos”': 'ex.: “dois quilos de arroz, leite, uma dúzia de ovos”',
+  'Add more': 'Adicionar mais',
   'Say your list, e.g. “two kilos of rice, milk, a dozen eggs”.': 'Diga a sua lista, ex.: “dois quilos de arroz, leite, uma dúzia de ovos”.',
   'Done': 'Terminar',
   'Making your list…': 'A preparar a sua lista…',
