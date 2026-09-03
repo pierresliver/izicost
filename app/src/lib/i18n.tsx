@@ -110,7 +110,7 @@ const PT: Record<string, string> = {
   'Error': 'Erro',
   'Your privacy': 'A sua privacidade',
   'Your receipts, totals and reports are private to you.': 'Os seus recibos, totais e relatórios são privados.',
-  'Community prices share only the price of a product at a store on a date, never who bought it or what else was in the basket. A price is shown only after at least two reports.': 'Os preços da comunidade partilham apenas o preço de um produto numa loja numa data, nunca quem o comprou nem o que mais estava no cesto. Um preço só aparece depois de pelo menos dois registos.',
+  'Community prices share only the price of a product at a store on a date, never who bought it or what else was in the basket.': 'Os preços da comunidade partilham apenas o preço de um produto numa loja numa data, nunca quem comprou nem o que mais estava no cesto.',
   'Show the introduction again': 'Mostrar a introdução novamente',
   'Introduction': 'Introdução',
   'The introduction will show the next time the app starts.': 'A introdução será mostrada na próxima vez que a aplicação iniciar.',

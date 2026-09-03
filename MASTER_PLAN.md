@@ -357,8 +357,11 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   private reward that makes people scan): hero "What do you need to buy?" (type / speak) + basket pill →
   scan card ("keeps prices fresh, tracks your spending") → community prices / invite → spending dashboard below.
   Intro cards reordered: say what you need → see where it is cheapest → scan to keep prices fresh → better together.
-- ⚠️ Cold-start risk noted: with the ≥2-reports rule, a brand-new city shows no bargains. Needs a seeding plan
-  (tester group scanning before launch, promotion flyers, always show the user's own prices) — decision pending.
+- ✅ **Cold start decided (PS):** show community prices from the FIRST report ("a bargain with one option is still a
+  bargain"). Migration 009 makes the threshold a setting (`community_settings.min_reports`, read by
+  `min_reports()`) used by the view and the trend RPC; set to 1 now, one-row update to go back to 2 before a public
+  launch if we want k-anonymity back. App texts no longer promise "at least two reports"; the report count is shown
+  on every price so users can judge.
 - ✅ Checks: typecheck clean; `expo lint` set up (eslint + eslint-config-expo added; today's files clean, 16
   pre-existing "setState in effect" style warnings left in older files); translation audit 0 missing (now also
   scans .ts files); review agent's 11 findings fixed (offline splitter, cancel-during-parse race, sheet never

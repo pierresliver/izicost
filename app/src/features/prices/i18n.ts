@@ -35,8 +35,7 @@ registerTranslations({
   'products': 'produtos',
   'No community prices here yet': 'Ainda não há preços da comunidade aqui',
   'No community price for “%q%” here yet': 'Ainda não há preço da comunidade para “%q%” aqui',
-  'Every receipt you scan adds anonymous price tags to the pool — product, store, city, date and price, never who bought it. A price shows once at least two reports exist in the last 60 days.':
-    'Cada recibo que digitaliza junta preços anónimos ao conjunto — produto, loja, cidade, data e preço, nunca quem comprou. Um preço aparece quando existem pelo menos dois registos nos últimos 60 dias.',
+  'Every receipt you scan adds anonymous price tags to the pool — product, store, city, date and price, never who bought it. Prices appear from the first report; more reports make them more reliable.': 'Cada recibo que digitaliza acrescenta etiquetas de preço anónimas ao conjunto — produto, loja, cidade, data e preço, nunca quem comprou. Os preços aparecem desde o primeiro registo; mais registos tornam-nos mais fiáveis.',
   'Add a market price': 'Adicionar preço de mercado',
   'Add price': 'Adicionar preço',
   // freshness
@@ -57,8 +56,7 @@ registerTranslations({
   'You paid %d% more than the cheapest store.': 'Pagou %d% a mais do que na loja mais barata.',
   'You paid %d% less than the cheapest community price.': 'Pagou %d% a menos do que o preço mais barato da comunidade.',
   'Not enough reports yet': 'Ainda não há registos suficientes',
-  'Community prices show once a store has at least two reports in the last 60 days. Your own receipts are still private and shown below.':
-    'Os preços da comunidade aparecem quando uma loja tem pelo menos dois registos nos últimos 60 dias. Os seus recibos continuam privados e aparecem abaixo.',
+  'Community prices come from receipts scanned in the last 60 days; check the report count before you travel. Your own receipts are still private and shown below.': 'Os preços da comunidade vêm de recibos digitalizados nos últimos 60 dias; confira o número de registos antes de se deslocar. Os seus recibos continuam privados e aparecem abaixo.',
   'Last 90 days': 'Últimos 90 dias',
   'Not enough data for a trend yet. Prices in %cur% appear here once two or more weeks have reports.':
     'Ainda não há dados suficientes para a tendência. Os preços em %cur% aparecem aqui quando duas ou mais semanas tiverem registos.',

@@ -134,7 +134,7 @@ export default function ProductScreen() {
       ) : loaded ? (
         <ThemedView type="backgroundElement" style={styles.card}>
           <ThemedText type="smallBold">{t('Not enough reports yet')}</ThemedText>
-          <ThemedText type="small" themeColor="textSecondary">{t('Community prices show once a store has at least two reports in the last 60 days. Your own receipts are still private and shown below.')}</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">{t('Community prices come from receipts scanned in the last 60 days; check the report count before you travel. Your own receipts are still private and shown below.')}</ThemedText>
         </ThemedView>
       ) : null}
 

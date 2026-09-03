@@ -122,7 +122,7 @@ export default function PricesScreen() {
             {error ?? (query.trim() ? t('No community price for “%q%” here yet', { q: query.trim() }) : t('No community prices here yet'))}
           </ThemedText>
           <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'center' }}>
-            {t('Every receipt you scan adds anonymous price tags to the pool — product, store, city, date and price, never who bought it. A price shows once at least two reports exist in the last 60 days.')}
+            {t('Every receipt you scan adds anonymous price tags to the pool — product, store, city, date and price, never who bought it. Prices appear from the first report; more reports make them more reliable.')}
           </ThemedText>
           <Pressable onPress={() => router.navigate('/scan')} style={styles.emptyBtn}>
             <Ionicons name="camera-outline" size={18} color={Brand.primary} />

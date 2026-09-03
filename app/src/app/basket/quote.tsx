@@ -132,7 +132,7 @@ export default function QuoteScreen() {
             <View style={styles.emptyIcon}><Ionicons name="basket" size={30} color={Brand.primary} /></View>
             <ThemedText type="smallBold" style={{ fontSize: 17, textAlign: 'center' }}>{t('No community prices for your basket here yet')}</ThemedText>
             <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'center' }}>
-              {t('A price shows once at least two reports exist in the last 60 days. Try another city, or scan receipts to add prices.')}
+              {t('Prices come from receipts scanned in the last 60 days. Try another city, or scan receipts to add prices.')}
             </ThemedText>
           </View>
         ) : (

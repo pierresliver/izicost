@@ -43,8 +43,7 @@ registerTranslations({
   'Cheapest store per item': 'Loja mais barata por artigo',
   'No price yet for: %names%': 'Ainda sem preço para: %names%',
   'No community prices for your basket here yet': 'Ainda não há preços da comunidade para o seu cesto aqui',
-  'A price shows once at least two reports exist in the last 60 days. Try another city, or scan receipts to add prices.':
-    'Um preço aparece quando existem pelo menos dois registos nos últimos 60 dias. Tente outra cidade ou digitalize recibos para adicionar preços.',
+  'Prices come from receipts scanned in the last 60 days. Try another city, or scan receipts to add prices.': 'Os preços vêm de recibos digitalizados nos últimos 60 dias. Tente outra cidade ou digitalize recibos para adicionar preços.',
   'Add items to your basket first.': 'Adicione primeiro artigos ao seu cesto.',
   'Stores within 15 km': 'Lojas num raio de 15 km',
   'No location — showing %city%': 'Sem localização — a mostrar %city%',
