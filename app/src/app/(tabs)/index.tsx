@@ -19,7 +19,7 @@ import { fetchReceipts, loadDashboard, type Dashboard } from '@/features/reports
 import { budgetStatus, listBudgets, type Budget } from '@/features/reports/budgets';
 import { BarChart, RingChart } from '@/features/reports/charts';
 import { monthEnd, monthLong, monthShort, monthStart, ym } from '@/features/reports/dates';
-import { BudgetRings, HeadlineCard, WeeklyCard } from '@/features/reports/home-cards';
+import { BudgetRings, EmptyChartsCard, HeadlineCard, WeeklyCard } from '@/features/reports/home-cards';
 import { DueSoonCard, InflationTeaser, RecapAskCard } from '@/features/reports/home-insights';
 import { categoryInflation, detectRecurring, fetchHistory, personalInflation, type CategoryInflation, type Recurring } from '@/features/reports/insights';
 import { CityIndexTeaser } from '@/features/prices/components/city-index-teaser';
@@ -164,6 +164,7 @@ export default function HomeScreen() {
       <WatchCard onEmptyScan={() => router.navigate('/scan')} />
 
       {/* 4. Private spending, only once there is something to show */}
+      {d && !hasReceipts && !household ? <EmptyChartsCard onScan={() => router.navigate('/scan')} /> : null}
       {hasReceipts || household ? <SectionTitle action={t('All reports')} onAction={() => go('/reports')}>{t('Your spending')}</SectionTitle> : null}
       {household ? <ScopeToggle /> : null}
       {hasReceipts && d ? <HeadlineCard d={d} monthName={monthName} overall={overall} onBudget={() => go('/reports/budgets')} /> : null}

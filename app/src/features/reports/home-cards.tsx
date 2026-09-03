@@ -29,6 +29,30 @@ export function OnboardingCard({ onScan }: { onScan: () => void }) {
   );
 }
 
+/** No receipts yet: a faint sample chart so the dashboard shows what is coming, plus the one action that unlocks it. */
+export function EmptyChartsCard({ onScan }: { onScan: () => void }) {
+  const p = useChartPalette();
+  const grow = useAnimatedNumber(1, 1100);
+  const sample = [38, 52, 45, 70, 58, 84]; // just a shape, not data
+  return (
+    <Card style={{ gap: Spacing.two }}>
+      <SectionTitle>{t('Your spending')}</SectionTitle>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10, height: 90, paddingHorizontal: Spacing.two }}>
+        {sample.map((h, i) => (
+          <View key={i} style={{ flex: 1, height: `${h * grow}%`, borderRadius: 6, backgroundColor: i === sample.length - 1 ? `${p.primary}66` : p.track }} />
+        ))}
+      </View>
+      <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'center' }}>
+        {t('Scan your first receipt and this turns into your real numbers: month by month, by category, by store, and how your usual items move in price.')}
+      </ThemedText>
+      <Pressable style={[ui.primaryBtn, { paddingVertical: 12 }]} onPress={onScan}>
+        <Ionicons name="camera" color="#fff" size={20} />
+        <ThemedText style={ui.primaryBtnText}>{t('Scan a receipt')}</ThemedText>
+      </Pressable>
+    </Card>
+  );
+}
+
 function levelColor(level: BudgetStatus['level'], p: ReturnType<typeof useChartPalette>): string {
   return level === 'over' ? p.danger : level === 'warn' ? p.warning : p.primary;
 }
