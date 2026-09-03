@@ -148,7 +148,8 @@ export async function listReceipts(): Promise<ReceiptRow[]> {
     .from('receipts')
     .select('id, user_id, store_name, store_branch_address, store_type, currency, purchased_on, total, payment_method, image_path, created_at, receipt_items(count)')
     .order('purchased_on', { ascending: false, nullsFirst: false })
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(500); // a household's list stays bounded; older receipts are reachable through Reports → Search
   if (me) q = q.eq('user_id', me);
   const { data, error } = await q;
   if (error) throw new Error(error.message);
@@ -173,8 +174,9 @@ export async function updateItemCategory(itemId: string, category: string, subca
 }
 
 export async function deleteReceipt(id: string, imagePath: string | null): Promise<void> {
-  const { error } = await supabase.from('receipts').delete().eq('id', id);
+  const { data, error } = await supabase.from('receipts').delete().eq('id', id).select('id');
   if (error) throw new Error(error.message);
+  if (!data?.length) throw new Error('not deleted: only the person who scanned a receipt can delete it');
   // image_path holds one path, or several joined by "|" for multi-photo receipts
   const paths = (imagePath ?? '').split('|').map((p) => p.trim()).filter(Boolean);
   if (paths.length) await supabase.storage.from('receipts').remove(paths);

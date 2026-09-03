@@ -150,11 +150,16 @@ Deno.serve(async (req) => {
 
   // Daily cap per user (abuse / cost protection). Guests and accounts get the same cap for now.
   const DAILY_CAP = Number(Deno.env.get("DAILY_SCAN_CAP")) || 40; // a mistyped secret must not disable the cap
+  // Global brake: guest accounts are free to create, so a per-user cap alone does not bound the bill.
+  // 600 scans/day ≈ US$10. When hit, scanning pauses for everyone until the window rolls over.
+  const GLOBAL_CAP = Number(Deno.env.get("GLOBAL_DAILY_SCAN_CAP")) || 600;
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
-  const { count: scansToday } = await admin
-    .from("scan_events").select("id", { count: "exact", head: true })
-    .eq("user_id", uid).gte("created_at", since);
+  const [{ count: scansToday }, { count: scansGlobal }] = await Promise.all([
+    admin.from("scan_events").select("id", { count: "exact", head: true }).eq("user_id", uid).gte("created_at", since),
+    admin.from("scan_events").select("id", { count: "exact", head: true }).gte("created_at", since),
+  ]);
   if ((scansToday ?? 0) >= DAILY_CAP) return json({ error: `daily scan limit reached (${DAILY_CAP} per day)` }, 429);
+  if ((scansGlobal ?? 0) >= GLOBAL_CAP) { console.error("GLOBAL scan cap reached", scansGlobal); return json({ error: "scanning is paused for today, please try again tomorrow" }, 503); }
 
   // Download the photo(s) with the service role (bucket is private).
   const imageBlocks: unknown[] = [];
@@ -172,34 +177,42 @@ Deno.serve(async (req) => {
     : "Extract this receipt.";
 
   const t0 = Date.now();
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": anthropicKey,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 8000,
-      system: SYSTEM,
-      messages: [{
-        role: "user",
-        content: [...imageBlocks, { type: "text", text: userText }],
-      }],
-      output_config: { format: { type: "json_schema", schema: SCHEMA } },
-    }),
-  });
   const logScan = (ok: boolean, msg?: { usage?: { input_tokens?: number; output_tokens?: number } }) =>
     admin.from("scan_events").insert({
       user_id: uid, image_count: imagePaths.length, model: MODEL, ok,
       input_tokens: msg?.usage?.input_tokens ?? null, output_tokens: msg?.usage?.output_tokens ?? null,
       latency_ms: Date.now() - t0,
     }).then(() => {}, () => {});
+  let resp: Response;
+  try {
+    resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": anthropicKey,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 8000,
+        system: SYSTEM,
+        messages: [{
+          role: "user",
+          content: [...imageBlocks, { type: "text", text: userText }],
+        }],
+        output_config: { format: { type: "json_schema", schema: SCHEMA } },
+      }),
+    });
+  } catch (e) {
+    await logScan(false);
+    console.error("anthropic unreachable", String((e as Error).message ?? e));
+    return json({ error: "the reading service is unavailable right now" }, 502);
+  }
   if (!resp.ok) {
     const errText = await resp.text();
     await logScan(false);
-    return json({ error: `model error ${resp.status}: ${errText.slice(0, 300)}` }, 502);
+    console.error("anthropic error", resp.status, errText.slice(0, 500)); // details stay in the server log
+    return json({ error: `the reading service returned an error (${resp.status})` }, 502);
   }
   const msg = await resp.json();
   await logScan(true, msg);

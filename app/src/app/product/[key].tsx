@@ -22,6 +22,9 @@ import { Segmented } from '@/features/prices/components/segmented';
 import { TrendChart } from '@/features/prices/components/trend-chart';
 import { sizeLabel, unitPriceLabel } from '@/features/prices/format';
 import '@/features/prices/i18n';
+import { unwatch, watchIdFor, watchProduct } from '@/features/watch/api';
+import '@/features/watch/i18n';
+import { enableDrops, getDropPref } from '@/features/watch/notify';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
@@ -102,6 +105,31 @@ export default function ProductScreen() {
 
   const mineDiff = mine && cheapest && mine.currency === currency ? mine.price - cheapest.price : null;
 
+  // "My items" watch: star on/off for this product in the current currency
+  const [watchId, setWatchId] = useState<string | null>(null);
+  const [watchBusy, setWatchBusy] = useState(false);
+  const watchPid = product?.id ?? cheapest?.product_id ?? null;
+  useEffect(() => {
+    if (!watchPid || !currency) return;
+    let live = true;
+    watchIdFor(watchPid, currency).then((id) => { if (live) setWatchId(id); }).catch(() => { if (live) setWatchId(null); });
+    return () => { live = false; };
+  }, [watchPid, currency]);
+  async function toggleWatch() {
+    if (!watchPid || !currency || watchBusy) return;
+    setWatchBusy(true);
+    try {
+      if (watchId) { await unwatch(watchId); setWatchId(null); }
+      else {
+        await watchProduct(watchPid, currency);
+        setWatchId(await watchIdFor(watchPid, currency));
+        if ((await getDropPref()) !== 'on') await enableDrops();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      }
+    } catch (e) { Alert.alert(t('Error'), String((e as Error).message ?? e)); }
+    finally { setWatchBusy(false); }
+  }
+
   async function onAddToBasket() {
     if (basketState !== 'idle' || !title) return;
     setBasketState('busy');
@@ -155,6 +183,17 @@ export default function ProductScreen() {
             </ThemedText>
           ) : null}
         </ThemedView>
+      ) : null}
+
+      {(product?.id ?? cheapest?.product_id) && currency ? (
+        <Pressable onPress={toggleWatch} disabled={watchBusy} style={({ pressed }) => [styles.watchBtn, { borderColor: watchId ? Brand.primary : theme.backgroundSelected, backgroundColor: watchId ? `${Brand.primary}14` : theme.backgroundElement }, (pressed || watchBusy) && { opacity: 0.7 }]}>
+          <Ionicons name={watchId ? 'star' : 'star-outline'} size={20} color={Brand.primary} />
+          <View style={{ flex: 1 }}>
+            <ThemedText type="smallBold" style={{ color: Brand.primary }}>{watchId ? t('Watching') : t('Watch this item')}</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">{watchId ? t('Added to My items on Home.') : t('Alert me when it gets cheaper')}</ThemedText>
+          </View>
+          <Ionicons name={watchId ? 'checkmark-circle' : 'add-circle-outline'} size={20} color={Brand.primary} />
+        </Pressable>
       ) : null}
 
       {currencies.length > 1 && currency ? (
@@ -216,4 +255,5 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', gap: Spacing.two },
   btn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 14 },
   btnWide: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 14 },
+  watchBtn: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, borderRadius: 14, borderWidth: 1.5, padding: 12 },
 });

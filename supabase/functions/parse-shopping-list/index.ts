@@ -78,13 +78,17 @@ Deno.serve(async (req) => {
   if (text.length < 2) return json({ error: "text required" }, 400);
   const lang = body.lang === "pt" ? "pt" : "en";
 
-  // Daily cap per user (abuse / cost protection).
+  // Daily cap per user (abuse / cost protection) + a global brake: guest accounts are free to create, so the
+  // per-user cap alone does not bound the bill. The global cap turns the feature off for everyone for the day.
   const DAILY_CAP = Number(Deno.env.get("DAILY_ASSIST_CAP")) || 60;
+  const GLOBAL_CAP = Number(Deno.env.get("GLOBAL_DAILY_ASSIST_CAP")) || 2000;
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
-  const { count: usedToday } = await admin
-    .from("assist_events").select("id", { count: "exact", head: true })
-    .eq("user_id", uid).eq("kind", KIND).gte("created_at", since);
+  const [{ count: usedToday }, { count: usedGlobal }] = await Promise.all([
+    admin.from("assist_events").select("id", { count: "exact", head: true }).eq("user_id", uid).eq("kind", KIND).gte("created_at", since),
+    admin.from("assist_events").select("id", { count: "exact", head: true }).eq("kind", KIND).gte("created_at", since),
+  ]);
   if ((usedToday ?? 0) >= DAILY_CAP) return json({ error: `daily limit reached (${DAILY_CAP} per day)` }, 429);
+  if ((usedGlobal ?? 0) >= GLOBAL_CAP) { console.error("GLOBAL assist cap reached", usedGlobal); return json({ error: "service busy, try again tomorrow" }, 503); }
 
   const t0 = Date.now();
   const log = (ok: boolean, msg?: { usage?: { input_tokens?: number; output_tokens?: number } }) =>
@@ -108,12 +112,14 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     await log(false);
-    return json({ error: `model unreachable: ${String((e as Error).message ?? e).slice(0, 200)}` }, 502);
+    console.error("anthropic unreachable", String((e as Error).message ?? e));
+    return json({ error: "the list service is unavailable right now" }, 502);
   }
   if (!resp.ok) {
     const errText = await resp.text();
     await log(false);
-    return json({ error: `model error ${resp.status}: ${errText.slice(0, 300)}` }, 502);
+    console.error("anthropic error", resp.status, errText.slice(0, 500)); // details stay in the server log
+    return json({ error: `the list service returned an error (${resp.status})` }, 502);
   }
   const msg = await resp.json();
   await log(true, msg);

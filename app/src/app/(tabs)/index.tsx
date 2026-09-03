@@ -26,6 +26,7 @@ import { enableWeeklyRecap, getRecapPref, rescheduleWeeklyRecap, setRecapPref, t
 import { assignColors, useChartPalette } from '@/features/reports/palette';
 import { Card, ErrorText, Row, SectionTitle, styles as ui } from '@/features/reports/ui';
 import { shareApp } from '@/features/share/share';
+import { WatchCard } from '@/features/watch/components/watch-card';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
@@ -157,7 +158,10 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      {/* 3. Private spending, only once there is something to show */}
+      {/* 3. Your usual items: cheapest price now, green/red since you last bought, bell for drops */}
+      <WatchCard onEmptyScan={() => router.navigate('/scan')} />
+
+      {/* 4. Private spending, only once there is something to show */}
       {hasReceipts || household ? <SectionTitle action={t('All reports')} onAction={() => go('/reports')}>{t('Your spending')}</SectionTitle> : null}
       {household ? <ScopeToggle /> : null}
       {hasReceipts && d ? <HeadlineCard d={d} monthName={monthName} overall={overall} onBudget={() => go('/reports/budgets')} /> : null}

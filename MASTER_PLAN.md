@@ -379,6 +379,24 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   nothing in `public`, authenticated has exactly the verbs its RLS policies allow, and the defaults for future
   tables are locked. Verified from the PC: no-session read of the view / search RPC / stores is refused; every
   backend test (security, household, voice list, scan) still passes.
+- ✅ **"My items" price watch** (PS: make the dashboard fun and dynamic): migration 012 — `watch_items` (own rows),
+  `watchlist_autofill()` fills the list from products bought ≥2× in 180 days (groceries only; hidden items never
+  return), `watchlist_overview()` returns per item the cheapest current community price (store · city · when ·
+  reports), 60-day low, 14-day vs earlier medians, the user's own last price, and an 8-week sparkline. Home card:
+  green ▼ / red ▲ / grey pill with % vs *what you paid* (fallback: community median before), 🔥 "lowest in 60 days",
+  sparkline, bell per item, long-press to remove, 🎉 banner when items got cheaper. Product page: ☆ Watch this item.
+  Notifications (stage A): local notification per new drop when the app checks the list (Home focus), permission
+  asked on the first bell; `last_notified_price` prevents repeats. **Stage B = server push while the app is closed
+  (needs a scheduled job + push tokens) — next.** 15-check live test passed.
+- ✅ **Security review (agent, 4th attempt after 3 server-overload failures) → migration 013 + function changes:**
+  authenticated now has an explicit function allowlist (extension functions re-granted; internal helpers never);
+  sequences locked (only `price_reports_id_seq`); caps: 300 lines per receipt, 100 receipts per user per day;
+  household default display name no longer derived from the email; both Edge Functions got a **global daily brake**
+  (600 scans ≈ US$10, 2000 list parses) because guest accounts are free to create, plus try/catch around the
+  Anthropic call and generic error text (details stay in the server log); anonymous sign-ups limited to 10 per hour
+  per IP (Auth setting). `deleteReceipt` now errors when nothing was deleted; receipts list capped at 500 rows.
+  Agent's open points for the launch checklist: **captcha on guest sign-up** (still #1) and **`min_reports` back
+  to ≥2** before public launch (with 1, a single fake receipt sets a visible community price).
 - ✅ Checks: typecheck clean; `expo lint` set up (eslint + eslint-config-expo added; today's files clean, 16
   pre-existing "setState in effect" style warnings left in older files); translation audit 0 missing (now also
   scans .ts files); review agent's 11 findings fixed (offline splitter, cancel-during-parse race, sheet never
