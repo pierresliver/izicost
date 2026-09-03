@@ -412,6 +412,12 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   extract-receipt smoke test still passes after the redeploy.
 - ✅ **Build 3 (PS consented 2026-09-03 evening):** `builds/izicost-v0.3.0-2026-09-03-1855.apk` (74 MB, phone-only ABIs,
   versionCode 3, prebuild ran: microphone permission present). Contains everything from Day 2. Handed to PS for testing.
+- 🐞 **First phone test (PS's dad):** Portuguese not understood (recogniser followed the app language) and listening
+  stopped after 2–3 s (single-phrase mode). Fixed: PT/EN switch on the sheet (remembered, defaults to PT in
+  PT-speaking regions), continuous listening until Done, "Paused → Add more" when the phone stops early.
+  PS's phone was on a fresh account with 0 receipts (yesterday's 5 receipts sit on the old guest) → no charts;
+  added a placeholder chart card before the first receipt. Receipt migration to PS's new account: pending PS's email.
+- ✅ **Build 4:** `builds/izicost-v0.3.1-2026-09-03-2010.apk` (versionCode 4) — voice fixes + placeholder chart.
 
 **Security — in place (2026-09-02):** AI key only on the server function, never in the app; the app ships only
 the public URL + publishable key (grant nothing without a session); row-level security on every table (a user
