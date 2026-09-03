@@ -12,9 +12,11 @@ import { addToBasket } from '@/features/basket/api';
 import '@/features/basket/i18n';
 import { BASKET_HREF } from '@/features/basket/routes';
 import {
-  getProduct, myLastPrice, productPrices, productTrend, reportPrice, setPriceAlert,
-  type CommunityPrice, type MyLastPrice, type ProductRow, type TrendPoint,
+  getProduct, myLastPrice, productPrices, productStoreTrend, productTrend, reportPrice, setPriceAlert,
+  type CommunityPrice, type MyLastPrice, type ProductRow, type StoreTrendPoint, type TrendPoint,
 } from '@/features/prices/api';
+import { IndexChart, type IndexSeries } from '@/features/reports/charts';
+import { assignColors, useChartPalette } from '@/features/reports/palette';
 import { FreshnessBadge } from '@/features/prices/components/freshness-badge';
 import { BigPrice, StorePriceRow } from '@/features/prices/components/price-card';
 import { PromptModal } from '@/features/prices/components/prompt-modal';
@@ -59,10 +61,23 @@ export default function ProductScreen() {
     finally { setLoaded(true); }
   }, [key]);
   useEffect(() => { load(); }, [load]);
+  const [storeTrend, setStoreTrend] = useState<StoreTrendPoint[]>([]);
   useEffect(() => {
     if (!key || !currency) { setTrend([]); return; }
     productTrend(key, currency).then(setTrend).catch(() => setTrend([]));
+    productStoreTrend(key, currency).then(setStoreTrend).catch(() => setStoreTrend([]));
   }, [key, currency]);
+  const palette = useChartPalette();
+  const storeSeries: IndexSeries[] = (() => {
+    const byStore = new Map<string, StoreTrendPoint[]>();
+    for (const pt of storeTrend) { const arr = byStore.get(pt.store_id) ?? []; arr.push(pt); byStore.set(pt.store_id, arr); }
+    const stores = [...byStore.entries()].sort((a, b) => b[1].length - a[1].length).slice(0, 5);
+    const colors = assignColors(stores.map(([id]) => id), palette);
+    return stores.map(([id, pts]) => ({
+      key: id, label: [pts[0].store_name, pts[0].city].filter(Boolean).join(' · '), color: colors[id],
+      points: pts.map((pt) => ({ x: pt.week_start, y: pt.median_price })),
+    }));
+  })();
 
   const currencies = Array.from(new Set(all.map((r) => r.currency)));
   const rows = all.filter((r) => r.currency === currency).sort((a, b) => a.price - b.price);
@@ -215,6 +230,13 @@ export default function ProductScreen() {
       ) : null}
 
       {currency ? <TrendChart points={trend} currency={currency} /> : null}
+      {currency && storeSeries.length >= 1 && storeTrend.length >= 2 ? (
+        <ThemedView type="backgroundElement" style={styles.card}>
+          <ThemedText type="smallBold">{t('Price by store over time')}</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">{t('Weekly median price at each store, last 6 months. Watch how each shop moves.')}</ThemedText>
+          <IndexChart series={storeSeries} baseline={null} formatX={(x) => { const d = new Date(`${x}T00:00:00`); return `${d.getDate()}/${d.getMonth() + 1}`; }} formatY={(y) => y.toLocaleString(undefined, { maximumFractionDigits: y >= 100 ? 0 : 1 })} />
+        </ThemedView>
+      ) : null}
 
       <View style={styles.actions}>
         <Pressable onPress={() => setAlertOpen(true)} style={[styles.btn, { backgroundColor: Brand.primary }]} disabled={!(product?.id ?? cheapest)}>

@@ -397,6 +397,13 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   per IP (Auth setting). `deleteReceipt` now errors when nothing was deleted; receipts list capped at 500 rows.
   Agent's open points for the launch checklist: **captcha on guest sign-up** (still #1) and **`min_reports` back
   to ≥2** before public launch (with 1, a single fake receipt sets a visible community price).
+- ✅ **Dashboard charts (PS: fun, dynamic, interactive):** bars, rings and budget rings now animate in; the weekly
+  bars slide; **category inflation** ("alcohol ▲8%, vegetables ▼3%") as ± horizontal bars on the Inflation report
+  and as pills on the Home teaser; **community price index per city** (migration 014 `city_price_index`: median
+  month-over-month change of the same products, chained to base 100, a month needs ≥3 products) with a multi-line
+  chart report + Home teaser ("Maputo ▲4% in Sep"); **price by store over time** on the product page (migration 015
+  `product_store_trend`: weekly medians per store, 180 days) so PS can watch how each shop moves picanha / whisky.
+  Both new RPCs security definer, authenticated only. Empty states explain what data is still needed.
 - ✅ Checks: typecheck clean; `expo lint` set up (eslint + eslint-config-expo added; today's files clean, 16
   pre-existing "setState in effect" style warnings left in older files); translation audit 0 missing (now also
   scans .ts files); review agent's 11 findings fixed (offline splitter, cancel-during-parse race, sheet never

@@ -10,6 +10,7 @@ export type HistoryRow = {
   currency: string;
   price: number | null;   // unit price (falls back to line_total / qty, then line_total)
   receiptId: string;
+  category: string;       // 'food', 'alcohol', ... ('other' when unknown)
 };
 
 /** lowercase, strip accents and punctuation, collapse spaces: "Leite  UHT, 1L" -> "leite uht 1l". */
@@ -33,6 +34,7 @@ export async function fetchHistory(days = 180): Promise<HistoryRow[]> {
         currency: r.receipts!.currency ?? '?',
         price,
         receiptId: r.receipt_id,
+        category: r.category ?? 'other',
       };
     })
     .filter((r) => r.key.length >= 2)
@@ -125,4 +127,29 @@ export function personalInflation(rows: HistoryRow[]): { items: InflationItem[];
   const changes = items.map((i) => i.changePct).filter((x): x is number => x != null);
   const overallPct = changes.length ? changes.reduce((s, x) => s + x, 0) / changes.length : null;
   return { items, overallPct, currency };
+}
+
+export type CategoryInflation = { category: string; changePct: number; items: number };
+
+/**
+ * "Alcohol up 8%, vegetables down 3%": per category, the median change of every item that has both a recent
+ * price and a price 1–3 months earlier. Sorted by size of the move. Empty until there is history.
+ */
+export function categoryInflation(rows: HistoryRow[]): CategoryInflation[] {
+  if (!rows.length) return [];
+  const currency = [...groupByKey(rows.map((r) => ({ ...r, key: r.currency })))].sort((a, b) => b[1].length - a[1].length)[0][0];
+  const inCur = rows.filter((r) => r.currency === currency && r.price != null && r.price > 0);
+  const perCategory = new Map<string, number[]>();
+  for (const [, list] of groupByKey(inCur)) {
+    const latest = list[list.length - 1];
+    const lo = iso(addDays(new Date(latest.date), -90)), hi = iso(addDays(new Date(latest.date), -30));
+    const before = median(list.filter((r) => r.date >= lo && r.date <= hi).map((r) => r.price!));
+    if (!before || !latest.price) continue;
+    const arr = perCategory.get(latest.category) ?? [];
+    arr.push(((latest.price - before) / before) * 100);
+    perCategory.set(latest.category, arr);
+  }
+  return [...perCategory]
+    .map(([category, pcts]) => ({ category, changePct: median(pcts) ?? 0, items: pcts.length }))
+    .sort((a, b) => Math.abs(b.changePct) - Math.abs(a.changePct));
 }

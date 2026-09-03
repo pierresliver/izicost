@@ -109,6 +109,21 @@ registerTranslations({
   'Your week in numbers': 'A sua semana em números',
   'Weekly recap is on. You will get one notification every Sunday at 18:00.': 'O resumo semanal está ativo. Vai receber uma notificação todos os domingos às 18:00.',
   'Notifications are off for IziCost. Enable them in the phone settings to get the recap.': 'As notificações do IziCost estão desativadas. Ative-as nas definições do telemóvel para receber o resumo.',
+  '1 item': '1 artigo',
+  '%n% items': '%n% artigos',
+  // category inflation + city price index
+  'Median change of your items in each category, latest price vs 1–3 months ago.': 'Variação mediana dos seus artigos em cada categoria, último preço vs há 1–3 meses.',
+  'Price index by city': 'Índice de preços por cidade',
+  'Which cities are getting more expensive, from everyone’s receipts': 'Que cidades estão a ficar mais caras, a partir dos recibos de todos',
+  'Community price index': 'Índice de preços da comunidade',
+  '100 = the first month with data. Median change of the same products, month over month, from everyone’s receipts.':
+    '100 = o primeiro mês com dados. Variação mediana dos mesmos produtos, mês a mês, a partir dos recibos de todos.',
+  'The index is warming up': 'O índice está a aquecer',
+  'A city gets an index once at least three products have prices in two consecutive months. Every receipt scanned in that city brings it closer.':
+    'Uma cidade ganha um índice quando pelo menos três produtos têm preços em dois meses consecutivos. Cada recibo digitalizado nessa cidade aproxima-o.',
+  'in %month%': 'em %month%',
+  '%n% products': '%n% produtos',
+  'index %i%': 'índice %i%',
   // months (short)
   'Jan': 'Jan', 'Feb': 'Fev', 'Mar': 'Mar', 'Apr': 'Abr', 'May': 'Mai', 'Jun': 'Jun',
   'Jul': 'Jul', 'Aug': 'Ago', 'Sep': 'Set', 'Oct': 'Out', 'Nov': 'Nov', 'Dec': 'Dez',

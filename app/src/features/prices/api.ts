@@ -100,6 +100,26 @@ export async function priceCities(): Promise<CityRow[]> {
   return (data ?? []) as CityRow[];
 }
 
+export type StoreTrendPoint = { store_id: string; store_name: string; city: string | null; week_start: string; median_price: number; report_count: number };
+
+/** Weekly median price of one product per store, last 180 days ("how each shop moves its price"). */
+export async function productStoreTrend(key: string, currency: string): Promise<StoreTrendPoint[]> {
+  await ensureSession();
+  const { data, error } = await supabase.rpc('product_store_trend', { p_key: key, p_currency: currency });
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as StoreTrendPoint[]).map((r) => ({ ...r, median_price: Number(r.median_price), report_count: Number(r.report_count) }));
+}
+
+export type CityIndexPoint = { city: string; country: string | null; currency: string; month: string; index: number; change_pct: number; products: number };
+
+/** Community price index per city and month (base 100 at the first month), from the anonymised pool. */
+export async function cityPriceIndex(months = 6): Promise<CityIndexPoint[]> {
+  await ensureSession();
+  const { data, error } = await supabase.rpc('city_price_index', { p_months: months });
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as CityIndexPoint[]).map((r) => ({ ...r, index: Number(r.index), change_pct: Number(r.change_pct), products: Number(r.products) }));
+}
+
 /** Every known city (reference table), for the quick-add picker. */
 export async function allCities(): Promise<CityRow[]> {
   await ensureSession();

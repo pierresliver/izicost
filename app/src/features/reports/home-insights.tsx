@@ -9,7 +9,7 @@ import { t } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
 
 import { dayShort } from './dates';
-import type { Recurring } from './insights';
+import type { CategoryInflation, Recurring } from './insights';
 import { Card, SectionTitle, styles as ui } from './ui';
 
 export function DueSoonCard({ items }: { items: Recurring[] }) {
@@ -39,10 +39,11 @@ export function DueSoonCard({ items }: { items: Recurring[] }) {
   );
 }
 
-export function InflationTeaser({ pct, onPress }: { pct: number | null; onPress: () => void }) {
+export function InflationTeaser({ pct, categories = [], onPress }: { pct: number | null; categories?: CategoryInflation[]; onPress: () => void }) {
   if (pct === null) return null;
   const up = pct > 0;
   const color = Math.abs(pct) < 0.5 ? undefined : up ? Brand.danger : Brand.success;
+  const movers = categories.filter((c) => Math.abs(c.changePct) >= 1).slice(0, 3);
   return (
     <Card onPress={onPress}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.two }}>
@@ -52,6 +53,17 @@ export function InflationTeaser({ pct, onPress }: { pct: number | null; onPress:
           <ThemedText type="small" themeColor="textSecondary">
             {t('Your basket costs %pct%% %dir% than 1–3 months ago', { pct: Math.abs(Math.round(pct * 10) / 10), dir: up ? t('more') : t('less') })}
           </ThemedText>
+          {movers.length ? (
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+              {movers.map((c) => (
+                <View key={c.category} style={{ flexDirection: 'row', alignItems: 'center', gap: 2, borderRadius: 8, paddingHorizontal: 7, paddingVertical: 2, backgroundColor: c.changePct > 0 ? 'rgba(198,40,40,0.12)' : 'rgba(30,158,90,0.14)' }}>
+                  <ThemedText type="small" style={{ fontSize: 11, lineHeight: 14, fontWeight: '700', color: c.changePct > 0 ? Brand.danger : Brand.success }}>
+                    {t(c.category)} {c.changePct > 0 ? '▲' : '▼'}{Math.abs(Math.round(c.changePct))}%
+                  </ThemedText>
+                </View>
+              ))}
+            </View>
+          ) : null}
         </View>
         <Ionicons name="chevron-forward" size={16} color="#8A8F98" />
       </View>

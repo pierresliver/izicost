@@ -7,7 +7,8 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Brand, Spacing } from '@/constants/theme';
-import { fetchHistory, personalInflation } from '@/features/reports/insights';
+import { HBarList } from '@/features/reports/charts';
+import { categoryInflation, fetchHistory, personalInflation } from '@/features/reports/insights';
 import { Card, Delta, Empty, ErrorText, Loading, SectionTitle, styles as ui, useLoader } from '@/features/reports/ui';
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
@@ -15,7 +16,10 @@ import { ScopeCaption } from '@/features/household/components/scope-caption';
 
 export default function InflationScreen() {
   useLang();
-  const { data, error, refreshing, refresh } = useLoader(async () => personalInflation(await fetchHistory()), []);
+  const { data, error, refreshing, refresh } = useLoader(async () => {
+    const h = await fetchHistory();
+    return { ...personalInflation(h), categories: categoryInflation(h) };
+  }, []);
   const pct = data?.overallPct ?? null;
   const up = (pct ?? 0) > 0;
 
@@ -34,6 +38,13 @@ export default function InflationScreen() {
               ? t('Not enough history yet. Keep scanning for a few weeks.')
               : t('Your basket costs %pct%% %dir% than 1–3 months ago', { pct: Math.abs(Math.round(pct * 10) / 10), dir: up ? t('more') : t('less') })}
           </ThemedText>
+        </Card>
+      ) : null}
+      {data && data.categories.length ? (
+        <Card>
+          <SectionTitle>{t('By category')}</SectionTitle>
+          <ThemedText type="small" themeColor="textSecondary">{t('Median change of your items in each category, latest price vs 1–3 months ago.')}</ThemedText>
+          <HBarList data={data.categories.map((c) => ({ key: c.category, label: t(c.category), pct: c.changePct, sub: c.items === 1 ? t('1 item') : t('%n% items', { n: c.items }) }))} />
         </Card>
       ) : null}
       {data && !data.items.length ? <Empty /> : null}

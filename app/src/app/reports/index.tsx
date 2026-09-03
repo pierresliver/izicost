@@ -30,6 +30,7 @@ export default function ReportsHub() {
     { icon: 'storefront', title: t('By store'), sub: t('Where you shop and your average basket'), href: '/reports/stores' },
     { icon: 'flag', title: t('Budgets'), sub: t('Monthly limits with left-per-day'), href: '/reports/budgets' },
     { icon: 'trending-up', title: t('Inflation'), sub: t('Are your usual items getting pricier?'), href: '/reports/inflation' },
+    { icon: 'analytics', title: t('Price index by city'), sub: t('Which cities are getting more expensive, from everyone’s receipts'), href: '/reports/price-index' },
     { icon: 'search', title: t('Search'), sub: t('Find any receipt or item'), href: '/reports/search' },
   ];
 

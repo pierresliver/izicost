@@ -21,7 +21,8 @@ import { BarChart, RingChart } from '@/features/reports/charts';
 import { monthEnd, monthLong, monthShort, monthStart, ym } from '@/features/reports/dates';
 import { BudgetRings, HeadlineCard, WeeklyCard } from '@/features/reports/home-cards';
 import { DueSoonCard, InflationTeaser, RecapAskCard } from '@/features/reports/home-insights';
-import { detectRecurring, fetchHistory, personalInflation, type Recurring } from '@/features/reports/insights';
+import { categoryInflation, detectRecurring, fetchHistory, personalInflation, type CategoryInflation, type Recurring } from '@/features/reports/insights';
+import { CityIndexTeaser } from '@/features/prices/components/city-index-teaser';
 import { enableWeeklyRecap, getRecapPref, rescheduleWeeklyRecap, setRecapPref, type RecapPref } from '@/features/reports/notifications';
 import { assignColors, useChartPalette } from '@/features/reports/palette';
 import { Card, ErrorText, Row, SectionTitle, styles as ui } from '@/features/reports/ui';
@@ -46,6 +47,7 @@ export default function HomeScreen() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [recurring, setRecurring] = useState<Recurring[]>([]);
   const [inflationPct, setInflationPct] = useState<number | null>(null);
+  const [catInflation, setCatInflation] = useState<CategoryInflation[]>([]);
   const [recapPref, setRecapPrefState] = useState<RecapPref>('off');
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -65,7 +67,7 @@ export default function HomeScreen() {
       setD(dash); setMine(me); setBudgets(b); setRecapPrefState(pref); setBasketCount(n); setError(null);
       rescheduleWeeklyRecap(me.week.current, me.week.currentCount, me.currency); // the recap is about you
       if (me.receiptsAllTime > 0) {
-        fetchHistory().then((h) => { setRecurring(detectRecurring(h)); setInflationPct(personalInflation(h).overallPct); }).catch(() => {});
+        fetchHistory().then((h) => { setRecurring(detectRecurring(h)); setInflationPct(personalInflation(h).overallPct); setCatInflation(categoryInflation(h)); }).catch(() => {});
       }
       // Household mode: who spent what this month (only receipts in the dashboard's currency)
       if (inHousehold) {
@@ -222,7 +224,8 @@ export default function HomeScreen() {
         </Card>
       ) : null}
 
-      <InflationTeaser pct={inflationPct} onPress={() => go('/reports/inflation')} />
+      <InflationTeaser pct={inflationPct} categories={catInflation} onPress={() => go('/reports/inflation')} />
+      <CityIndexTeaser onPress={() => go('/reports/price-index')} />
     </ScrollView>
   );
 }

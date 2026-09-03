@@ -3,6 +3,9 @@
 import { registerTranslations } from '@/lib/i18n';
 
 registerTranslations({
+  // per-store trend (product page)
+  'Price by store over time': 'Preço por loja ao longo do tempo',
+  'Weekly median price at each store, last 6 months. Watch how each shop moves.': 'Preço mediano semanal em cada loja, últimos 6 meses. Veja como cada loja se mexe.',
   // quick-add switched off for launch
   'Market prices are coming later': 'Os preços de mercado chegam mais tarde',
   'For now, community prices come only from scanned receipts, which are hard to fake. Scan a receipt to add prices.':

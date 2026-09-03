@@ -9,7 +9,7 @@ import { formatMoney } from '@/lib/receipts';
 
 import type { Dashboard } from './api';
 import type { BudgetStatus } from './budgets';
-import { ProgressRing } from './charts';
+import { ProgressRing, useAnimatedNumber } from './charts';
 import { useChartPalette } from './palette';
 import { Card, Delta, SectionTitle, styles as ui } from './ui';
 
@@ -110,6 +110,7 @@ export function WeeklyCard({ d }: { d: Dashboard }) {
   const pct = previous > 0 ? ((current - previous) / previous) * 100 : null;
   const max = Math.max(current, previous, 1);
   const p = useChartPalette();
+  const grow = useAnimatedNumber(1); // the two bars slide in
   return (
     <Card>
       <SectionTitle>{t('Weekly recap')}</SectionTitle>
@@ -120,8 +121,8 @@ export function WeeklyCard({ d }: { d: Dashboard }) {
           <Delta pct={pct} label={pct === null ? `${t('previous 7 days')}: ${formatMoney(previous, d.currency)}` : t('vs previous week')} />
         </View>
         <View style={{ gap: 6, width: 120 }}>
-          <View style={[s.hbar, { width: `${Math.max(4, (current / max) * 100)}%`, backgroundColor: p.primary }]} />
-          <View style={[s.hbar, { width: `${Math.max(4, (previous / max) * 100)}%`, backgroundColor: p.track }]} />
+          <View style={[s.hbar, { width: `${Math.max(4, (current / max) * 100 * grow)}%`, backgroundColor: p.primary }]} />
+          <View style={[s.hbar, { width: `${Math.max(4, (previous / max) * 100 * grow)}%`, backgroundColor: p.track }]} />
           <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 11, lineHeight: 13 }}>
             {t('previous 7 days')}: {formatMoney(previous, d.currency)}
           </ThemedText>
