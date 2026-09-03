@@ -11,8 +11,8 @@ Start by reading MASTER_PLAN.md section 12 ("Next steps"), especially the "Day 2
 Rule: **never start an APK build without my explicit yes in this session.** Build 3 needs `expo prebuild` because a new native module (speech recognition) was added; the build script handles that.
 
 Today:
-1. Ask me if you may make build 3 (scripts\build-apk.ps1). If I say yes, copy it to builds\ and tell me the file name. I will test: photos must now show on new receipts, the mic on Home and in My basket, category editing, Invite friends, and the new Home.
-2. I will give you my findings from testing. Fix them all. Ask for screenshots if something is unclear.
+1. I will give you my findings from testing build 3. Fix them all. Ask for screenshots if something is unclear.
+2. When the fixes are done, ask me before making build 4 (scriptsuild-apk.ps1); copy it to builds\ and tell me the file name.
 3. Visual polish pass, screen by screen: consistent spacing, brand green, clean cards, dark mode correct, nice empty states. The app must look better than the competitor apps in research/COMPETITOR_RESEARCH.md section 3.
 4. Seeding plan for the price pool (community prices now show from the first report, but a new city still starts empty): tester group, promotion flyers, etc.
 5. Price-drop push notifications while the app is closed (stage B: scheduled server job + push tokens) — PS: "we need to do it". Then more dashboard life (budget rings more prominent, weekly line as a moving bar) — PS wants the dashboard fun, dynamic and interactive.
