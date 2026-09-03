@@ -410,7 +410,8 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   hangs, half-added lists, function fetch guard, FK on assist_events); security script: function refuses callers
   without a session, RLS blocks cross-user category edits/reads, quick-add RPC refused, assist_events hidden.
   extract-receipt smoke test still passes after the redeploy.
-- Build 3 not made yet (PS: no builds without explicit consent). It needs `expo prebuild` (new native module).
+- ✅ **Build 3 (PS consented 2026-09-03 evening):** `builds/izicost-v0.3.0-2026-09-03-1855.apk` (74 MB, phone-only ABIs,
+  versionCode 3, prebuild ran: microphone permission present). Contains everything from Day 2. Handed to PS for testing.
 
 **Security — in place (2026-09-02):** AI key only on the server function, never in the app; the app ships only
 the public URL + publishable key (grant nothing without a session); row-level security on every table (a user

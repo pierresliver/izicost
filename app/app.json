@@ -2,7 +2,7 @@
   "expo": {
     "name": "IziCost",
     "slug": "izicost",
-    "version": "0.1.0",
+    "version": "0.3.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "izicost",
@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.pierresliver2026.izicost"
+      "package": "com.pierresliver2026.izicost",
+      "versionCode": 3
     },
     "web": {
       "output": "static",
