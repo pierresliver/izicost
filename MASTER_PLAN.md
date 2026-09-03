@@ -362,6 +362,23 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   `min_reports()`) used by the view and the trend RPC; set to 1 now, one-row update to go back to 2 before a public
   launch if we want k-anonymity back. App texts no longer promise "at least two reports"; the report count is shown
   on every price so users can judge.
+- ✅ **Household sharing** (PS: "how much is my household spending"): migration 010 — `households` +
+  `household_members` (one household per user, max 12, owner/member roles), 6-character invite code (rotatable),
+  needs a real account (guests refused), 20 join attempts/day. Members READ each other's receipts, lines and
+  photos (extra SELECT policies); edit/delete stay owner-only. RPCs create/join/leave/remove/rotate/rename/
+  set-name/overview, all security definer with fixed search_path. App: Me tab card (create / join / members /
+  share code / leave), **Me / Household switch** on Home, Receipts and Reports (persisted; every receipt query goes
+  through `scopeUserId()`), "Household this month" per-person card, "Scanned by X" on shared receipts, read-only
+  detail for others' receipts. 27-check live test passed (RLS boundaries, owner-only RPCs, code rotation, leave).
+  Budgets stay personal (a household budget is a later feature). Review-agent fixes applied: account check reads
+  `auth.users.is_anonymous` (the phone's token still says "guest" for up to an hour after upgrading) + the app
+  refreshes the token after creating an account; roster refreshed on every Home visit; budgets + weekly recap +
+  "your usual items" always personal (`onlyMe`); CSV gets a `scanned_by` column; scope caption on every report.
+- ✅ **Migration 011 — least-privilege grants:** anon (no session) had the default "everything" grants on every
+  table and could read the `community_prices` view without signing in; authenticated could TRUNCATE. Now anon has
+  nothing in `public`, authenticated has exactly the verbs its RLS policies allow, and the defaults for future
+  tables are locked. Verified from the PC: no-session read of the view / search RPC / stores is refused; every
+  backend test (security, household, voice list, scan) still passes.
 - ✅ Checks: typecheck clean; `expo lint` set up (eslint + eslint-config-expo added; today's files clean, 16
   pre-existing "setState in effect" style warnings left in older files); translation audit 0 missing (now also
   scans .ts files); review agent's 11 findings fixed (offline splitter, cancel-during-parse race, sheet never

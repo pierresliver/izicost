@@ -14,5 +14,6 @@ registerTranslations({
   'Scan your receipts: every one adds anonymous prices for everyone and tracks your own spending, privately.':
     'Digitalize os seus recibos: cada um acrescenta preços anónimos para todos e acompanha os seus gastos, em privado.',
   'Your spending': 'Os seus gastos',
+  '1 receipt': '1 recibo',
   'Browse community prices': 'Ver preços da comunidade',
 });

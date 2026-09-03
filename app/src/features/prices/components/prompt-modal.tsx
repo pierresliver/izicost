@@ -8,13 +8,15 @@ import { Brand, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { t } from '@/lib/i18n';
 
-export function PromptModal({ visible, title, message, placeholder, keyboardType, confirmLabel, onSubmit, onClose }: {
+export function PromptModal({ visible, title, message, placeholder, keyboardType, confirmLabel, initialValue, onSubmit, onClose }: {
   visible: boolean; title: string; message?: string; placeholder?: string;
   keyboardType?: 'default' | 'decimal-pad'; confirmLabel?: string;
+  /** Prefilled text (e.g. the current name when renaming). Give the modal a `key` to reset it between uses. */
+  initialValue?: string;
   onSubmit: (value: string) => void; onClose: () => void;
 }) {
   const theme = useTheme();
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState(initialValue ?? '');
   const submit = () => { const v = value.trim(); if (!v) return; onSubmit(v); setValue(''); };
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>

@@ -1,5 +1,6 @@
 // Text search over receipts (store name) and items (name), with a date range.
-import { ensureSession, supabase } from '@/lib/supabase';
+import { scopeUserId } from '@/features/household/api';
+import { supabase } from '@/lib/supabase';
 
 import { addDays, iso, monthStart, ym } from './dates';
 
@@ -28,17 +29,19 @@ function pattern(q: string): string {
 }
 
 export async function search(q: string, range: SearchRange): Promise<SearchHit[]> {
-  await ensureSession();
+  const me = await scopeUserId(); // follows the Me / Household switch
   const from = rangeStart(range);
   const pat = pattern(q);
 
   let rq = supabase.from('receipts').select('id, store_name, currency, total, purchased_on').ilike('store_name', pat).limit(50);
+  if (me) rq = rq.eq('user_id', me);
   if (from) rq = rq.gte('purchased_on', from);
   let iq = supabase
     .from('receipt_items')
     .select('id, receipt_id, name_as_printed, line_total, receipts!inner(purchased_on, store_name, currency)')
     .ilike('name_as_printed', pat)
     .limit(80);
+  if (me) iq = iq.eq('user_id', me);
   if (from) iq = iq.gte('receipts.purchased_on', from);
 
   const [r, i] = await Promise.all([rq, iq]);

@@ -10,6 +10,8 @@ import { ONBOARDING_KEY } from '@/components/onboarding';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Brand, Spacing } from '@/constants/theme';
+import { HouseholdCard } from '@/features/household/components/household-card';
+import '@/features/household/i18n';
 import { shareApp } from '@/features/share/share';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
@@ -49,6 +51,7 @@ export default function MeScreen() {
       await ensureSession();
       const { error } = await supabase.auth.updateUser({ email: formEmail.trim(), password: formPassword });
       if (error) throw error;
+      await supabase.auth.refreshSession().catch(() => {}); // new token without the guest flag, so server checks see the account at once
       setMode('none'); setFormPassword('');
       Alert.alert(t('Account created'), t('Your receipts are now linked to %email%. You stay signed in on this phone.', { email: formEmail.trim() }));
       await refresh();
@@ -149,6 +152,9 @@ export default function MeScreen() {
             ))}
           </View>
         </ThemedView>
+
+        {/* Household (family sharing) */}
+        <HouseholdCard isGuest={isGuest} onNeedAccount={() => setMode('upgrade')} />
 
         {/* Invite */}
         <ThemedView type="backgroundElement" style={styles.card}>

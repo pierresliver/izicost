@@ -31,6 +31,7 @@ export type Extraction = {
 
 export type ReceiptRow = {
   id: string;
+  user_id: string;
   store_name: string | null;
   store_branch_address: string | null;
   store_type: string | null;

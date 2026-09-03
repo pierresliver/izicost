@@ -18,7 +18,7 @@ import { CATEGORIES } from '@/lib/types';
 type State = { dash: Dashboard; budgets: Budget[]; unavailable: boolean };
 
 async function load(): Promise<State> {
-  const dash = await loadDashboard();
+  const dash = await loadDashboard({ onlyMe: true }); // budgets are personal, whatever the Me / Household switch says
   try { return { dash, budgets: await listBudgets(), unavailable: false }; }
   catch (e) { if (e instanceof BudgetsUnavailable) return { dash, budgets: [], unavailable: true }; throw e; }
 }

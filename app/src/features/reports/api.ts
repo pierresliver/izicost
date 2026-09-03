@@ -1,11 +1,13 @@
 // Queries for the Home dashboard and the month report. Everything is computed client-side from
 // the user's own rows (RLS), which is fine at personal-receipt volumes (hundreds, not millions).
+import { scopeUserId } from '@/features/household/api';
 import { ensureSession, supabase } from '@/lib/supabase';
 
 import { addDays, iso, lastMonths, monthEnd, monthStart, ym } from './dates';
 
 export type ReceiptLite = {
   id: string;
+  user_id: string;
   store_name: string | null;
   currency: string | null;
   total: number | null;
@@ -53,9 +55,13 @@ export function groupSlices<T>(rows: T[], key: (r: T) => string, value: (r: T) =
   return Object.values(m).sort((a, b) => b.total - a.total);
 }
 
-export async function fetchReceipts(from?: string, to?: string): Promise<ReceiptLite[]> {
-  await ensureSession();
-  let q = supabase.from('receipts').select('id, store_name, currency, total, purchased_on');
+/** Personal-only things (budgets, the weekly recap) pass `onlyMe` so they ignore the Me / Household switch. */
+export type ScopeOpts = { onlyMe?: boolean };
+
+export async function fetchReceipts(from?: string, to?: string, opts: ScopeOpts = {}): Promise<ReceiptLite[]> {
+  const me = opts.onlyMe ? await ensureSession() : await scopeUserId(); // "Me" = only my rows; "Household" = whatever RLS lets me see
+  let q = supabase.from('receipts').select('id, user_id, store_name, currency, total, purchased_on');
+  if (me) q = q.eq('user_id', me);
   if (from) q = q.gte('purchased_on', from);
   if (to) q = q.lt('purchased_on', to);
   const { data, error } = await q.order('purchased_on', { ascending: false, nullsFirst: false });
@@ -77,9 +83,11 @@ export async function fetchItemsFor(ids: string[]): Promise<ItemLite[]> {
   return out;
 }
 
-export async function countAllReceipts(): Promise<number> {
-  await ensureSession();
-  const { count } = await supabase.from('receipts').select('id', { count: 'exact', head: true });
+export async function countAllReceipts(opts: ScopeOpts = {}): Promise<number> {
+  const me = opts.onlyMe ? await ensureSession() : await scopeUserId();
+  let q = supabase.from('receipts').select('id', { count: 'exact', head: true });
+  if (me) q = q.eq('user_id', me);
+  const { count } = await q;
   return count ?? 0;
 }
 
@@ -96,12 +104,12 @@ export type Dashboard = {
   receiptsAllTime: number;
 };
 
-export async function loadDashboard(): Promise<Dashboard> {
+export async function loadDashboard(opts: ScopeOpts = {}): Promise<Dashboard> {
   const now = new Date();
   const months = lastMonths(6, now);
   const [rows, receiptsAllTime] = await Promise.all([
-    fetchReceipts(monthStart(months[0]), monthEnd(months[5])),
-    countAllReceipts(),
+    fetchReceipts(monthStart(months[0]), monthEnd(months[5]), opts),
+    countAllReceipts(opts),
   ]);
   const currency = pickCurrency(rows);
   const inCur = rows.filter((r) => (r.currency ?? '?') === currency);

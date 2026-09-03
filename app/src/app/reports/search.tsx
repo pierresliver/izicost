@@ -14,6 +14,7 @@ import { Chip, Empty, ErrorText, styles as ui } from '@/features/reports/ui';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
+import { ScopeCaption } from '@/features/household/components/scope-caption';
 
 const RANGES: { key: SearchRange; label: string }[] = [
   { key: 'month', label: 'This month' },
@@ -45,6 +46,7 @@ export default function SearchScreen() {
   return (
     <ThemedView style={{ flex: 1 }}>
       <Stack.Screen options={{ title: t('Search') }} />
+      <ScopeCaption />
       <View style={{ padding: Spacing.three, gap: Spacing.two }}>
         <View style={[s.box, { backgroundColor: theme.backgroundElement }]}>
           <Ionicons name="search" size={18} color={theme.textSecondary} />

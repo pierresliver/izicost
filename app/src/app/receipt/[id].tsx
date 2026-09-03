@@ -7,12 +7,15 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } fro
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Brand, Spacing } from '@/constants/theme';
+import { memberName } from '@/features/household/api';
+import '@/features/household/i18n';
 import { splitImagePaths } from '@/features/scan/api';
 import { PhotoStrip } from '@/features/scan/components/photo-strip';
 import { PhotoViewer } from '@/features/scan/components/photo-viewer';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
 import { deleteReceipt, formatMoney, getReceipt, signedImageUrl, updateItemCategory } from '@/lib/receipts';
+import { ensureSession } from '@/lib/supabase';
 import { CATEGORIES, type ReceiptItemRow, type ReceiptRow } from '@/lib/types';
 
 export default function ReceiptDetail() {
@@ -26,13 +29,15 @@ export default function ReceiptDetail() {
   const [photosMissing, setPhotosMissing] = useState(false);
   const [viewer, setViewer] = useState<number | null>(null);
   const [editing, setEditing] = useState<string | null>(null); // item id whose category chips are open
+  const [mine, setMine] = useState(true); // a household member's receipt is read-only for me
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
     getReceipt(id)
       .then(async ({ receipt, items }) => {
-        setReceipt(receipt); setItems(items);
+        const uid = await ensureSession(); // decide ownership before the first paint: no flash of a Delete button
+        setMine(receipt.user_id === uid); setReceipt(receipt); setItems(items);
         const paths = splitImagePaths(receipt.image_path);
         const urls = await Promise.all(paths.map((p) => signedImageUrl(p)));
         const ok = urls.filter((u): u is string => Boolean(u));
@@ -81,26 +86,32 @@ export default function ReceiptDetail() {
         {receipt.store_branch_address ? <ThemedText themeColor="textSecondary">{receipt.store_branch_address}</ThemedText> : null}
         <ThemedText themeColor="textSecondary">{receipt.purchased_on ?? '—'} · {receipt.payment_method ? t(receipt.payment_method) : t('unknown')}</ThemedText>
         {receipt.store_tax_id ? <ThemedText type="small" themeColor="textSecondary">NUIT/VAT {receipt.store_tax_id}</ThemedText> : null}
+        {!mine ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+            <Ionicons name="people" size={14} color={Brand.primary} />
+            <ThemedText type="small" style={{ color: Brand.primary }}>{t('Scanned by %name%', { name: memberName(receipt.user_id) ?? t('Household') })}</ThemedText>
+          </View>
+        ) : null}
         <ThemedText style={styles.total}>{formatMoney(receipt.total, receipt.currency)}</ThemedText>
       </ThemedView>
 
       <View style={styles.sectionRow}>
         <ThemedText type="smallBold" style={styles.section}>{t('Items')} ({items.length})</ThemedText>
-        {items.length ? <ThemedText type="small" themeColor="textSecondary">{t('Tap an item to change its category')}</ThemedText> : null}
+        {items.length && mine ? <ThemedText type="small" themeColor="textSecondary">{t('Tap an item to change its category')}</ThemedText> : null}
       </View>
       <ThemedView type="backgroundElement" style={styles.card}>
         {items.map((it) => {
-          const open = editing === it.id;
+          const open = mine && editing === it.id;
           return (
             <View key={it.id}>
-              <Pressable onPress={() => setEditing(open ? null : it.id)} style={({ pressed }) => [styles.row, pressed && { opacity: 0.7 }]}>
+              <Pressable disabled={!mine} onPress={() => setEditing(open ? null : it.id)} style={({ pressed }) => [styles.row, pressed && { opacity: 0.7 }]}>
                 <ThemedText type="small" themeColor="textSecondary" style={styles.qty}>{it.qty ?? ''}</ThemedText>
                 <View style={{ flex: 1 }}>
                   <ThemedText>{it.name_as_printed}</ThemedText>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                     <ThemedText type="small" style={{ color: Brand.primary }}>{t(it.category ?? 'other')}</ThemedText>
                     {it.subcategory ? <ThemedText type="small" themeColor="textSecondary">· {it.subcategory.replace(/_/g, ' ')}</ThemedText> : null}
-                    <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={12} color={theme.textSecondary} />
+                    {mine ? <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={12} color={theme.textSecondary} /> : null}
                   </View>
                 </View>
                 <ThemedText>{formatMoney(it.line_total)}</ThemedText>
@@ -136,10 +147,14 @@ export default function ReceiptDetail() {
       ) : null}
       <PhotoViewer uris={photos} index={viewer} onClose={() => setViewer(null)} />
 
-      <Pressable style={styles.deleteBtn} onPress={onDelete}>
-        <Ionicons name="trash" color={Brand.danger} size={18} />
-        <ThemedText style={{ color: Brand.danger, fontWeight: '600' }}> {t('Delete')}</ThemedText>
-      </Pressable>
+      {mine ? (
+        <Pressable style={styles.deleteBtn} onPress={onDelete}>
+          <Ionicons name="trash" color={Brand.danger} size={18} />
+          <ThemedText style={{ color: Brand.danger, fontWeight: '600' }}> {t('Delete')}</ThemedText>
+        </Pressable>
+      ) : (
+        <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'center' }}>{t('Only the person who scanned a receipt can change or delete it.')}</ThemedText>
+      )}
     </ScrollView>
   );
 }

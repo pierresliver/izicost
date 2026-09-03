@@ -18,7 +18,8 @@ export function normaliseName(s: string): string {
 }
 
 export async function fetchHistory(days = 180): Promise<HistoryRow[]> {
-  const rows = await fetchJoinedItems(iso(addDays(new Date(), -days)));
+  // "Your usual items" and "personal inflation" are about the person, not the household: always own rows.
+  const rows = await fetchJoinedItems(iso(addDays(new Date(), -days)), undefined, 1500, { onlyMe: true });
   return rows
     .filter((r) => r.receipts?.purchased_on && r.name_as_printed)
     .map((r) => {

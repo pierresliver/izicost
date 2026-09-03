@@ -13,10 +13,12 @@ import { ThemedText } from '@/components/themed-text';
 import { Brand, Spacing } from '@/constants/theme';
 import { countOpenItems } from '@/features/basket/api';
 import { BASKET_HREF, BASKET_QUOTE_HREF } from '@/features/basket/routes';
-import { loadDashboard, type Dashboard } from '@/features/reports/api';
+import { memberName, refreshHousehold, useHousehold } from '@/features/household/api';
+import { ScopeToggle } from '@/features/household/components/scope-toggle';
+import { fetchReceipts, loadDashboard, type Dashboard } from '@/features/reports/api';
 import { budgetStatus, listBudgets, type Budget } from '@/features/reports/budgets';
 import { BarChart, RingChart } from '@/features/reports/charts';
-import { monthLong, monthShort } from '@/features/reports/dates';
+import { monthEnd, monthLong, monthShort, monthStart, ym } from '@/features/reports/dates';
 import { BudgetRings, HeadlineCard, WeeklyCard } from '@/features/reports/home-cards';
 import { DueSoonCard, InflationTeaser, RecapAskCard } from '@/features/reports/home-insights';
 import { detectRecurring, fetchHistory, personalInflation, type Recurring } from '@/features/reports/insights';
@@ -34,7 +36,11 @@ export default function HomeScreen() {
   const theme = useTheme();
   const { lang } = useLang();
   const p = useChartPalette();
+  const { household, scope, loaded: householdLoaded } = useHousehold();
+  const householdId = household?.id ?? null;
   const [d, setD] = useState<Dashboard | null>(null);
+  const [mine, setMine] = useState<Dashboard | null>(null); // own-rows numbers for budgets + weekly recap
+  const [byMember, setByMember] = useState<{ user_id: string; name: string; total: number; count: number }[]>([]);
   const [basketCount, setBasketCount] = useState(0);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [recurring, setRecurring] = useState<Recurring[]>([]);
@@ -45,20 +51,39 @@ export default function HomeScreen() {
 
   const load = useCallback(async () => {
     if (!supabaseConfigured) { setError('Supabase is not configured (app/.env missing).'); return; }
+    if (!householdLoaded) return; // wait until we know the scope situation, so the dashboard loads once
     try {
-      const [dash, b, pref, n] = await Promise.all([
+      const inHousehold = !!householdId && scope === 'household';
+      // Members can join or be removed from another phone: refresh the roster on every visit (one small call).
+      if (householdId) await refreshHousehold().catch(() => {});
+      const [dash, b, pref, n, own] = await Promise.all([
         loadDashboard(), listBudgets().catch(() => [] as Budget[]), getRecapPref(), countOpenItems().catch(() => 0),
+        inHousehold ? loadDashboard({ onlyMe: true }) : null,
       ]);
-      setD(dash); setBudgets(b); setRecapPrefState(pref); setBasketCount(n); setError(null);
-      rescheduleWeeklyRecap(dash.week.current, dash.week.currentCount, dash.currency);
-      if (dash.receiptsAllTime > 0) {
+      const me = own ?? dash;
+      setD(dash); setMine(me); setBudgets(b); setRecapPrefState(pref); setBasketCount(n); setError(null);
+      rescheduleWeeklyRecap(me.week.current, me.week.currentCount, me.currency); // the recap is about you
+      if (me.receiptsAllTime > 0) {
         fetchHistory().then((h) => { setRecurring(detectRecurring(h)); setInflationPct(personalInflation(h).overallPct); }).catch(() => {});
       }
+      // Household mode: who spent what this month (only receipts in the dashboard's currency)
+      if (inHousehold) {
+        const now = new Date();
+        const rows = await fetchReceipts(monthStart(ym(now)), monthEnd(ym(now)));
+        const m = new Map<string, { user_id: string; name: string; total: number; count: number }>();
+        for (const r of rows) {
+          if ((r.currency ?? '?') !== dash.currency) continue;
+          const cur = m.get(r.user_id) ?? { user_id: r.user_id, name: memberName(r.user_id) ?? '?', total: 0, count: 0 };
+          cur.total += r.total ?? 0; cur.count += 1; m.set(r.user_id, cur);
+        }
+        setByMember([...m.values()].sort((a, b) => b.total - a.total));
+      } else setByMember([]);
     } catch (e) { setError(String((e as Error).message ?? e)); }
-  }, []);
+  }, [householdId, householdLoaded, scope]); // the Me / Household switch changes every number on this screen
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  const statuses = useMemo(() => (d ? budgetStatus(budgets, d.currency, d.thisMonth.total, d.byCategory) : []), [d, budgets]);
+  // Budgets are personal: always measured against own receipts, even in Household mode.
+  const statuses = useMemo(() => (mine ? budgetStatus(budgets, mine.currency, mine.thisMonth.total, mine.byCategory) : []), [mine, budgets]);
   const overall = statuses.find((s) => s.budget.category === null) ?? null;
   const perCategory = statuses.filter((s) => s.budget.category !== null);
 
@@ -133,11 +158,23 @@ export default function HomeScreen() {
       </View>
 
       {/* 3. Private spending, only once there is something to show */}
-      {hasReceipts ? <SectionTitle action={t('All reports')} onAction={() => go('/reports')}>{t('Your spending')}</SectionTitle> : null}
+      {hasReceipts || household ? <SectionTitle action={t('All reports')} onAction={() => go('/reports')}>{t('Your spending')}</SectionTitle> : null}
+      {household ? <ScopeToggle /> : null}
       {hasReceipts && d ? <HeadlineCard d={d} monthName={monthName} overall={overall} onBudget={() => go('/reports/budgets')} /> : null}
+      {household && scope === 'household' && byMember.length > 1 && d ? (
+        <Card>
+          <SectionTitle>{t('Household this month')}</SectionTitle>
+          {byMember.map((m) => (
+            <Row key={m.user_id} title={m.name} subtitle={m.count === 1 ? t('1 receipt') : `${m.count} ${t('receipts')}`} right={formatMoney(m.total, d.currency)} />
+          ))}
+        </Card>
+      ) : null}
       {!d && !error ? <Card><ThemedText themeColor="textSecondary">{t('Loading…')}</ThemedText></Card> : null}
 
-      {d ? <BudgetRings statuses={perCategory} currency={d.currency} onPress={() => go('/reports/budgets')} /> : null}
+      {mine ? <BudgetRings statuses={perCategory} currency={mine.currency} onPress={() => go('/reports/budgets')} /> : null}
+      {household && scope === 'household' && (overall || perCategory.length) ? (
+        <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'center', marginTop: -Spacing.two }}>{t('Budgets are personal: they compare against your own receipts.')}</ThemedText>
+      ) : null}
       {hasReceipts && d ? <WeeklyCard d={d} /> : null}
       {hasReceipts && recapPref === null ? (
         <RecapAskCard onYes={onRecapYes} onNo={async () => { await setRecapPref('off'); setRecapPrefState('off'); }} />

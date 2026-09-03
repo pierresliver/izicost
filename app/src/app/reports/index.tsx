@@ -9,6 +9,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, View } from 'react-nat
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Brand, Spacing } from '@/constants/theme';
+import { ScopeToggle } from '@/features/household/components/scope-toggle';
 import { ym } from '@/features/reports/dates';
 import { exportCsv } from '@/features/reports/export';
 import { styles as ui } from '@/features/reports/ui';
@@ -46,6 +47,7 @@ export default function ReportsHub() {
   return (
     <ScrollView contentContainerStyle={ui.screen}>
       <Stack.Screen options={{ title: t('Reports') }} />
+      <ScopeToggle />
       {entries.map((e) => (
         <Pressable key={e.href} onPress={() => router.push(e.href as Href)} style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}>
           <ThemedView type="backgroundElement" style={[ui.card, { flexDirection: 'row', alignItems: 'center', gap: Spacing.three }]}>

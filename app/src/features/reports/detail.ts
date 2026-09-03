@@ -1,7 +1,8 @@
 // Category and store reports (overview lists + one-entity detail).
+import { scopeUserId } from '@/features/household/api';
 import { ensureSession, supabase } from '@/lib/supabase';
 
-import { fetchItemsFor, fetchReceipts, groupSlices, pickCurrency, type MonthPoint, type ReceiptLite, type Slice } from './api';
+import { fetchItemsFor, fetchReceipts, groupSlices, pickCurrency, type MonthPoint, type ReceiptLite, type ScopeOpts, type Slice } from './api';
 import { lastMonths, monthStart } from './dates';
 
 /** A receipt_items row joined to its receipt (date, store, currency). */
@@ -17,14 +18,15 @@ export type JoinedItem = {
 };
 
 /** Items with their receipt's date/store, from `from` (inclusive) on. Optional category filter. */
-export async function fetchJoinedItems(from: string, category?: string, limit = 1500): Promise<JoinedItem[]> {
-  await ensureSession();
+export async function fetchJoinedItems(from: string, category?: string, limit = 1500, opts: ScopeOpts = {}): Promise<JoinedItem[]> {
+  const me = opts.onlyMe ? await ensureSession() : await scopeUserId();
   let q = supabase
     .from('receipt_items')
     .select('receipt_id, name_as_printed, qty, unit_price, line_total, category, subcategory, receipts!inner(purchased_on, store_name, currency)')
     .gte('receipts.purchased_on', from)
     .order('purchased_on', { referencedTable: 'receipts', ascending: false })
     .limit(limit);
+  if (me) q = q.eq('user_id', me);
   if (category) q = q.eq('category', category);
   const { data, error } = await q;
   if (error) throw new Error(error.message);
@@ -107,12 +109,14 @@ export type StoreReport = {
 };
 
 export async function loadStore(name: string): Promise<StoreReport> {
-  await ensureSession();
-  const { data, error } = await supabase
+  const me = await scopeUserId();
+  let q = supabase
     .from('receipts')
-    .select('id, store_name, currency, total, purchased_on, receipt_items(count)')
+    .select('id, user_id, store_name, currency, total, purchased_on, receipt_items(count)')
     .eq('store_name', name)
     .order('purchased_on', { ascending: false, nullsFirst: false });
+  if (me) q = q.eq('user_id', me);
+  const { data, error } = await q;
   if (error) throw new Error(error.message);
   const rows = (data ?? []).map((r) => {
     const { receipt_items, ...rest } = r as ReceiptLite & { receipt_items: { count: number }[] };

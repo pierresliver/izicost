@@ -6,26 +6,32 @@ import { FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-nat
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Brand, Spacing } from '@/constants/theme';
+import { memberName, useHousehold } from '@/features/household/api';
+import { ScopeToggle } from '@/features/household/components/scope-toggle';
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney, listReceipts } from '@/lib/receipts';
+import { ensureSession } from '@/lib/supabase';
 import type { ReceiptRow } from '@/lib/types';
 
 export default function ReceiptsScreen() {
   useLang();
   const router = useRouter();
+  const { household, scope } = useHousehold();
   const [rows, setRows] = useState<ReceiptRow[]>([]);
+  const [uid, setUid] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
-    try { setRows(await listReceipts()); setError(null); }
+    try { setUid(await ensureSession()); setRows(await listReceipts()); setError(null); }
     catch (e) { setError(String((e as Error).message ?? e)); }
-  }, []);
+  }, [scope]); // eslint-disable-line react-hooks/exhaustive-deps -- reload when the Me / Household switch changes
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   return (
     <ThemedView style={{ flex: 1 }}>
       <FlatList
+        ListHeaderComponent={household ? <View style={{ marginBottom: Spacing.two }}><ScopeToggle /></View> : null}
         data={rows}
         keyExtractor={(r) => r.id}
         contentContainerStyle={styles.list}
@@ -41,6 +47,7 @@ export default function ReceiptsScreen() {
                 <ThemedText type="smallBold">{item.store_name ?? '?'}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
                   {item.purchased_on ?? '—'} · {item.item_count ?? 0} {t('items')}
+                  {uid && item.user_id !== uid && memberName(item.user_id) ? ` · ${memberName(item.user_id)}` : ''}
                 </ThemedText>
               </View>
               <ThemedText type="smallBold">{formatMoney(item.total, item.currency)}</ThemedText>

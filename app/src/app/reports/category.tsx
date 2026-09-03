@@ -12,6 +12,7 @@ import { categoryColor, useChartPalette } from '@/features/reports/palette';
 import { Card, Empty, ErrorText, Loading, Row, SectionTitle, styles as ui, useLoader } from '@/features/reports/ui';
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
+import { ScopeCaption } from '@/features/household/components/scope-caption';
 
 export default function CategoryScreen() {
   useLang();
@@ -25,6 +26,7 @@ export default function CategoryScreen() {
   return (
     <ScrollView contentContainerStyle={ui.screen} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}>
       <Stack.Screen options={{ title: t(category) }} />
+      <ScopeCaption />
       <ErrorText error={error} />
       {!data && !error ? <Loading /> : null}
       {data ? (

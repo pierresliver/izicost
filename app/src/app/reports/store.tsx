@@ -13,6 +13,7 @@ import { categoryColor, useChartPalette } from '@/features/reports/palette';
 import { Card, Empty, ErrorText, Loading, Row, SectionTitle, styles as ui, useLoader } from '@/features/reports/ui';
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
+import { ScopeCaption } from '@/features/household/components/scope-caption';
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
@@ -33,6 +34,7 @@ export default function StoreScreen() {
   return (
     <ScrollView contentContainerStyle={ui.screen} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}>
       <Stack.Screen options={{ title: name }} />
+      <ScopeCaption />
       <ErrorText error={error} />
       {!data && !error ? <Loading /> : null}
       {data && data.count === 0 ? <Empty /> : null}

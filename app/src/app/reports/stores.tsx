@@ -8,6 +8,7 @@ import { loadStoreOverview } from '@/features/reports/detail';
 import { Card, Empty, ErrorText, Loading, Row, SectionTitle, styles as ui, useLoader } from '@/features/reports/ui';
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
+import { ScopeCaption } from '@/features/household/components/scope-caption';
 
 export default function StoresScreen() {
   useLang();
@@ -17,6 +18,7 @@ export default function StoresScreen() {
   return (
     <ScrollView contentContainerStyle={ui.screen} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}>
       <Stack.Screen options={{ title: t('By store') }} />
+      <ScopeCaption />
       <ErrorText error={error} />
       {!data && !error ? <Loading /> : null}
       {data && !data.stores.length ? <Empty text={t('No stores yet.')} /> : null}

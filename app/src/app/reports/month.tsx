@@ -15,6 +15,7 @@ import { assignColors, useChartPalette } from '@/features/reports/palette';
 import { Card, Empty, ErrorText, Loading, Row, SectionTitle, styles as ui, useLoader } from '@/features/reports/ui';
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
+import { ScopeCaption } from '@/features/household/components/scope-caption';
 
 export default function MonthScreen() {
   const { lang } = useLang();
@@ -37,6 +38,7 @@ export default function MonthScreen() {
   return (
     <ScrollView contentContainerStyle={ui.screen} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}>
       <Stack.Screen options={{ title: t('By month') }} />
+      <ScopeCaption />
       <Card>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <Pressable onPress={() => setMonth(ymShift(month, -1))} hitSlop={10}><Ionicons name="chevron-back" size={24} color={Brand.primary} /></Pressable>

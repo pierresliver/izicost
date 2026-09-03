@@ -11,6 +11,7 @@ import { fetchHistory, personalInflation } from '@/features/reports/insights';
 import { Card, Delta, Empty, ErrorText, Loading, SectionTitle, styles as ui, useLoader } from '@/features/reports/ui';
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
+import { ScopeCaption } from '@/features/household/components/scope-caption';
 
 export default function InflationScreen() {
   useLang();
@@ -21,6 +22,7 @@ export default function InflationScreen() {
   return (
     <ScrollView contentContainerStyle={ui.screen} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}>
       <Stack.Screen options={{ title: t('Inflation') }} />
+      <ScopeCaption />
       <ErrorText error={error} />
       {!data && !error ? <Loading /> : null}
       {data ? (

@@ -2,6 +2,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import * as ImageManipulator from 'expo-image-manipulator';
 
+import { scopeUserId } from '@/features/household/api';
 import { captureLocation } from '@/features/prices/location';
 
 import { todayIso } from './numbers';
@@ -142,12 +143,14 @@ export async function saveReceipt(x: Extraction, imagePath: string, raw: Extract
 }
 
 export async function listReceipts(): Promise<ReceiptRow[]> {
-  await ensureSession();
-  const { data, error } = await supabase
+  const me = await scopeUserId(); // "Me" filters to my rows; "Household" lets RLS show the family's too
+  let q = supabase
     .from('receipts')
-    .select('id, store_name, store_branch_address, store_type, currency, purchased_on, total, payment_method, image_path, created_at, receipt_items(count)')
+    .select('id, user_id, store_name, store_branch_address, store_type, currency, purchased_on, total, payment_method, image_path, created_at, receipt_items(count)')
     .order('purchased_on', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false });
+  if (me) q = q.eq('user_id', me);
+  const { data, error } = await q;
   if (error) throw new Error(error.message);
   return (data ?? []).map((r) => {
     const { receipt_items, ...rest } = r as ReceiptRow & { receipt_items: { count: number }[] };
@@ -180,49 +183,6 @@ export async function deleteReceipt(id: string, imagePath: string | null): Promi
 export async function signedImageUrl(imagePath: string): Promise<string | null> {
   const { data } = await supabase.storage.from('receipts').createSignedUrl(imagePath, 3600);
   return data?.signedUrl ?? null;
-}
-
-export type MonthSummary = {
-  total: number;
-  count: number;
-  currency: string;
-  byStore: { name: string; total: number }[];
-  byCategory: { name: string; total: number }[];
-};
-
-/** Totals for the current calendar month, in the most common currency of those receipts. */
-export async function monthSummary(): Promise<MonthSummary> {
-  await ensureSession();
-  const now = new Date();
-  const ym = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
-  const from = ym(now);
-  const to = ym(new Date(now.getFullYear(), now.getMonth() + 1, 1));
-  const { data: receipts } = await supabase
-    .from('receipts')
-    .select('id, store_name, currency, total')
-    .gte('purchased_on', from)
-    .lt('purchased_on', to);
-  const rows = receipts ?? [];
-  const currencyCount: Record<string, number> = {};
-  for (const r of rows) currencyCount[r.currency ?? '?'] = (currencyCount[r.currency ?? '?'] ?? 0) + 1;
-  const currency = Object.entries(currencyCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'MZN';
-  const inCur = rows.filter((r) => (r.currency ?? '?') === currency);
-  const byStoreMap: Record<string, number> = {};
-  for (const r of inCur) byStoreMap[r.store_name ?? '?'] = (byStoreMap[r.store_name ?? '?'] ?? 0) + (r.total ?? 0);
-  const ids = inCur.map((r) => r.id);
-  const byCategoryMap: Record<string, number> = {};
-  if (ids.length) {
-    const { data: items } = await supabase.from('receipt_items').select('category, line_total').in('receipt_id', ids);
-    for (const it of items ?? []) byCategoryMap[it.category ?? 'other'] = (byCategoryMap[it.category ?? 'other'] ?? 0) + (it.line_total ?? 0);
-  }
-  const sortDesc = (m: Record<string, number>) => Object.entries(m).map(([name, total]) => ({ name, total })).sort((a, b) => b.total - a.total);
-  return {
-    total: inCur.reduce((s, r) => s + (r.total ?? 0), 0),
-    count: inCur.length,
-    currency,
-    byStore: sortDesc(byStoreMap).slice(0, 5),
-    byCategory: sortDesc(byCategoryMap).slice(0, 6),
-  };
 }
 
 export function formatMoney(n: number | null | undefined, currency?: string | null): string {
