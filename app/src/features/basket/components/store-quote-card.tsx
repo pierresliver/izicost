@@ -82,7 +82,10 @@ export function StoreQuoteCard({ quote, rank, currency, saving, nextStore, estim
           <View style={[styles.lines, { borderTopColor: theme.backgroundSelected }]}>
             {quote.items.map((i) => (
               <View key={i.item_id} style={styles.line}>
-                <ThemedText type="small" style={{ flex: 1 }} numberOfLines={1}>{i.name}{i.qty !== 1 ? ` × ${i.qty}` : ''}</ThemedText>
+                <ThemedText type="small" style={{ flex: 1 }} numberOfLines={1}>
+                  {i.name}{i.qty !== 1 ? ` × ${i.qty}` : ''}
+                  {i.brand && !i.name.toLowerCase().includes(i.brand.toLowerCase()) ? <ThemedText type="small" themeColor="textSecondary"> · {i.brand}</ThemedText> : null}
+                </ThemedText>
                 <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 12 }}>{t('seen %when%', { when: freshnessText(daysAgo(i.observed_on)) })}</ThemedText>
                 <ThemedText type="smallBold" style={{ minWidth: 80, textAlign: 'right' }}>{formatMoney(i.line_total, currency)}</ThemedText>
               </View>

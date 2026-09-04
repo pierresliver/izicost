@@ -7,10 +7,19 @@ import { ensureSession, supabase } from '@/lib/supabase';
 export type BasketList = { id: string; name: string; household_id?: string | null; user_id?: string };
 export type BasketItem = {
   id: string; list_id: string; product_id: string | null; name: string; qty: number; checked: boolean; created_at: string;
+  /** Brand the person insists on; null = any brand (the quote picks the cheapest one per shop). */
+  brand_pref: string | null;
+  /** Brand of the catalogue product this line points at, when known. */
+  brand: string | null;
   product_key: string | null;
 };
-export type ProductHit = { id: string; product_key: string; display_name: string; size_value: number | null; size_unit: string | null };
-export type QuoteItem = { item_id: string; name: string; qty: number; price: number; line_total: number; observed_on: string; report_count: number };
+export type ProductHit = { id: string; product_key: string; display_name: string; size_value: number | null; size_unit: string | null; brand?: string | null };
+export type QuoteItem = {
+  item_id: string; name: string; qty: number; price: number; line_total: number; observed_on: string; report_count: number;
+  /** The catalogue product actually priced at this shop (may be another brand than the typed name). */
+  product_name?: string | null; brand?: string | null; product_key?: string | null;
+};
+export type BrandOption = { brand: string | null; product_key: string; display_name: string; min_price: number | null; store_count: number };
 export type StoreQuote = {
   store_id: string; store_name: string; branch_address: string | null; city: string | null; store_type: string | null;
   lat: number | null; lng: number | null; items_found: number; items_total: number; basket_total: number; items: QuoteItem[];
@@ -19,11 +28,15 @@ export type StoreQuote = {
 function num(v: unknown): number { return typeof v === 'number' ? v : Number(v); }
 function numOrNull(v: unknown): number | null { return v === null || v === undefined ? null : num(v); }
 
-const ITEM_COLS = 'id, list_id, product_id, name, qty, checked, created_at, products(product_key)';
-type RawItem = Omit<BasketItem, 'product_key' | 'qty'> & { qty: unknown; products: { product_key: string } | { product_key: string }[] | null };
+const ITEM_COLS = 'id, list_id, product_id, name, qty, checked, created_at, brand_pref, products(product_key, brand)';
+type RawProduct = { product_key: string; brand: string | null };
+type RawItem = Omit<BasketItem, 'product_key' | 'qty' | 'brand'> & { qty: unknown; products: RawProduct | RawProduct[] | null };
 function toItem(r: RawItem): BasketItem {
   const p = Array.isArray(r.products) ? r.products[0] : r.products;
-  return { id: r.id, list_id: r.list_id, product_id: r.product_id, name: r.name, qty: num(r.qty), checked: r.checked, created_at: r.created_at, product_key: p?.product_key ?? null };
+  return {
+    id: r.id, list_id: r.list_id, product_id: r.product_id, name: r.name, qty: num(r.qty), checked: r.checked, created_at: r.created_at,
+    brand_pref: r.brand_pref ?? null, brand: p?.brand ?? null, product_key: p?.product_key ?? null,
+  };
 }
 
 const ACTIVE_KEY = 'izicost.basket.activeList';
@@ -144,7 +157,7 @@ export async function listItems(listId: string): Promise<BasketItem[]> {
  * Add an item; when the same product (or the same name) is already on the list its quantity is
  * increased instead, so "add to basket" twice means "two of them".
  */
-export async function addItem(listId: string, x: { name: string; productId?: string | null; qty?: number }): Promise<BasketItem> {
+export async function addItem(listId: string, x: { name: string; productId?: string | null; qty?: number; brandPref?: string | null }): Promise<BasketItem> {
   const uid = await ensureSession();
   const name = x.name.trim().replace(/\s+/g, ' ').slice(0, 120);
   if (!name) throw new Error('empty name');
@@ -160,7 +173,7 @@ export async function addItem(listId: string, x: { name: string; productId?: str
     return toItem(data as unknown as RawItem);
   }
   const { data, error } = await supabase.from('shopping_list_items')
-    .insert({ list_id: listId, user_id: uid, product_id: x.productId ?? null, name, qty }).select(ITEM_COLS).single();
+    .insert({ list_id: listId, user_id: uid, product_id: x.productId ?? null, name, qty, brand_pref: x.brandPref?.trim().slice(0, 60) || null }).select(ITEM_COLS).single();
   if (error || !data) throw new Error(error?.message ?? 'could not add');
   return toItem(data as unknown as RawItem);
 }
@@ -179,7 +192,7 @@ export async function addToBasket(name: string, productId?: string | null): Prom
   return addItem(list.id, { name, productId });
 }
 
-export async function updateItem(id: string, patch: { qty?: number; checked?: boolean }): Promise<void> {
+export async function updateItem(id: string, patch: { qty?: number; checked?: boolean; brand_pref?: string | null }): Promise<void> {
   const { error } = await supabase.from('shopping_list_items').update(patch).eq('id', id);
   if (error) throw new Error(error.message);
 }
@@ -200,9 +213,17 @@ export async function searchProducts(query: string, limit = 8): Promise<ProductH
   if (q.length < 2) return [];
   await ensureSession();
   const { data, error } = await supabase.from('products')
-    .select('id, product_key, display_name, size_value, size_unit').ilike('display_name', `%${q}%`).order('display_name').limit(limit);
+    .select('id, product_key, display_name, size_value, size_unit, brand').ilike('display_name', `%${q.replace(/[%_\\]/g, ' ')}%`).order('display_name').limit(limit);
   if (error) throw new Error(error.message);
   return ((data ?? []) as ProductHit[]).map((p) => ({ ...p, size_value: numOrNull(p.size_value) }));
+}
+
+/** Brands available for one list line (same product family), cheapest first. */
+export async function itemBrandOptions(itemId: string, currency: string): Promise<BrandOption[]> {
+  await ensureSession();
+  const { data, error } = await supabase.rpc('item_brand_options', { p_item: itemId, p_currency: currency });
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as BrandOption[]).map((r) => ({ ...r, min_price: numOrNull(r.min_price), store_count: num(r.store_count) }));
 }
 
 /** One row per store with at least one of the list's products in the community pool. `typical` = 60-day medians instead of latest prices. */

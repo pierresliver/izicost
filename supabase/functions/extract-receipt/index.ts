@@ -155,8 +155,8 @@ Deno.serve(async (req) => {
   const GLOBAL_CAP = Number(Deno.env.get("GLOBAL_DAILY_SCAN_CAP")) || 600;
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
   const [{ count: scansToday }, { count: scansGlobal }] = await Promise.all([
-    admin.from("scan_events").select("id", { count: "exact", head: true }).eq("user_id", uid).gte("created_at", since),
-    admin.from("scan_events").select("id", { count: "exact", head: true }).gte("created_at", since),
+    admin.from("scan_events").select("id", { count: "exact", head: true }).eq("user_id", uid).eq("kind", "receipt").gte("created_at", since),
+    admin.from("scan_events").select("id", { count: "exact", head: true }).eq("kind", "receipt").gte("created_at", since),
   ]);
   if ((scansToday ?? 0) >= DAILY_CAP) return json({ error: `daily scan limit reached (${DAILY_CAP} per day)` }, 429);
   if ((scansGlobal ?? 0) >= GLOBAL_CAP) { console.error("GLOBAL scan cap reached", scansGlobal); return json({ error: "scanning is paused for today, please try again tomorrow" }, 503); }

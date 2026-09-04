@@ -6,7 +6,7 @@
 # The APK is signed with the debug keystore, which is fine for testing. Before a Play Store release
 # we create a permanent keystore (like IziCamera's) and switch the signing config.
 # Options:  -Abi 'arm64-v8a'   build for one processor type only (smaller file)
-#           -Slim              also enable ProGuard + resource shrinking (smaller again; the published download uses this)
+#           -Slim              also enable code minification (R8) + resource shrinking (smaller again; the published download uses this)
 # Example (the download build): powershell -ExecutionPolicy Bypass -File scripts\build-apk.ps1 -Abi arm64-v8a -Slim
 param(
   [string]$Abi = 'armeabi-v7a,arm64-v8a',
@@ -41,7 +41,7 @@ if ($needPrebuild) {
 $gp = Join-Path $app 'android\gradle.properties'
 $gpText = Get-Content $gp -Raw
 $gpText = [regex]::Replace($gpText, '(?m)^reactNativeArchitectures=.*$', "reactNativeArchitectures=$Abi")
-foreach ($k in @('android.enableProguardInReleaseBuilds', 'android.enableShrinkResourcesInReleaseBuilds')) {
+foreach ($k in @('android.enableMinifyInReleaseBuilds', 'android.enableProguardInReleaseBuilds', 'android.enableShrinkResourcesInReleaseBuilds')) {
   $v = if ($Slim) { 'true' } else { 'false' }
   if ($gpText -match "(?m)^$([regex]::Escape($k))=") { $gpText = [regex]::Replace($gpText, "(?m)^$([regex]::Escape($k))=.*$", "$k=$v") }
   else { $gpText = $gpText.TrimEnd() + "`n$k=$v`n" }

@@ -5,3 +5,6 @@ verify_jwt = true
 
 [functions.parse-shopping-list]
 verify_jwt = true
+
+[functions.read-shelf]
+verify_jwt = true

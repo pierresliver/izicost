@@ -12,6 +12,8 @@ export type MatchedItem = ParsedItem & {
   label: string;
   /** Catalogue product when one clearly matches; null = free text (still quoted by name fingerprint). */
   product: ProductHit | null;
+  /** The person named a brand ("leite parmalat"): keep to it. Otherwise any brand is fine. */
+  brandPref: string | null;
 };
 
 export class ParseLimitError extends Error {
@@ -137,7 +139,9 @@ export async function matchCatalogue(items: ParsedItem[]): Promise<MatchedItem[]
       // exact name match first, then a lone candidate; several candidates = not sure = free text
       product = good.find((h) => norm(h.display_name) === norm(label)) ?? (good.length === 1 ? good[0] : null);
     } catch { /* offline or catalogue error: free text is fine */ }
-    return { ...it, label, product };
+    const typed = ` ${norm(it.name)} `;
+    const brandPref = product?.brand && typed.includes(` ${norm(product.brand)} `) ? product.brand : null; // whole words only
+    return { ...it, label, product, brandPref };
   }));
 }
 

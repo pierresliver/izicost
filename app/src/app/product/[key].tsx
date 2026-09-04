@@ -12,8 +12,8 @@ import { addToBasket } from '@/features/basket/api';
 import '@/features/basket/i18n';
 import { BASKET_HREF } from '@/features/basket/routes';
 import {
-  getProduct, myLastPrice, productPrices, productStoreTrend, productTrend, reportPrice, setPriceAlert,
-  type CommunityPrice, type MyLastPrice, type ProductRow, type StoreTrendPoint, type TrendPoint,
+  getProduct, myLastPrice, productBrands, productPrices, productStoreTrend, productTrend, reportPrice, setPriceAlert,
+  type BrandRow, type CommunityPrice, type MyLastPrice, type ProductRow, type StoreTrendPoint, type TrendPoint,
 } from '@/features/prices/api';
 import { IndexChart, type IndexSeries } from '@/features/reports/charts';
 import { assignColors, useChartPalette } from '@/features/reports/palette';
@@ -63,11 +63,14 @@ export default function ProductScreen() {
   }, [key]);
   useEffect(() => { load(); }, [load]);
   const [storeTrend, setStoreTrend] = useState<StoreTrendPoint[]>([]);
+  const [family, setFamily] = useState<BrandRow[]>([]);
   useEffect(() => {
     if (!key || !currency) { setTrend([]); return; }
     productTrend(key, currency).then(setTrend).catch(() => setTrend([]));
     productStoreTrend(key, currency).then(setStoreTrend).catch(() => setStoreTrend([]));
+    productBrands(key, currency).then(setFamily).catch(() => setFamily([]));
   }, [key, currency]);
+  const otherBrands = family.filter((b) => b.product_key !== key && b.min_price !== null);
   const palette = useChartPalette();
   const storeSeries: IndexSeries[] = (() => {
     const byStore = new Map<string, StoreTrendPoint[]>();
@@ -242,6 +245,22 @@ export default function ProductScreen() {
         </>
       ) : null}
 
+      {otherBrands.length ? (
+        <ThemedView type="backgroundElement" style={styles.card}>
+          <ThemedText type="smallBold">{t('Compare brands')}</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">{t('Same product, other brands, cheapest first. Tap one to see where.')}</ThemedText>
+          {[...family].filter((b) => b.min_price !== null).sort((a, b) => a.min_price! - b.min_price!).map((b) => (
+            <Pressable key={b.product_key} onPress={() => { if (b.product_key !== key) router.push({ pathname: '/product/[key]', params: { key: b.product_key } }); }} style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingVertical: 6 }}>
+              <Ionicons name={b.product_key === key ? 'radio-button-on' : 'radio-button-off'} size={16} color={Brand.primary} />
+              <View style={{ flex: 1 }}>
+                <ThemedText type="smallBold" numberOfLines={1}>{b.brand ?? t('No brand')}</ThemedText>
+                <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>{b.display_name} · {b.store_count === 1 ? t('%n% shop', { n: 1 }) : t('%n% shops', { n: b.store_count })}</ThemedText>
+              </View>
+              <ThemedText type="smallBold">{t('from %price%', { price: formatMoney(b.min_price!, currency ?? undefined) })}</ThemedText>
+            </Pressable>
+          ))}
+        </ThemedView>
+      ) : null}
       {currency ? <TrendChart points={trend} currency={currency} /> : null}
       {currency && storeSeries.length >= 1 && storeTrend.length >= 2 ? (
         <ThemedView type="backgroundElement" style={styles.card}>

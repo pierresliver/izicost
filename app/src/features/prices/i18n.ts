@@ -3,6 +3,12 @@
 import { registerTranslations } from '@/lib/i18n';
 
 registerTranslations({
+  // compare brands
+  'Compare brands': 'Comparar marcas',
+  'Same product, other brands, cheapest first. Tap one to see where.': 'O mesmo produto, outras marcas, a mais barata primeiro. Toque numa para ver onde.',
+  'No brand': 'Sem marca',
+  '%n% shop': '%n% loja',
+  '%n% shops': '%n% lojas',
   // store page
   'vs the typical price in %city% · %n% products compared': 'vs o preço habitual em %city% · %n% produtos comparados',
   'cheaper here': 'mais baratos aqui',

@@ -80,6 +80,10 @@ function Root() {
         <Stack.Screen name="quick-add" options={{ title: t('Add a market price'), presentation: 'modal' }} />
         <Stack.Screen name="recap" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="store/[id]" options={{ title: t('Store') }} />
+        <Stack.Screen name="shelf/index" options={{ title: t('Shelf scan') }} />
+        <Stack.Screen name="shelf/capture" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="shelf/photos" options={{ title: t('Check the photos') }} />
+        <Stack.Screen name="shelf/review" options={{ title: t('Check the prices') }} />
       </Stack>
     </ThemeProvider>
   );

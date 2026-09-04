@@ -1,6 +1,7 @@
 // Scan tab: the entry point. Opens the full-screen camera (or the gallery), runs the shared
 // upload/read pipeline, and shows the offline queue with retry.
 import '@/features/scan/i18n';
+import '@/features/shelf/i18n';
 
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -17,6 +18,7 @@ import { PhotoStrip } from '@/features/scan/components/photo-strip';
 import { dequeueScan, loadQueue, subscribeQueue, type QueuedScan } from '@/features/scan/queue';
 import { takeShots } from '@/features/scan/shots';
 import { useScanPipeline, type Phase, type ScanNotice } from '@/features/scan/use-scan-pipeline';
+import { shelfScanAllowed } from '@/features/shelf/api';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
 
@@ -30,9 +32,11 @@ export default function ScanScreen() {
   const skipAuto = useRef<Set<string>>(new Set()); // entries that failed for a non-network reason this session
   const limitHit = useRef(false);
   const focused = useRef(false);
+  const [shelfOk, setShelfOk] = useState(false);
 
   useEffect(() => {
     loadQueue().then(setQueue).catch(() => {});
+    shelfScanAllowed().then(setShelfOk);
     return subscribeQueue(setQueue);
   }, []);
 
@@ -142,6 +146,17 @@ export default function ScanScreen() {
           <Ionicons name="images" color={Brand.primary} size={22} />
           <ThemedText style={[styles.btnText, { color: Brand.primary }]}>{t('Choose from gallery')}</ThemedText>
         </Pressable>
+
+        {shelfOk ? (
+          <Pressable style={({ pressed }) => [styles.card, styles.shelfCard, { backgroundColor: theme.backgroundElement }, pressed && { opacity: 0.8 }, busy && styles.disabled]} disabled={busy} onPress={() => router.push('/shelf')}>
+            <View style={styles.shelfIcon}><Ionicons name="pricetags" size={22} color="#fff" /></View>
+            <View style={{ flex: 1 }}>
+              <ThemedText style={styles.cardTitle}>{t('Shelf scan')} <ThemedText type="small" themeColor="textSecondary">· {t('tester')}</ThemedText></ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">{t('Walk the aisles with the phone in your pocket; it reads the shelf price labels for you.')}</ThemedText>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
+          </Pressable>
+        ) : null}
       </ScrollView>
 
       {busy ? <ProcessingOverlay phase={phase} progress={progress} photos={photos} bg={theme.background} card={theme.backgroundElement} /> : null}
@@ -223,6 +238,8 @@ const styles = StyleSheet.create({
 
   card: { borderRadius: 16, padding: Spacing.three, gap: Spacing.two },
   cardTitle: { fontWeight: '700' },
+  shelfCard: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, borderWidth: 1, borderColor: `${Brand.primary}55` },
+  shelfIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: Brand.primary, alignItems: 'center', justifyContent: 'center' },
   queueHead: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   queueIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: Brand.warning, alignItems: 'center', justifyContent: 'center' },
   badge: { minWidth: 26, height: 26, borderRadius: 13, paddingHorizontal: 8, backgroundColor: Brand.danger, alignItems: 'center', justifyContent: 'center' },

@@ -404,6 +404,46 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   chart report + Home teaser ("Maputo ▲4% in Sep"); **price by store over time** on the product page (migration 015
   `product_store_trend`: weekly medians per store, 180 days) so PS can watch how each shop moves picanha / whisky.
   Both new RPCs security definer, authenticated only. Empty states explain what data is still needed.
+**Day 4 (2026-09-04, afternoon) — Shelf scan + brands (no build yet; build 7 needs PS's yes):**
+- ✅ **Shelf scan** (tester-only): Scan tab card → `/shelf` setup (shop from GPS within 1 km, name search, or create;
+  interval 3/5/8/12 s remembered) → `/shelf/capture` (5-s countdown, then a silent photo every N s with the screen
+  almost black, `shutterSound:false`, keep-awake, tap to pause, AppState pause, max 120 shots, originals deleted after
+  the 1200-px copy) → `/shelf/photos` (grid, cheap sharpness score = JPEG bytes per 1000 px of a 320-px copy, blurry
+  ones flagged and skipped by default, tap to keep, gallery add, upload in batches of 12) → `/shelf/review` (name,
+  brand, price, each / per kg / per l, promo, category; typed lines marked `manual`) → publish. Files
+  `features/shelf/*`, `app/shelf/*`, `features/shelf/i18n.ts`.
+- ✅ **Backend:** migration 024 (`price_points.source` 'shelf', `scan_events.kind`, `trusted_seeders`, setting
+  `shelf_scan_open` = '0', private `shelf_scans` / `shelf_items`, RPCs `shelf_scan_allowed`, `save_shelf_scan`,
+  `my_shelf_stats`); Edge Function `read-shelf` (Claude Sonnet 5, JSON schema, photos deleted from the bucket in a
+  `finally`, fail-closed caps: 300 photos/person/day + 1500/day global reserved in `scan_events` before the model
+  call, guest sessions refused). `scripts/trust-seeder.js <email|id-prefix>` flags testers; the three real accounts
+  (PS's household) were flagged 2026-09-04. Open to everyone later with
+  `update community_settings set value='1' where key='shelf_scan_open'` (needs a real account even then).
+- ✅ **Brands** (migration 025): `brands` reference list (~170 MZ/ZA brands, grows from trusted shelf scans),
+  `detect_brand()`, `products.brand` + `products.generic_key` (name without the brand words) backfilled,
+  `upsert_product(..., p_brand)`; `shopping_list_items.brand_pref` (null = any brand); `basket_quote` now prices, per
+  shop, the cheapest brand that fits each line (result items carry `product_name`, `brand`, `product_key`);
+  `item_brand_options` (brand picker), `product_brands` (Compare-brands card on the product page). App: brand chip on
+  every list line ("Any brand" / a brand) with a picker sheet showing the cheapest price per brand; voice/typed
+  "leite parmalat" keeps to Parmalat; quote card shows the brand actually priced; product page "Compare brands".
+- ✅ **Reviews (3 agents):** security (no critical/high; fixed: fail-open caps, orphaned photos, guest accounts, 0.00
+  prices, subcategory free text, currency vs shop country, weekly instead of daily dedupe of shelf readings so a daily
+  walk cannot inflate report counts, sequence revoke), functional (fixed: Android shutter click, lost price unit,
+  wrong currency for a nearby shop, "Take more photos" losing shots, cache leak, per-l chip, photo numbering,
+  accessibility labels, dark-mode card). Live tests: 32 shelf checks + 24 brand/hardening checks + one real read of a
+  synthetic label picture (3/3 labels right, promo and per-kg handled, photo gone from storage). Typecheck clean,
+  lint: nothing new (9 pre-existing style errors in older files), translation audit 0 missing.
+- ✅ **Third review (brands + shelf fixes) → migration 026:** a product named only "brand + size" ("Parmalat 1L") no
+  longer collapses to the generic "1l" (milk, oil and water would have become one family); only trusted seeders can
+  teach new brands and typed lines of non-seeders never touch the catalogue; 'Oleo'/'Rooibos' removed from the brand
+  list; LATERAL join in `basket_quote` / `item_brand_options` (the candidate function ran once per price row);
+  brand picker uses the region's currency, de-duplicates brands, reverts on failure; whole-word brand match when
+  parsing speech. All live suites re-run: pass.
+- ⏳ **Build 7 + the slim download** wait for PS's yes (PS: "only build when you finish everything"). The slim build
+  script now sets `android.enableMinifyInReleaseBuilds` (SDK 57 name; the old ProGuard flag alone made Gradle fail).
+- 💡 Open: PS's own account is one of the three flagged ids (280099df / 992a80f4 / add533b1) — confirm which by email;
+  move the 5 old guest receipts (d36d289a) to it; `shelf_scan_open` stays '0'; the "photo N" link opens nothing yet.
+
 **Day 3 (2026-09-04) — "make it shareable, alive and talked about":**
 - ✅ **Demo data** (`scripts/seed-demo.js`, `clean` to remove): 12 fake branches in Maputo/Matola/Beira/Nampula, 30 products,
   ~4,400 community price points over 90 days, ~26 receipts per test account (`notes='SEED'`). PS's phone had a fresh
@@ -469,10 +509,9 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   store index honours `min_reports()`). Verified live.
 - ✅ **Build 5:** `builds/izicost-v0.4.0-2026-09-04-1146.apk` (Day 3 rounds 1–2). **Build 6** = `builds/izicost-v0.4.1-2026-09-04-1206.apk`
   (0.4.1 / versionCode 6) with round 3 (shared lists, buy again, list alerts, store page) — handed to PS.
-- 💡 **Next (PS ideas, agreed):** *Shelf scan* — photos of shelf labels instead of receipts (interval capture every N
-  seconds with the phone in a pocket, sharpness filter before upload, branch confirmed from GPS, source 'shelf',
-  "trusted seeder" flag for PS); then *brands* — brand on every product, a generic product behind each brand, a brand
-  chip ("any brand" / a specific one) on list items, comparison and product page by brand.
+- ✅ **Next (PS ideas, agreed) → built on Day 4:** *Shelf scan* (interval capture, sharpness filter, GPS shop, source
+  'shelf', trusted seeders) and *brands* (brand + generic key on every product, brand chip on list items, cheapest brand
+  per shop, Compare brands). See the Day 4 block above.
 - 🐞 **Basket add failed** ("infinite recursion detected in policy for shopping_list_items", PS's 20-item voice list):
   the 200-item cap from 006 counted the table inside its own policy. Migration 018 moves the cap to a definer
   trigger; verified from the PC (6 adds OK, other user still refused). Server-side only — no new build needed.

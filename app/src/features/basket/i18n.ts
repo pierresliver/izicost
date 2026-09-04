@@ -2,6 +2,14 @@
 import { registerTranslations } from '@/lib/i18n';
 
 registerTranslations({
+  // brands
+  'Brand': 'Marca',
+  'Any brand': 'Qualquer marca',
+  'Which brand? With "Any brand" we pick the cheapest one at each shop.': 'Qual marca? Com "Qualquer marca" escolhemos a mais barata em cada loja.',
+  'from %price%': 'desde %price%',
+  'no price yet': 'ainda sem preço',
+  'No brand known for this product yet. Brands appear as receipts and shelf scans come in.': 'Ainda não se conhece nenhuma marca deste produto. As marcas aparecem à medida que chegam recibos e leituras de prateleira.',
+  'Could not save': 'Não foi possível guardar',
   // entry points
   'My basket': 'O meu cesto',
   'Where is it cheapest?': 'Onde é mais barato?',

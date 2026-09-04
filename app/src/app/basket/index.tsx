@@ -10,9 +10,10 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Brand, Spacing } from '@/constants/theme';
 import {
-  addItem, createList, deleteList, getActiveList, listItems, listLists, mergeLists, removeChecked, removeItem, renameList, searchProducts, setActiveList, shareList, updateItem, watchListItems,
-  type BasketItem, type BasketList, type ListRow, type ProductHit,
+  addItem, createList, deleteList, getActiveList, itemBrandOptions, listItems, listLists, mergeLists, removeChecked, removeItem, renameList, searchProducts, setActiveList, shareList, updateItem, watchListItems,
+  type BasketItem, type BasketList, type BrandOption, type ListRow, type ProductHit,
 } from '@/features/basket/api';
+import { formatMoney } from '@/lib/receipts';
 import { useHousehold } from '@/features/household/api';
 import '@/features/household/i18n';
 import { BasketItemRow } from '@/features/basket/components/basket-item-row';
@@ -22,6 +23,7 @@ import { parseShoppingList, ParseLimitError, type MatchedItem } from '@/features
 import { ALERTS_HREF, BASKET_QUOTE_HREF } from '@/features/basket/routes';
 import { loadVoiceLang, saveVoiceLang, useVoiceInput, type VoiceError, type VoiceLang } from '@/features/basket/voice';
 import { PromptModal } from '@/features/prices/components/prompt-modal';
+import { useScope } from '@/features/prices/use-scope';
 import { sizeLabel } from '@/features/prices/format';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
@@ -42,6 +44,10 @@ export default function BasketScreen() {
   const [adding, setAdding] = useState(false);
   const [prompt, setPrompt] = useState<'new' | 'rename' | null>(null);
   const [menuFor, setMenuFor] = useState<ListRow | null>(null); // the list whose menu is open (not always the active one)
+  const [brandFor, setBrandFor] = useState<BasketItem | null>(null); // the line whose brand picker is open
+  const [brandOptions, setBrandOptions] = useState<BrandOption[] | null>(null);
+  const scope = useScope();
+  const cur = scope.myCity?.country === 'ZA' ? 'ZAR' : 'MZN'; // same rule as the quote screen
   const [renameTarget, setRenameTarget] = useState<BasketList | null>(null);
   const [mergeOpen, setMergeOpen] = useState(false);
   const [mergePick, setMergePick] = useState<Set<string>>(new Set());
@@ -134,7 +140,8 @@ export default function BasketScreen() {
       const l = list ?? await getActiveList();
       if (!list) setList(l);
       for (const it of parsed) {
-        await addItem(l.id, { name: it.product ? it.product.display_name : it.label, productId: it.product?.id ?? null, qty: it.qty });
+        // "leite 1l" + any brand keeps the person's words as the line name; a named brand uses the catalogue name
+        await addItem(l.id, { name: it.product && it.brandPref ? it.product.display_name : it.label, productId: it.product?.id ?? null, qty: it.qty, brandPref: it.brandPref });
         setParsed((cur) => cur.filter((x) => x !== it));
       }
       setItems(await listItems(l.id));
@@ -155,6 +162,35 @@ export default function BasketScreen() {
     } catch (e) { Alert.alert(t('Error'), String((e as Error).message ?? e)); }
     finally { setAdding(false); }
   }
+  const brandReq = useRef(0);
+  function openBrand(item: BasketItem) {
+    const req = ++brandReq.current;
+    setBrandFor(item); setBrandOptions(null);
+    itemBrandOptions(item.id, cur)
+      .then((opts) => {
+        if (req !== brandReq.current) return; // a slower answer for another line must not overwrite this one
+        // one row per brand (a family can hold two catalogue entries of the same brand): keep the cheapest
+        const byBrand = new Map<string, BrandOption>();
+        for (const o of opts) {
+          if (!o.brand) continue;
+          const prev = byBrand.get(o.brand);
+          if (!prev || (o.min_price !== null && (prev.min_price === null || o.min_price < prev.min_price))) byBrand.set(o.brand, o);
+        }
+        setBrandOptions([...byBrand.values()]);
+      })
+      .catch(() => { if (req === brandReq.current) setBrandOptions([]); });
+  }
+  async function chooseBrand(brand: string | null) {
+    const target = brandFor; setBrandFor(null);
+    if (!target) return;
+    setItems((c) => c.map((i) => (i.id === target.id ? { ...i, brand_pref: brand } : i)));
+    try { await updateItem(target.id, { brand_pref: brand }); }
+    catch (e) {
+      setItems((c) => c.map((i) => (i.id === target.id ? { ...i, brand_pref: target.brand_pref } : i))); // put it back
+      Alert.alert(t('Could not save'), String((e as Error).message ?? e));
+    }
+  }
+
   async function patch(item: BasketItem, p: { qty?: number; checked?: boolean }) {
     setItems((cur) => cur.map((i) => (i.id === item.id ? { ...i, ...p } : i)));
     try { await updateItem(item.id, p); } catch { load(); }
@@ -295,6 +331,7 @@ export default function BasketScreen() {
           <BasketItemRow
             item={item} onToggle={() => patch(item, { checked: !item.checked })} onQty={(qty) => patch(item, { qty })} onRemove={() => remove(item)}
             onOpen={item.product_key ? () => router.push({ pathname: '/product/[key]', params: { key: item.product_key! } }) : undefined}
+            onBrand={() => openBrand(item)}
           />
         )}
       />
@@ -343,6 +380,30 @@ export default function BasketScreen() {
             </Pressable>
           ))}
           <Pressable onPress={() => setMenuFor(null)} style={{ alignItems: 'center', paddingVertical: Spacing.two }}><ThemedText themeColor="textSecondary">{t('Cancel')}</ThemedText></Pressable>
+        </View>
+      </Modal>
+      <Modal visible={brandFor !== null} transparent animationType="fade" onRequestClose={() => setBrandFor(null)}>
+        <Pressable style={styles.backdrop} onPress={() => setBrandFor(null)} />
+        <View style={[styles.sheet, { backgroundColor: theme.background }]}>
+          <ThemedText type="smallBold" style={{ fontSize: 17 }} numberOfLines={1}>{brandFor?.name}</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">{t('Which brand? With "Any brand" we pick the cheapest one at each shop.')}</ThemedText>
+          <Pressable onPress={() => chooseBrand(null)} style={styles.menuRow}>
+            <Ionicons name={brandFor?.brand_pref ? 'ellipse-outline' : 'checkmark-circle'} size={20} color={Brand.primary} />
+            <ThemedText style={{ flex: 1 }}>{t('Any brand')}</ThemedText>
+          </Pressable>
+          {brandOptions === null ? <ActivityIndicator color={Brand.primary} /> : null}
+          {brandOptions?.filter((o) => o.brand).map((o) => (
+            <Pressable key={o.product_key} onPress={() => chooseBrand(o.brand)} style={styles.menuRow}>
+              <Ionicons name={brandFor?.brand_pref === o.brand ? 'checkmark-circle' : 'ellipse-outline'} size={20} color={Brand.primary} />
+              <View style={{ flex: 1 }}>
+                <ThemedText>{o.brand}</ThemedText>
+                <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>{o.display_name}</ThemedText>
+              </View>
+              {o.min_price !== null ? <ThemedText type="smallBold">{t('from %price%', { price: formatMoney(o.min_price, cur) })}</ThemedText> : <ThemedText type="small" themeColor="textSecondary">{t('no price yet')}</ThemedText>}
+            </Pressable>
+          ))}
+          {brandOptions && !brandOptions.some((o) => o.brand) ? <ThemedText type="small" themeColor="textSecondary">{t('No brand known for this product yet. Brands appear as receipts and shelf scans come in.')}</ThemedText> : null}
+          <Pressable onPress={() => setBrandFor(null)} style={{ alignItems: 'center', paddingVertical: Spacing.two }}><ThemedText themeColor="textSecondary">{t('Cancel')}</ThemedText></Pressable>
         </View>
       </Modal>
       <Modal visible={mergeOpen} transparent animationType="fade" onRequestClose={() => setMergeOpen(false)}>

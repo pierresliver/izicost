@@ -130,6 +130,22 @@ export async function storeIndex(storeId: string, currency = 'MZN'): Promise<Sto
   return ((data ?? []) as StoreIndexPoint[]).map((r) => ({ ...r, index: Number(r.index), products: Number(r.products) }));
 }
 
+export type BrandRow = {
+  product_key: string; display_name: string; brand: string | null; size_value: number | null; size_unit: string | null;
+  min_price: number | null; median_price: number | null; store_count: number; report_count: number; last_seen: string | null;
+};
+
+/** The products behind the same generic name (all brands), with their community prices. */
+export async function productBrands(key: string, currency: string, city?: string | null): Promise<BrandRow[]> {
+  await ensureSession();
+  const { data, error } = await supabase.rpc('product_brands', { p_key: key, p_currency: currency, p_city: city ?? null });
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as BrandRow[]).map((r) => ({
+    ...r, size_value: numOrNull(r.size_value), min_price: numOrNull(r.min_price), median_price: numOrNull(r.median_price),
+    store_count: Number(r.store_count ?? 0), report_count: Number(r.report_count ?? 0),
+  }));
+}
+
 export type StoreTrendPoint = { store_id: string; store_name: string; city: string | null; week_start: string; median_price: number; report_count: number };
 
 /** Weekly median price of one product per store, last 180 days ("how each shop moves its price"). */
