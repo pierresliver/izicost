@@ -468,7 +468,7 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
 - ✅ **Build 9 (PS's yes, ~17:50):** the "this month" index fix on Home, the category ring and the category detail page
   (a sweep found the third leftover, `trend[5]` in `app/reports/category.tsx`), plus PS's two asks: the month headline
   card now opens that month's report page (chevron shown) and the weekly summary card opens the week story.
-  File: `builds/izicost-v0.5.2-2026-09-04-<time>.apk` (0.5.2 / versionCode 9); slim published as the download.
+  File: `builds/izicost-v0.5.2-2026-09-04-1904.apk` (0.5.2 / versionCode 9); slim published as the download.
 - 🐞🐞 **Build 9 first attempt was BROKEN (18:26):** I stopped a running build to add the tappable cards and restarted
   it. The stop landed in the middle of `expo prebuild`, which had already rewritten `android/app/build.gradle` with the
   bare template; the restart saw build.gradle newer than app.json, skipped prebuild and built the template:
