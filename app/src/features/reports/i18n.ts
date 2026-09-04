@@ -12,6 +12,7 @@ registerTranslations({
   'Welcome to IziCost': 'Bem-vindo ao IziCost',
   'Scan your first receipt and see where your money goes. Takes about ten seconds.': 'Digitalize o seu primeiro recibo e veja para onde vai o seu dinheiro. Leva cerca de dez segundos.',
   'Last 6 months': 'Últimos 6 meses',
+  'Last 12 months': 'Últimos 12 meses',
   'Tap a bar to open that month': 'Toque numa barra para abrir esse mês',
   'Weekly recap': 'Resumo semanal',
   'Last 7 days': 'Últimos 7 dias',

@@ -36,7 +36,7 @@ export async function fetchJoinedItems(from: string, category?: string, limit = 
 export type CategoryOverview = { currency: string; months: string[]; categories: { name: string; thisMonth: number; trend: number[] }[] };
 
 export async function loadCategoryOverview(): Promise<CategoryOverview> {
-  const months = lastMonths(6);
+  const months = lastMonths(12);
   const items = await fetchJoinedItems(monthStart(months[0]));
   const currency = pickCurrency(items.map((i) => ({ currency: i.receipts?.currency ?? null })));
   const inCur = items.filter((i) => (i.receipts?.currency ?? '?') === currency);
@@ -58,7 +58,7 @@ export type CategoryItem = { key: string; name: string; store: string; date: str
 export type CategoryReport = { currency: string; trend: MonthPoint[]; subcategories: Slice[]; items: CategoryItem[] };
 
 export async function loadCategory(category: string): Promise<CategoryReport> {
-  const months = lastMonths(6);
+  const months = lastMonths(12);
   const items = await fetchJoinedItems(monthStart(months[0]), category);
   const currency = pickCurrency(items.map((i) => ({ currency: i.receipts?.currency ?? null })));
   const inCur = items.filter((i) => (i.receipts?.currency ?? '?') === currency);
@@ -66,7 +66,7 @@ export async function loadCategory(category: string): Promise<CategoryReport> {
     const rs = inCur.filter((i) => (i.receipts?.purchased_on ?? '').startsWith(m));
     return { ym: m, total: rs.reduce((s, i) => s + (i.line_total ?? 0), 0), count: rs.length };
   });
-  const from3 = monthStart(months[3]);
+  const from3 = monthStart(months[months.length - 3]);
   const recent = inCur.filter((i) => (i.receipts?.purchased_on ?? '') >= from3);
   const subcategories = groupSlices(recent, (i) => i.subcategory || 'other', (i) => i.line_total ?? 0);
   const list = recent
@@ -124,13 +124,13 @@ export async function loadStore(name: string): Promise<StoreReport> {
   });
   const currency = pickCurrency(rows);
   const inCur = rows.filter((r) => (r.currency ?? '?') === currency);
-  const months = lastMonths(6);
+  const months = lastMonths(12);
   const trend: MonthPoint[] = months.map((m) => {
     const rs = inCur.filter((r) => (r.purchased_on ?? '').startsWith(m));
     return { ym: m, total: rs.reduce((s, r) => s + (r.total ?? 0), 0), count: rs.length };
   });
   const total = inCur.reduce((s, r) => s + (r.total ?? 0), 0);
-  const recentIds = inCur.filter((r) => (r.purchased_on ?? '') >= monthStart(months[3])).map((r) => r.id);
+  const recentIds = inCur.filter((r) => (r.purchased_on ?? '') >= monthStart(months[months.length - 3])).map((r) => r.id);
   const items = recentIds.length ? await fetchItemsFor(recentIds) : [];
   return {
     currency,

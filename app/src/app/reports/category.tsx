@@ -34,7 +34,7 @@ export default function CategoryScreen() {
           <ThemedText type="small" themeColor="textSecondary">{t('This month')}</ThemedText>
           <ThemedText style={ui.big}>{formatMoney(thisMonth, data.currency)}</ThemedText>
           <SectionTitle>{t('Monthly trend')}</SectionTitle>
-          <BarChart color={color} data={data.trend.map((m, i) => ({ key: m.ym, label: monthShort(m.ym), value: m.total, highlight: i === 5 }))} />
+          <BarChart color={color} data={data.trend.map((m, i) => ({ key: m.ym, label: monthShort(m.ym), value: m.total, highlight: i === data.trend.length - 1 }))} />
         </Card>
       ) : null}
       {data && data.subcategories.length ? (

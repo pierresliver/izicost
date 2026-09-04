@@ -51,7 +51,7 @@ export default function StoreScreen() {
           </Card>
           <Card>
             <SectionTitle>{t('Spend per month')}</SectionTitle>
-            <BarChart data={data.trend.map((m, i) => ({ key: m.ym, label: monthShort(m.ym), value: m.total, highlight: i === 5 }))} />
+            <BarChart data={data.trend.map((m, i) => ({ key: m.ym, label: monthShort(m.ym), value: m.total, highlight: i === data.trend.length - 1 }))} />
           </Card>
           {data.topCategories.length ? (
             <Card>

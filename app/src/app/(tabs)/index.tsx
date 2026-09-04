@@ -100,7 +100,7 @@ export default function HomeScreen() {
   }, [d, p]);
 
   const go = (path: string) => router.push(path as Href);
-  const monthName = d ? monthLong(d.months[5].ym, lang) : '';
+  const monthName = d ? monthLong(d.months[d.months.length - 1].ym, lang) : '';
   const hasReceipts = !!d && d.receiptsAllTime > 0;
 
   async function onRecapYes() {
@@ -171,9 +171,9 @@ export default function HomeScreen() {
 
       {hasReceipts && d ? (
         <Card>
-          <SectionTitle action={t('By month')} onAction={() => go(`/reports/month?ym=${d.months[5].ym}`)}>{t('Last 6 months')}</SectionTitle>
+          <SectionTitle action={t('By month')} onAction={() => go(`/reports/month?ym=${d.months[d.months.length - 1].ym}`)}>{t('Last 12 months')}</SectionTitle>
           <BarChart
-            data={d.months.map((m, i) => ({ key: m.ym, label: monthShort(m.ym), value: m.total, highlight: i === 5 }))}
+            data={d.months.map((m, i) => ({ key: m.ym, label: monthShort(m.ym), value: m.total, highlight: i === d.months.length - 1 }))}
             onPressBar={(b) => go(`/reports/month?ym=${b.key}`)}
           />
           <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'center' }}>{t('Tap a bar to open that month')}</ThemedText>

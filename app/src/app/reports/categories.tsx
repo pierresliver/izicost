@@ -28,14 +28,14 @@ export default function CategoriesScreen() {
       {data && !data.categories.length ? <Empty /> : null}
       {data && data.categories.length ? (
         <Card>
-          <SectionTitle>{t('This month')} · {t('Last 6 months')}</SectionTitle>
+          <SectionTitle>{t('This month')} · {t('Last 12 months')}</SectionTitle>
           {data.categories.map((c) => (
             <Row key={c.name} title={t(c.name)} right={formatMoney(c.thisMonth, data.currency)} color={categoryColor(c.name, p)}
               rightSub={formatMoney(c.trend.reduce((s, x) => s + x, 0))} onPress={() => router.push(`/reports/category?category=${encodeURIComponent(c.name)}` as Href)}>
               <Sparkline values={c.trend} width={90} height={24} color={categoryColor(c.name, p)} />
             </Row>
           ))}
-          <ThemedText type="small" themeColor="textSecondary">{t('This month')} / {t('Last 6 months')}</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">{t('This month')} / {t('Last 12 months')}</ThemedText>
         </Card>
       ) : null}
     </ScrollView>

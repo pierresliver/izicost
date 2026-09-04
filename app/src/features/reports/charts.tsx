@@ -72,9 +72,11 @@ export function BarChart({ data, height = 150, color, onPressBar, formatValue }:
               {d.highlight && d.value > 0 && grow > 0.95 ? (
                 <SvgText x={x + barW / 2} y={y - 6} fontSize={11} fontWeight="700" fill={p.label} textAnchor="middle">{fmt(d.value)}</SvgText>
               ) : null}
-              <SvgText x={x + barW / 2} y={height - 6} fontSize={11} fill={p.label} textAnchor="middle" fontWeight={d.highlight ? '700' : '400'}>
-                {d.label}
-              </SvgText>
+              {n <= 8 || d.highlight || (n - 1 - i) % 2 === 0 ? (
+                <SvgText x={x + barW / 2} y={height - 6} fontSize={n > 8 ? 10 : 11} fill={p.label} textAnchor="middle" fontWeight={d.highlight ? '700' : '400'}>
+                  {d.label}
+                </SvgText>
+              ) : null}
             </G>
           );
         })}

@@ -1,6 +1,7 @@
-// Demo data for testing how the app FEELS with three months of activity (PS, 2026-09-04).
-//   node scripts/seed-demo.js          -> seed: fake branches + ~2500 community price points over 90 days in
-//                                         Maputo/Matola/Beira/Nampula, and ~30 receipts per test account
+// Demo data for testing how the app FEELS with a year of activity (PS, 2026-09-04; 12 months since the evening).
+//   node scripts/seed-demo.js          -> seed: fake branches + ~17000 community price points over 365 days in
+//                                         Maputo/Matola/Beira/Nampula, ~100 receipts per test account (denser in
+//                                         the last two weeks), and PS's own sample receipt photos attached to them
 //   node scripts/seed-demo.js clean    -> remove everything the seed created (nothing else)
 // Everything is flagged: seed stores carry tax ids 4000990xx, seed receipts have notes = 'SEED', and only
 // products that did not exist before are recorded for deletion. Uses the management API (postgres role),
@@ -16,6 +17,36 @@ for (const line of fs.readFileSync(path.join(root, "passwords", "supabase.txt"),
 }
 const ref = (vars.SUPABASE_URL || "").match(/https:\/\/([a-z0-9]+)\.supabase\.co/)?.[1];
 if (!vars.SUPABASE_ACCESS_TOKEN || !ref) { console.error("Need SUPABASE_ACCESS_TOKEN and SUPABASE_URL in passwords/supabase.txt"); process.exit(1); }
+const serviceKey = vars.SUPABASE_SECRET_KEY; // storage uploads (sample photos); optional
+const storageHeaders = () => ({ Authorization: `Bearer ${serviceKey}`, apikey: serviceKey });
+
+/** Upload one sample photo into a user's private folder (same place the app puts real receipt photos). */
+async function uploadPhoto(objectPath, bytes) {
+  const r = await fetch(`${vars.SUPABASE_URL}/storage/v1/object/receipts/${objectPath}`, {
+    method: "POST", headers: { ...storageHeaders(), "Content-Type": "image/jpeg", "x-upsert": "true" }, body: bytes,
+  });
+  if (!r.ok) throw new Error(`upload ${objectPath}: ${r.status} ${(await r.text()).slice(0, 200)}`);
+}
+async function deletePhotos(paths) {
+  for (let i = 0; i < paths.length; i += 100) {
+    const r = await fetch(`${vars.SUPABASE_URL}/storage/v1/object/receipts`, {
+      method: "DELETE", headers: { ...storageHeaders(), "Content-Type": "application/json" }, body: JSON.stringify({ prefixes: paths.slice(i, i + 100) }),
+    });
+    if (!r.ok) console.warn(`photo delete: ${r.status} ${(await r.text()).slice(0, 200)}`);
+  }
+}
+// PS's own sample receipts (phase 0) stand in as photos for the fake receipts, matched loosely by shop type.
+const PHOTO_DIR = path.join(root, "phase0", "receipts");
+const PHOTOS = {
+  Shoprite: ["r10_Shoprite_CostaDoSol.jpeg"],
+  Woolworths: ["r08_Woolworths_3_items.jpeg", "r09_Woolworths_17_items.jpeg"],
+  Lokal: ["r04_Lokal_Maputo.jpeg"],
+  other_shop: ["r14_SupermercadoReal.jpeg", "r10_Shoprite_CostaDoSol.jpeg", "r09_Woolworths_17_items.jpeg"],
+  "Complexo Piripiri": ["r06_Piripiri_bar_tab_18_items.jpeg", "r13_Piripiri_bar_tab_1_item.jpeg", "r17_Piripiri_bar_tab_9_items.jpeg"],
+  "Café Sol": ["r11_Primavera_jameson.jpeg"],
+  "Estacionamento Baía": ["r12_EMME_parking_crumpled.jpeg", "r15_EMME_parking_blank_value.jpeg"],
+};
+const photoFor = (storeName) => pick(PHOTOS[storeName] ?? PHOTOS.other_shop);
 
 async function sql(query) {
   const r = await fetch(`https://api.supabase.com/v1/projects/${ref}/database/query`, {
@@ -85,7 +116,7 @@ const PRODUCTS = [
   ["SABONETE LUX", "Sabonete Lux", "personal_care", "toiletries", 45, 0.006],
 ];
 const USUAL = [0, 1, 2, 3, 6, 7, 8, 11, 12, 13, 14, 16, 17, 21]; // what "our" test accounts buy over and over
-const DAYS = 90;
+const DAYS = 365;
 
 /** Price of product p at store s on a given day: base × store × drift × weekly promo × noise. */
 function price(p, s, day) {
@@ -139,11 +170,15 @@ async function seedAll() {
   // personal receipts for every test account (everything except the old guest that holds real receipts)
   const users = await sql(`select id from auth.users u where not exists (select 1 from public.receipts r where r.user_id = u.id and coalesce(r.notes,'') <> 'SEED') order by created_at`);
   let receipts = 0;
+  const photoPaths = [];
   for (const u of users) {
-    const fav = [STORES[0], STORES[pick([1, 2, 3, 4, 6])]]; // two favourite Maputo/Matola branches
+    const fav = [STORES[0], STORES[pick([1, 2, 3, 4, 6])], STORES[5]]; // two favourite branches + the occasional Woolworths
     const stmts = [];
-    for (let day = DAYS; day >= 0; day -= 3 + Math.floor(rnd() * 3)) {          // a shop every 3–5 days
-      const s = rnd() < 0.7 ? fav[0] : fav[1];
+    const usedPhotos = new Set();
+    for (let day = DAYS; day >= 0; day -= day <= 14 ? 1 + Math.floor(rnd() * 2) : 3 + Math.floor(rnd() * 3)) { // a shop every 3–5 days; every 1–2 days in the last two weeks
+      const r = rnd();
+      const s = r < 0.55 ? fav[0] : r < 0.85 ? fav[1] : fav[2];
+      const photo = `${u.id}/seed_${photoFor(s.name)}`; usedPhotos.add(photo);
       const idx = new Set(USUAL.filter(() => rnd() < 0.6));
       while (idx.size < 6) idx.add(Math.floor(rnd() * PRODUCTS.length));
       const lines = [...idx].map((i, n) => {
@@ -154,35 +189,50 @@ async function seedAll() {
       });
       const total = round2(lines.reduce((a, l) => a + l.total, 0));
       const when = iso(daysAgo(day));
-      stmts.push(`with r as (insert into public.receipts (user_id, store_id, store_name, store_branch_address, store_tax_id, store_type, doc_type, country, currency, purchased_on, purchased_at_time, subtotal, tax_total, discount_total, total, payment_method, legibility, notes, model, confirmed, created_at)
-        values (${q(u.id)}, ${q(s.id)}, ${q(s.name)}, ${q(s.branch)}, ${q(s.tax)}, 'supermarket', 'itemized_receipt', 'MZ', 'MZN', ${q(when)}, ${q(`${10 + Math.floor(rnd() * 9)}:${String(Math.floor(rnd() * 60)).padStart(2, "0")}`)}, ${total}, ${round2(total * 0.16 / 1.16)}, 0, ${total}, ${q(pick(["card", "cash", "mobile_money"]))}, 'good', 'SEED', 'seed', true, ${q(new Date(daysAgo(day).getTime() + 15 * 3600e3).toISOString())}) returning id)
+      stmts.push(`with r as (insert into public.receipts (user_id, store_id, store_name, store_branch_address, store_tax_id, store_type, doc_type, country, currency, purchased_on, purchased_at_time, subtotal, tax_total, discount_total, total, payment_method, legibility, notes, model, confirmed, image_path, created_at)
+        values (${q(u.id)}, ${q(s.id)}, ${q(s.name)}, ${q(s.branch)}, ${q(s.tax)}, 'supermarket', 'itemized_receipt', 'MZ', 'MZN', ${q(when)}, ${q(`${10 + Math.floor(rnd() * 9)}:${String(Math.floor(rnd() * 60)).padStart(2, "0")}`)}, ${total}, ${round2(total * 0.16 / 1.16)}, 0, ${total}, ${q(pick(["card", "cash", "mobile_money"]))}, 'good', 'SEED', 'seed', true, ${q(photo)}, ${q(new Date(daysAgo(day).getTime() + 15 * 3600e3).toISOString())}) returning id)
         insert into public.receipt_items (receipt_id, user_id, line_no, name_as_printed, product_name, qty, unit_price, line_total, category, subcategory, created_at)
         select r.id, ${q(u.id)}, v.n, v.a, v.b, v.qty, v.u, v.t, v.c, v.s, ${q(new Date(daysAgo(day).getTime() + 15 * 3600e3).toISOString())} from r, (values ${lines.map((l) => `(${l.n}, ${q(l.p[0])}, ${q(l.p[1])}, ${l.qty}, ${l.unit}, ${l.total}, ${q(l.p[2])}, ${q(l.p[3])})`).join(",")}) v(n, a, b, qty, u, t, c, s)`);
       receipts++;
     }
     // a few restaurant and parking receipts for variety in the category ring
-    for (const [day, name, type, items] of [
-      [8, "Complexo Piripiri", "restaurant", [["FRANGO PIRIPIRI", "restaurant", "meal", 650], ["CERVEJA 2M", "restaurant", "alcohol", 120], ["CERVEJA 2M", "restaurant", "alcohol", 120]]],
-      [22, "Café Sol", "bar_cafe", [["CAPPUCCINO", "restaurant", "coffee", 180], ["BOLO CENOURA", "restaurant", "dessert", 220]]],
-      [40, "Estacionamento Baía", "parking", [["ESTACIONAMENTO", "parking", "parking", 50]]],
-    ]) {
+    const EXTRAS = [
+      ["Complexo Piripiri", "restaurant", [["FRANGO PIRIPIRI", "restaurant", "meal", 650], ["CERVEJA 2M", "restaurant", "alcohol", 120], ["CERVEJA 2M", "restaurant", "alcohol", 120]]],
+      ["Café Sol", "bar_cafe", [["CAPPUCCINO", "restaurant", "coffee", 180], ["BOLO CENOURA", "restaurant", "dessert", 220]]],
+      ["Estacionamento Baía", "parking", [["ESTACIONAMENTO", "parking", "parking", 50]]],
+    ];
+    const extraDays = [3, 8, 22, 40, 61, 95, 128, 160, 199, 233, 270, 301, 340];
+    for (const day of extraDays) {
+      const [name, type, items] = EXTRAS[(day + extraDays.indexOf(day)) % EXTRAS.length];
+      const photo = `${u.id}/seed_${photoFor(name)}`; usedPhotos.add(photo);
       const total = items.reduce((a, it) => a + it[3], 0);
-      stmts.push(`with r as (insert into public.receipts (user_id, store_name, store_type, doc_type, country, currency, purchased_on, total, payment_method, legibility, notes, model, confirmed, created_at)
-        values (${q(u.id)}, ${q(name)}, ${q(type)}, 'itemized_receipt', 'MZ', 'MZN', ${q(iso(daysAgo(day)))}, ${total}, 'card', 'good', 'SEED', 'seed', true, ${q(new Date(daysAgo(day).getTime() + 19 * 3600e3).toISOString())}) returning id)
+      stmts.push(`with r as (insert into public.receipts (user_id, store_name, store_type, doc_type, country, currency, purchased_on, total, payment_method, legibility, notes, model, confirmed, image_path, created_at)
+        values (${q(u.id)}, ${q(name)}, ${q(type)}, 'itemized_receipt', 'MZ', 'MZN', ${q(iso(daysAgo(day)))}, ${total}, 'card', 'good', 'SEED', 'seed', true, ${q(photo)}, ${q(new Date(daysAgo(day).getTime() + 19 * 3600e3).toISOString())}) returning id)
         insert into public.receipt_items (receipt_id, user_id, line_no, name_as_printed, product_name, qty, unit_price, line_total, category, subcategory)
         select r.id, ${q(u.id)}, v.n, v.a, v.a, 1, v.t, v.t, v.c, v.s from r, (values ${items.map((it, n) => `(${n + 1}, ${q(it[0])}, ${it[3]}, ${q(it[1])}, ${q(it[2])})`).join(",")}) v(n, a, t, c, s)`);
       receipts++;
     }
     for (let i = 0; i < stmts.length; i += 15) await sql(stmts.slice(i, i + 15).join(";\n"));
+    // the sample photos, once per account (the app shows them on the receipt page like real ones)
+    if (serviceKey) {
+      for (const objectPath of usedPhotos) {
+        await uploadPhoto(objectPath, fs.readFileSync(path.join(PHOTO_DIR, objectPath.split("seed_")[1])));
+        photoPaths.push(objectPath);
+      }
+    }
   }
+  if (photoPaths.length) await sql(`insert into public.seed_log (kind, ref) values ${photoPaths.map((p) => `('photo', ${q(p)})`).join(",")}`);
+  console.log(`photos: ${photoPaths.length} sample photos uploaded${serviceKey ? "" : " (skipped: no SUPABASE_SECRET_KEY)"}`);
   await sql(`insert into public.seed_log (kind, ref) values ('window', ${q(t0)})`);
   console.log(`personal: ${receipts} receipts across ${users.length} accounts (notes = 'SEED')`);
 
-  const check = await sql(`select (select count(*) from public.community_prices) as community_prices, (select count(*) from public.city_price_index(6)) as city_index_rows, (select count(*) from public.receipts where notes='SEED') as seed_receipts`);
+  const check = await sql(`select (select count(*) from public.community_prices) as community_prices, (select count(*) from public.city_price_index(12)) as city_index_rows, (select count(*) from public.receipts where notes='SEED') as seed_receipts`);
   console.log("check:", JSON.stringify(check[0]));
 }
 
 async function cleanAll() {
+  const photos = await sql(`select ref from public.seed_log where kind = 'photo'`);
+  if (photos.length && serviceKey) await deletePhotos(photos.map((r) => r.ref));
   const n = await sql(`
     with s as (select ref::uuid as id from public.seed_log where kind = 'store'),
          d1 as (delete from public.receipts where notes = 'SEED' returning id),
@@ -198,7 +248,7 @@ async function cleanAll() {
                   and not exists (select 1 from public.price_points pp where pp.product_id = p.id) returning id),
          d6 as (delete from public.seed_log returning kind)
     select (select count(*) from d5) products`);
-  console.log("removed:", JSON.stringify({ ...n[0], ...p[0] }));
+  console.log("removed:", JSON.stringify({ ...n[0], ...p[0], photos: photos.length }));
 }
 
 (async () => {

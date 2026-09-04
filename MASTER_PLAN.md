@@ -445,6 +445,18 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   slim build script now sets `android.enableMinifyInReleaseBuilds` (SDK 57 name; the old ProGuard flag alone made
   Gradle fail). **PS never installed builds 5 and 6** (phone was still on 0.3.1 / build 4), so build 7 is the first
   look at everything since Day 3: the build-7 findings cover Day 3 + rounds 2–3 + Day 4.
+- 🐞 **Build-7 findings, evening (PS was on build 4 until today):** (1) "permission denied for function
+  city_price_index" — since 013 new functions need an explicit grant and 014–016 forgot it for `city_price_index`,
+  `city_staples`, `community_ticker`, `product_store_trend` (price-index screen, staples table, ticker and per-store
+  chart were refused for everyone). Migration 027 grants them and switches every function still callable through
+  PUBLIC (i.e. by anon without a session) to an explicit authenticated grant; live test: 15 app RPCs × account /
+  guest / no-session all behave, 4 internal functions refused. Server-side, works on build 7. (2) Demo data only
+  covered June–Sept, never used Woolworths for personal receipts and had no photos → `seed-demo.js` now seeds
+  **12 months** (Sept 2025 → today; 8–10 receipts/month, denser in the last two weeks, ~100 per account),
+  Woolworths as an occasional third shop, restaurant/parking extras spread over the year, 17 881 community price
+  points, and **PS's own phase-0 receipt photos** attached as sample photos (93 uploads, 9.5 MB; `clean` deletes
+  them too; the photos do not match the fake lines — say so to testers). Reseeded 2026-09-04 evening. (3) Reports
+  and the Home bar chart now cover **12 months** (label every other month when > 8 bars) — needs build 8.
 - 💡 Open: PS's own account is one of the three flagged ids (280099df / 992a80f4 / add533b1) — confirm which by email;
   move the 5 old guest receipts (d36d289a) to it; `shelf_scan_open` stays '0'; the "photo N" link opens nothing yet.
 

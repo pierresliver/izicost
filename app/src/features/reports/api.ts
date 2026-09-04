@@ -94,7 +94,7 @@ export async function countAllReceipts(opts: ScopeOpts = {}): Promise<number> {
 export type Dashboard = {
   currency: string;
   others: { currency: string; total: number }[];
-  months: MonthPoint[];                 // last 6, oldest first
+  months: MonthPoint[];                 // last 12, oldest first
   thisMonth: { total: number; count: number };
   lastMonth: { total: number; count: number };
   deltaPct: number | null;              // null when last month had nothing
@@ -106,9 +106,9 @@ export type Dashboard = {
 
 export async function loadDashboard(opts: ScopeOpts = {}): Promise<Dashboard> {
   const now = new Date();
-  const months = lastMonths(6, now);
+  const months = lastMonths(12, now); // a year of evolution on the dashboard
   const [rows, receiptsAllTime] = await Promise.all([
-    fetchReceipts(monthStart(months[0]), monthEnd(months[5]), opts),
+    fetchReceipts(monthStart(months[0]), monthEnd(months[months.length - 1]), opts),
     countAllReceipts(opts),
   ]);
   const currency = pickCurrency(rows);
