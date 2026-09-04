@@ -10,7 +10,9 @@ Start by reading MASTER_PLAN.md section 12 ("Next steps"), especially the "Day 2
 
 Day 3 (2026-09-04, see the "Day 3" block in section 12) added: demo data (`node scripts/seed-demo.js`, `clean` removes it — it is still in the database), background price alerts while the app is closed, share cards (product, basket result, inflation, city index, weekly story), open data in the app (staples table per city + CSV download + live ticker on Prices), the weekly story screen with household leaderboard, badges on Home, and the Update button in the Me tab (reads `latest.json` from the public `releases` bucket; publish with `node scripts/publish-release.js <apk>`; the Free plan caps files at 50 MB, so publish the slim arm64 build made with `build-apk.ps1 -Abi arm64-v8a -Slim`).
 
-Builds: build 4 = builds\izicost-v0.3.1-2026-09-03-2010.apk is on my phone; my dad also tests. Day 3's work needs build 5 (two new native modules: background task, view capture).
+Later on Day 3 (round 2): Near-me radius chooser (2/5/10/25 km), several shopping lists with merge, Latest/Typical price and Items-found/Estimated-total ranking on the basket result, "Worth the trip", dashboard de-duplicated with numbers first and the endless "Loading…" fixed, basket-add recursion bug fixed (migration 018). Migrations 001–019 applied.
+
+Builds: build 4 = builds\izicost-v0.3.1-2026-09-03-2010.apk is on my phone; my dad also tests. Everything from Day 3 needs build 5 (two new native modules: background task, view capture) — I said "add everything to build 5".
 
 Rule: **never start an APK build without my explicit yes in this session.**
 

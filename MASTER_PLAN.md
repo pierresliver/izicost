@@ -434,6 +434,25 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   users who were already "on"; headless notifications honour the chosen language; recap skips an empty week; update
   card distinguishes "could not check"; seed clean-up deletes products in a second statement; ticker "today" = today).
   Build 5 needed for all of Day 3 (new native modules: background task, view capture).
+- ✅ **Round 2 (PS's requests):** "Near me" **radius** 2/5/10/25 km (remembered, Prices + basket result; same GPS fix
+  reused when the radius changes); demo branches now have real coordinates so Near me works on the seed data.
+  Basket result: **Latest / Typical price** toggle (`basket_quote(..., p_typical)` uses 60-day medians), **Rank by
+  items found / Estimated total** (missing items counted at their typical price so partial stores compare fairly),
+  **Worth the trip** card (saving vs the nearest store per extra km, threshold 15 MZN/km). **Several shopping lists**
+  (create, rename, delete, switch, **merge** via `merge_shopping_lists` — same product or name adds up, sources
+  removed; max 20 lists; active list remembered; product-page "add to basket" uses the active list).
+  **Dashboard**: duplicate cards removed (scan card = tab-bar button, community prices = Prices tab, invite moved to a
+  small link at the bottom), numbers and charts first, and the "Loading…" that never went away fixed (Home waited for
+  the household lookup before loading anything; now it loads at once and refreshes when the household is known) with
+  a retry button on errors.
+- ✅ **Round 2 reviews:** correctness agent (high: the list menu used a system alert, which Android caps at three
+  buttons → Delete would have been unreachable → replaced by a bottom sheet that also targets the pressed list;
+  Home cold start could run two loads and keep the stale one → sequence guard; estimates now use only stores in
+  scope; no "locating" flash on a radius change; live chip counts; currency-aware trip threshold; consistent share
+  card; merge respects the 200-item cap and matches names symmetrically; 013's allowlist tolerant of renamed
+  signatures; server messages translated). Security agent (low: trigger helpers and the price-point trigger get
+  explicit revokes — migration 020; `nearby_stores` radius clamped 0.5–50 km; merge takes ≤20 lists; rename/delete
+  filter by owner). Verified: zero own functions callable without a session; trigger still fires; merge test passes.
 - 🐞 **Basket add failed** ("infinite recursion detected in policy for shopping_list_items", PS's 20-item voice list):
   the 200-item cap from 006 counted the table inside its own policy. Migration 018 moves the cap to a definer
   trigger; verified from the PC (6 adds OK, other user still refused). Server-side only — no new build needed.

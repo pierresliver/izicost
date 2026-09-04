@@ -100,6 +100,45 @@ export function splitPlan(quotes: StoreQuote[], single: StoreQuote | undefined):
   };
 }
 
+export type FullEstimate = { total: number; filled: number };
+
+/**
+ * "What would the whole basket cost here?" For items a store does not have, use the typical (median) line
+ * total across the stores that do. Lets a store with 8/10 items be compared fairly with one that has 10/10.
+ */
+export function estimateFull(quotes: StoreQuote[]): Map<string, FullEstimate> {
+  const perItem = new Map<string, number[]>();
+  for (const s of quotes) for (const i of s.items) { const arr = perItem.get(i.item_id) ?? []; arr.push(i.line_total); perItem.set(i.item_id, arr); }
+  const typical = new Map<string, number>();
+  for (const [id, xs] of perItem) { const s = [...xs].sort((a, b) => a - b); const m = Math.floor(s.length / 2); typical.set(id, s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2); }
+  const out = new Map<string, FullEstimate>();
+  for (const s of quotes) {
+    const have = new Set(s.items.map((i) => i.item_id));
+    let extra = 0; let filled = 0;
+    for (const [id, t] of typical) if (!have.has(id)) { extra += t; filled++; }
+    out.set(s.store_id, { total: Math.round((s.basket_total + extra) * 100) / 100, filled });
+  }
+  return out;
+}
+
+export type TripAdvice = { best: RankedQuote; nearest: RankedQuote; extraKm: number; saving: number; perKm: number; worthIt: boolean };
+
+/**
+ * Is the cheapest store worth the extra distance over the nearest one? Compares the two on the items they both
+ * have; "worth it" when the saving is at least `minPerKm` per extra kilometre (fuel, time, chapa fare).
+ */
+export function tripAdvice(ranked: RankedQuote[], minPerKm = 15): TripAdvice | null {
+  const best = ranked[0];
+  if (!best || best.distance_km === null) return null;
+  const nearest = [...ranked].filter((q) => q.distance_km !== null).sort((a, b) => a.distance_km! - b.distance_km!)[0];
+  if (!nearest || nearest.store_id === best.store_id) return null;
+  const extraKm = best.distance_km - nearest.distance_km!;
+  if (extraKm < 0.5) return null;
+  const saving = savingVsNext(best, nearest) ?? 0;
+  const perKm = saving / extraKm;
+  return { best, nearest, extraKm: Math.round(extraKm * 10) / 10, saving: Math.round(saving * 100) / 100, perKm, worthIt: perKm >= minPerKm };
+}
+
 /** Names of list items that no store in scope has a price for. */
 export function missingItems(quotes: StoreQuote[], allItems: { id: string; name: string }[]): string[] {
   const seen = new Set<string>();

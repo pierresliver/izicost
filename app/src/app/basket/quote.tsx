@@ -1,4 +1,5 @@
-// Where is it cheapest? — per-store basket totals ranked, plus the best two-store split.
+// Where is it cheapest? — per-store basket totals ranked, the best two-store split, cheapest store per item,
+// a whole-basket estimate for stores missing items, latest vs typical prices, and "worth the trip?".
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -8,23 +9,23 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'reac
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Brand, Spacing } from '@/constants/theme';
-import { basketQuote, getDefaultList, listItems, type BasketItem, type StoreQuote } from '@/features/basket/api';
+import { basketQuote, getActiveList, listItems, type BasketItem, type StoreQuote } from '@/features/basket/api';
 import { SplitCard } from '@/features/basket/components/split-card';
 import { Pill, StoreQuoteCard } from '@/features/basket/components/store-quote-card';
 import '@/features/basket/i18n';
-import { bestPerItem, missingItems, rankQuotes, savingVsNext, splitPlan, type LatLng } from '@/features/basket/optimise';
+import { bestPerItem, estimateFull, missingItems, rankQuotes, savingVsNext, splitPlan, tripAdvice, type LatLng } from '@/features/basket/optimise';
 import { priceCities, type CityRow } from '@/features/prices/api';
 import { CityPicker } from '@/features/prices/components/city-picker';
+import { RadiusPicker } from '@/features/prices/components/radius-picker';
+import '@/features/prices/i18n';
 import { Segmented } from '@/features/prices/components/segmented';
 import { captureLocation } from '@/features/prices/location';
 import { useScope, type ScopeMode } from '@/features/prices/use-scope';
+import { BigNumber, Rows, ShareButton, ShareCard, ShareCardModal } from '@/features/share/share-card';
+import '@/features/share/i18n';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
-import { BigNumber, Rows, ShareButton, ShareCard, ShareCardModal } from '@/features/share/share-card';
-import '@/features/share/i18n';
-
-const NEAR_KM = 15;
 
 /** Position without any prompt: only when permission was already granted. */
 async function silentPosition(): Promise<LatLng | null> {
@@ -36,6 +37,8 @@ async function silentPosition(): Promise<LatLng | null> {
   } catch { return null; }
 }
 
+type RankBy = 'found' | 'estimate';
+
 export default function QuoteScreen() {
   useLang();
   const theme = useTheme();
@@ -44,6 +47,9 @@ export default function QuoteScreen() {
   const [cities, setCities] = useState<CityRow[]>([]);
   const [picker, setPicker] = useState<'my' | 'other' | null>(null);
   const [currency, setCurrency] = useState<string | null>(null);
+  const [typical, setTypical] = useState(false);
+  const [rankBy, setRankBy] = useState<RankBy>('found');
+  const [listName, setListName] = useState<string | null>(null);
   const [items, setItems] = useState<BasketItem[]>([]);
   const [quotes, setQuotes] = useState<StoreQuote[]>([]);
   const [pos, setPos] = useState<LatLng | null>(null);
@@ -72,22 +78,31 @@ export default function QuoteScreen() {
     if (!cityScope.ready) { setLoading(false); return; } // e.g. city picker dismissed: don't spin forever
     setLoading(true);
     try {
-      const list = await getDefaultList();
-      const [its, p] = await Promise.all([listItems(list.id), scope.mode === 'near' ? captureLocation() : silentPosition()]);
+      const list = await getActiveList();
+      setListName(list.name);
+      const [its, p] = await Promise.all([listItems(list.id), scope.mode === 'near' ? (scope.pos ?? captureLocation()) : silentPosition()]);
       setItems(its); setPos(p);
-      setQuotes(its.length ? await basketQuote(list.id, cityScope.city, cur) : []); setError(null);
+      setQuotes(its.length ? await basketQuote(list.id, cityScope.city, cur, typical) : []); setError(null);
     } catch (e) { setError(String((e as Error).message ?? e)); }
     finally { setLoading(false); }
-  }, [cityScope, cur, scope.mode]);
+  }, [cityScope, cur, scope.mode, scope.pos, typical]);
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  const nearFilter = scope.mode === 'near' && scope.nearStatus === 'ok' && pos ? NEAR_KM : undefined;
-  const { ranked, partial } = useMemo(() => rankQuotes(quotes, pos, nearFilter), [quotes, pos, nearFilter]);
-  const inScope = useMemo(() => [...ranked, ...partial], [ranked, partial]);
-  const plan = useMemo(() => splitPlan(inScope, ranked[0] ?? inScope[0]), [inScope, ranked]); // a split helps even when every store is partial
+  const nearFilter = scope.mode === 'near' && scope.nearStatus === 'ok' && pos ? scope.radiusKm : undefined;
+  const { ranked: byFound, partial: partialByFound } = useMemo(() => rankQuotes(quotes, pos, nearFilter), [quotes, pos, nearFilter]);
+  const inScope = useMemo(() => [...byFound, ...partialByFound], [byFound, partialByFound]);
+  const estimates = useMemo(() => estimateFull(inScope), [inScope]); // typical prices from the stores in scope only
+  // "Estimated total" puts every store in scope on one list, cheapest full basket first.
+  const { ranked, partial } = useMemo(() => {
+    if (rankBy === 'found') return { ranked: byFound, partial: partialByFound };
+    const all = [...byFound, ...partialByFound].sort((a, b) => (estimates.get(a.store_id)?.total ?? 1e12) - (estimates.get(b.store_id)?.total ?? 1e12));
+    return { ranked: all, partial: [] as typeof all };
+  }, [rankBy, byFound, partialByFound, estimates]);
+  const plan = useMemo(() => splitPlan(inScope, byFound[0] ?? inScope[0]), [inScope, byFound]); // a split helps even when every store is partial
   const perItem = useMemo(() => bestPerItem(inScope), [inScope]);
   const missing = useMemo(() => missingItems(inScope, items.filter((i) => !i.checked)), [inScope, items]); // ticked items are not quoted
   const saving = savingVsNext(ranked[0], ranked[1]);
+  const trip = useMemo(() => tripAdvice(byFound, cur === 'ZAR' ? 1.5 : 15), [byFound, cur]); // saving per extra km worth a detour
 
   const onMode = (m: ScopeMode) => {
     scope.setMode(m);
@@ -98,22 +113,24 @@ export default function QuoteScreen() {
     switch (scope.mode) {
       case 'near':
         if (scope.nearStatus === 'locating' || scope.nearStatus === 'idle') return t('Finding stores near you…');
-        if (scope.nearStatus === 'ok') return nearFilter ? t('Stores within 15 km') : t('No location — showing everywhere');
+        if (scope.nearStatus === 'ok') return nearFilter ? t('Stores within %km% km', { km: scope.radiusKm }) : t('No location — showing everywhere');
         return scope.myCity ? t('No location — showing %city%', { city: scope.myCity.city }) : t('No location — showing everywhere');
       case 'mycity': return scope.myCity?.city ?? t('Choose your city');
       case 'bycity': return scope.otherCity?.city ?? t('Choose a city');
       default: return t('All cities');
     }
   })();
+  const openItems = items.filter((i) => !i.checked).length;
 
   return (
     <ThemedView style={{ flex: 1 }}>
-      <Stack.Screen options={{ title: t('Where is it cheapest?') }} />
+      <Stack.Screen options={{ title: listName ? `${t('Where is it cheapest?')} · ${listName}` : t('Where is it cheapest?') }} />
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Segmented
           options={[{ key: 'near', label: t('Near me') }, { key: 'mycity', label: t('My city') }, { key: 'bycity', label: t('By city') }, { key: 'anywhere', label: t('Anywhere') }]}
           value={scope.mode} onChange={onMode}
         />
+        {scope.mode === 'near' ? <RadiusPicker value={scope.radiusKm} onChange={scope.setRadiusKm} /> : null}
         <View style={styles.scopeLine}>
           <Ionicons name={scope.mode === 'near' ? 'navigate' : scope.mode === 'anywhere' ? 'globe-outline' : 'location'} size={14} color={Brand.primary} />
           <Pressable onPress={() => setPicker(scope.mode === 'bycity' ? 'other' : scope.mode === 'mycity' ? 'my' : null)} disabled={scope.mode === 'near' || scope.mode === 'anywhere'} style={{ flex: 1 }}>
@@ -123,12 +140,20 @@ export default function QuoteScreen() {
             <Segmented options={[{ key: 'MZN', label: 'MZN' }, { key: 'ZAR', label: 'ZAR' }]} value={cur} onChange={setCurrency} />
           </View>
         </View>
+        <View style={styles.optionRow}>
+          <View style={{ flex: 1 }}>
+            <Segmented<'latest' | 'typical'> options={[{ key: 'latest', label: t('Latest price') }, { key: 'typical', label: t('Typical price') }]} value={typical ? 'typical' : 'latest'} onChange={(k) => setTypical(k === 'typical')} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Segmented<RankBy> options={[{ key: 'found', label: t('Items found') }, { key: 'estimate', label: t('Estimated total') }]} value={rankBy} onChange={setRankBy} />
+          </View>
+        </View>
 
         {loading ? (
           <View style={styles.center}><ActivityIndicator color={Brand.primary} /><ThemedText type="small" themeColor="textSecondary">{t('Comparing stores…')}</ThemedText></View>
         ) : error ? (
           <ThemedText style={{ color: Brand.danger }}>{error}</ThemedText>
-        ) : !items.length ? (
+        ) : !openItems ? (
           <ThemedText themeColor="textSecondary" style={{ textAlign: 'center', marginTop: Spacing.four }}>{t('Add items to your basket first.')}</ThemedText>
         ) : !inScope.length ? (
           <View style={styles.center}>
@@ -142,24 +167,41 @@ export default function QuoteScreen() {
           <>
             {plan ? <SplitCard plan={plan} currency={cur} /> : null}
 
+            {trip && trip.saving > 0 ? (
+              <View style={[styles.trip, { backgroundColor: trip.worthIt ? 'rgba(30,158,90,0.12)' : 'rgba(224,161,0,0.14)' }]}>
+                <Ionicons name={trip.worthIt ? 'car' : 'walk'} size={22} color={trip.worthIt ? Brand.success : '#B57F00'} />
+                <View style={{ flex: 1 }}>
+                  <ThemedText type="smallBold" style={{ color: trip.worthIt ? Brand.success : '#B57F00' }}>{trip.worthIt ? t('Worth the trip') : t('Maybe not worth the trip')}</ThemedText>
+                  <ThemedText type="small">
+                    {trip.worthIt
+                      ? t('%best% saves %x% over %nearest%, %km% km further away (about %perkm% per extra km).', { best: trip.best.store_name, x: formatMoney(trip.saving, cur), nearest: trip.nearest.store_name, km: trip.extraKm, perkm: formatMoney(trip.perKm, cur) })
+                      : t('%nearest% is %km% km closer and costs only %x% more than %best%.', { nearest: trip.nearest.store_name, km: trip.extraKm, x: formatMoney(trip.saving, cur), best: trip.best.store_name })}
+                  </ThemedText>
+                </View>
+              </View>
+            ) : null}
+
             {ranked.length ? (
               <>
                 <View style={styles.sectionHead}>
-                  <ThemedText type="smallBold" style={{ fontSize: 16, flex: 1 }}>{t('Best single store')}</ThemedText>
+                  <ThemedText type="smallBold" style={{ fontSize: 16, flex: 1 }}>{rankBy === 'found' ? t('Best single store') : t('Estimated total')}</ThemedText>
                   <ShareButton onPress={() => setShareOpen(true)} label={t('Share')} />
                 </View>
+                {rankBy === 'estimate' ? <ThemedText type="small" themeColor="textSecondary">{t('Missing items are counted at their typical price so every store can be compared on the full list.')}</ThemedText> : null}
                 <ShareCardModal visible={shareOpen} onClose={() => setShareOpen(false)}>
-                  <ShareCard title={t('Where is it cheapest?')} subtitle={t('%n% items', { n: items.filter((i) => !i.checked).length })}>
-                    {saving !== null && saving > 0.5 && ranked[1] ? (
+                  <ShareCard title={t('Where is it cheapest?')} subtitle={t('%n% items', { n: openItems })}>
+                    {rankBy === 'estimate' ? (
+                      <BigNumber value={formatMoney(estimates.get(ranked[0].store_id)?.total ?? ranked[0].basket_total, cur)} label={`${t('Estimated total')} · ${ranked[0].store_name}${ranked[0].city ? ` · ${ranked[0].city}` : ''}`} tone="down" />
+                    ) : saving !== null && saving > 0.5 && ranked[1] ? (
                       <BigNumber value={formatMoney(saving, cur)} label={`${t('You save')} ${t('by shopping at %store%', { store: ranked[0].store_name })} ${t('vs %store%', { store: ranked[1].store_name })}`} tone="down" />
                     ) : (
                       <BigNumber value={formatMoney(ranked[0].basket_total, cur)} label={`${ranked[0].store_name}${ranked[0].city ? ` · ${ranked[0].city}` : ''}`} tone="down" />
                     )}
-                    <Rows highlightFirst rows={ranked.slice(0, 4).map((q) => ({ left: q.store_name, sub: `${q.items_found}/${q.items_total} ${t('items found')}${q.city ? ` · ${q.city}` : ''}`, right: formatMoney(q.basket_total, cur) }))} />
+                    <Rows highlightFirst rows={ranked.slice(0, 4).map((q) => ({ left: q.store_name, sub: `${q.items_found}/${q.items_total} ${t('items found')}${q.city ? ` · ${q.city}` : ''}`, right: formatMoney(rankBy === 'estimate' ? estimates.get(q.store_id)?.total ?? q.basket_total : q.basket_total, cur) }))} />
                   </ShareCard>
                 </ShareCardModal>
                 {ranked.map((q, i) => (
-                  <StoreQuoteCard key={q.store_id} quote={q} rank={i + 1} currency={cur} saving={i === 0 ? saving : null} nextStore={ranked[1]?.store_name ?? null} />
+                  <StoreQuoteCard key={q.store_id} quote={q} rank={i + 1} currency={cur} saving={i === 0 ? saving : null} nextStore={ranked[1]?.store_name ?? null} estimate={estimates.get(q.store_id) ?? null} />
                 ))}
               </>
             ) : null}
@@ -170,7 +212,7 @@ export default function QuoteScreen() {
                   <ThemedText type="smallBold" style={{ fontSize: 16 }}>{t('Partial matches')}</ThemedText>
                   <ThemedText type="small" themeColor="textSecondary">{t('These stores have fewer than half of your items.')}</ThemedText>
                 </View>
-                {partial.map((q) => <StoreQuoteCard key={q.store_id} quote={q} rank={null} currency={cur} />)}
+                {partial.map((q) => <StoreQuoteCard key={q.store_id} quote={q} rank={null} currency={cur} estimate={estimates.get(q.store_id) ?? null} />)}
               </>
             ) : null}
 
@@ -208,9 +250,11 @@ export default function QuoteScreen() {
 const styles = StyleSheet.create({
   container: { padding: Spacing.three, gap: Spacing.two, paddingBottom: Spacing.six },
   scopeLine: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingLeft: 4 },
+  optionRow: { flexDirection: 'row', gap: Spacing.two },
   center: { alignItems: 'center', gap: Spacing.two, paddingHorizontal: Spacing.three, paddingTop: Spacing.four },
   emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(11,110,79,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.one },
-  sectionHead: { flexDirection: 'row', alignItems: 'flex-end', gap: Spacing.two, marginTop: Spacing.one },
+  sectionHead: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, marginTop: Spacing.one },
+  trip: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, borderRadius: 14, padding: 12 },
   card: { borderRadius: 16, padding: Spacing.three, gap: Spacing.two },
   itemLine: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   missing: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: Spacing.two },

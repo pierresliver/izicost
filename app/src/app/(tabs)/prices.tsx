@@ -15,6 +15,7 @@ import { ALERTS_HREF, BASKET_HREF } from '@/features/basket/routes';
 import { priceCities, searchPrices, type CityRow, type SearchRow } from '@/features/prices/api';
 import { CityPicker } from '@/features/prices/components/city-picker';
 import { ProductResultCard } from '@/features/prices/components/price-card';
+import { RadiusPicker } from '@/features/prices/components/radius-picker';
 import { Segmented } from '@/features/prices/components/segmented';
 import { Ticker } from '@/features/prices/components/ticker';
 import '@/features/prices/i18n';
@@ -57,7 +58,7 @@ export default function PricesScreen() {
     switch (scope.mode) {
       case 'near':
         if (scope.nearStatus === 'locating') return { icon: 'navigate' as const, text: t('Finding stores near you…') };
-        if (scope.nearStatus === 'ok') return { icon: 'navigate' as const, text: t('Stores within 10 km') };
+        if (scope.nearStatus === 'ok') return { icon: 'navigate' as const, text: t('Stores within %km% km', { km: scope.radiusKm }) };
         if (scope.nearStatus === 'denied') return { icon: 'alert-circle-outline' as const, text: scope.myCity ? t('No location — showing %city%', { city: scope.myCity.city }) : t('No location — showing everywhere') };
         return { icon: 'alert-circle-outline' as const, text: scope.myCity ? t('No known store nearby — showing %city%', { city: scope.myCity.city }) : t('No known store nearby — showing everywhere') };
       case 'mycity': return { icon: 'location' as const, text: scope.myCity?.city ?? t('Choose your city'), onPress: () => setPicker('my') };
@@ -100,6 +101,7 @@ export default function PricesScreen() {
         ]}
         value={scope.mode} onChange={onMode}
       />
+      {scope.mode === 'near' ? <RadiusPicker value={scope.radiusKm} onChange={scope.setRadiusKm} /> : null}
       <Pressable onPress={scopeLine.onPress} disabled={!scopeLine.onPress} style={styles.scopeLine}>
         <Ionicons name={scopeLine.icon} size={14} color={Brand.primary} />
         <ThemedText type="small" themeColor="textSecondary" style={{ flex: 1 }}>{scopeLine.text}</ThemedText>

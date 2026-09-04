@@ -3,6 +3,9 @@
 import { registerTranslations } from '@/lib/i18n';
 
 registerTranslations({
+  // radius
+  'Radius': 'Raio',
+  'Stores within %km% km': 'Lojas num raio de %km% km',
   // ticker
   'LIVE': 'AO VIVO',
   '%n% prices today · %city%': '%n% preços hoje · %city%',
@@ -29,7 +32,6 @@ registerTranslations({
   'City': 'Cidade',
   'Change': 'Mudar',
   'Finding stores near you…': 'A procurar lojas perto de si…',
-  'Stores within 10 km': 'Lojas num raio de 10 km',
   'No location — showing %city%': 'Sem localização — a mostrar %city%',
   'No location — showing everywhere': 'Sem localização — a mostrar todas as cidades',
   'No known store nearby — showing %city%': 'Nenhuma loja conhecida por perto — a mostrar %city%',

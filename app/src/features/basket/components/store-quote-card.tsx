@@ -26,8 +26,10 @@ export function Pill({ text, tone }: { text: string; tone: 'success' | 'warning'
   );
 }
 
-export function StoreQuoteCard({ quote, rank, currency, saving, nextStore }: {
+export function StoreQuoteCard({ quote, rank, currency, saving, nextStore, estimate }: {
   quote: RankedQuote; rank: number | null; currency: string; saving?: number | null; nextStore?: string | null;
+  /** Whole-basket estimate (missing items at the typical price), shown under the real total when items are missing. */
+  estimate?: { total: number; filled: number } | null;
 }) {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
@@ -55,6 +57,11 @@ export function StoreQuoteCard({ quote, rank, currency, saving, nextStore }: {
           </View>
           <View style={{ alignItems: 'flex-end' }}>
             <BigPrice value={quote.basket_total} currency={currency} size={best ? 28 : 22} color={best ? Brand.primary : undefined} />
+            {estimate && estimate.filled > 0 ? (
+              <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 11, lineHeight: 14 }}>
+                {t('≈ %total% for all items', { total: formatMoney(estimate.total, currency) })}
+              </ThemedText>
+            ) : null}
           </View>
         </View>
         <View style={styles.bottom}>

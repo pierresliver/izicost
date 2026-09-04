@@ -1,12 +1,13 @@
-// Home: bargain-first. "What do you need to buy?" (say it or type it) → cheapest store, then the
-// scan card that feeds the price pool, then the private spending dashboard underneath.
+// Home: bargain-first. "What do you need to buy?" (say it or type it), then the numbers and charts that
+// change every day: this month, this week, your items, budgets, months, categories, stores, inflation,
+// the city index, badges. Scanning and community prices live on the tab bar, so no duplicate cards here.
 import '@/features/basket/i18n';
 import '@/features/home/i18n';
 import '@/features/reports/i18n';
 
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter, type Href } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -15,31 +16,29 @@ import { countOpenItems } from '@/features/basket/api';
 import { BASKET_HREF, BASKET_QUOTE_HREF } from '@/features/basket/routes';
 import { memberName, refreshHousehold, useHousehold } from '@/features/household/api';
 import { ScopeToggle } from '@/features/household/components/scope-toggle';
+import { CityIndexTeaser } from '@/features/prices/components/city-index-teaser';
+import { AchievementsCard } from '@/features/reports/achievements';
 import { fetchReceipts, loadDashboard, type Dashboard } from '@/features/reports/api';
 import { budgetStatus, listBudgets, type Budget } from '@/features/reports/budgets';
 import { BarChart, RingChart } from '@/features/reports/charts';
 import { monthEnd, monthLong, monthShort, monthStart, ym } from '@/features/reports/dates';
-import { AchievementsCard } from '@/features/reports/achievements';
 import { BudgetRings, EmptyChartsCard, HeadlineCard, WeeklyCard } from '@/features/reports/home-cards';
 import { DueSoonCard, InflationTeaser, RecapAskCard } from '@/features/reports/home-insights';
 import { categoryInflation, detectRecurring, fetchHistory, personalInflation, type CategoryInflation, type Recurring } from '@/features/reports/insights';
-import { CityIndexTeaser } from '@/features/prices/components/city-index-teaser';
 import { enableWeeklyRecap, getRecapPref, rescheduleWeeklyRecap, setRecapPref, type RecapPref } from '@/features/reports/notifications';
 import { assignColors, useChartPalette } from '@/features/reports/palette';
 import { Card, ErrorText, Row, SectionTitle, styles as ui } from '@/features/reports/ui';
 import { shareApp } from '@/features/share/share';
 import { WatchCard } from '@/features/watch/components/watch-card';
-import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
 import { supabaseConfigured } from '@/lib/supabase';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const theme = useTheme();
   const { lang } = useLang();
   const p = useChartPalette();
-  const { household, scope, loaded: householdLoaded } = useHousehold();
+  const { household, scope } = useHousehold();
   const householdId = household?.id ?? null;
   const [d, setD] = useState<Dashboard | null>(null);
   const [mine, setMine] = useState<Dashboard | null>(null); // own-rows numbers for budgets + weekly recap
@@ -52,25 +51,26 @@ export default function HomeScreen() {
   const [recapPref, setRecapPrefState] = useState<RecapPref>('off');
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const seq = useRef(0); // a load that finishes after a newer one started must not overwrite it
 
+  // Loads straight away with whatever is known; re-runs when the household/scope becomes known or changes.
   const load = useCallback(async () => {
     if (!supabaseConfigured) { setError('Supabase is not configured (app/.env missing).'); return; }
-    if (!householdLoaded) return; // wait until we know the scope situation, so the dashboard loads once
+    const my = ++seq.current;
     try {
       const inHousehold = !!householdId && scope === 'household';
-      // Members can join or be removed from another phone: refresh the roster on every visit (one small call).
-      if (householdId) await refreshHousehold().catch(() => {});
+      if (householdId) await refreshHousehold().catch(() => {}); // members can join or leave from another phone
       const [dash, b, pref, n, own] = await Promise.all([
         loadDashboard(), listBudgets().catch(() => [] as Budget[]), getRecapPref(), countOpenItems().catch(() => 0),
         inHousehold ? loadDashboard({ onlyMe: true }) : null,
       ]);
+      if (my !== seq.current) return; // superseded
       const me = own ?? dash;
       setD(dash); setMine(me); setBudgets(b); setRecapPrefState(pref); setBasketCount(n); setError(null);
-      rescheduleWeeklyRecap(me.week.current, me.week.currentCount, me.currency); // the recap is about you
+      rescheduleWeeklyRecap(me.week.current, me.week.currentCount, me.currency);
       if (me.receiptsAllTime > 0) {
         fetchHistory().then((h) => { setRecurring(detectRecurring(h)); setInflationPct(personalInflation(h).overallPct); setCatInflation(categoryInflation(h)); }).catch(() => {});
       }
-      // Household mode: who spent what this month (only receipts in the dashboard's currency)
       if (inHousehold) {
         const now = new Date();
         const rows = await fetchReceipts(monthStart(ym(now)), monthEnd(ym(now)));
@@ -80,13 +80,12 @@ export default function HomeScreen() {
           const cur = m.get(r.user_id) ?? { user_id: r.user_id, name: memberName(r.user_id) ?? '?', total: 0, count: 0 };
           cur.total += r.total ?? 0; cur.count += 1; m.set(r.user_id, cur);
         }
-        setByMember([...m.values()].sort((a, b) => b.total - a.total));
+        if (my === seq.current) setByMember([...m.values()].sort((a, b) => b.total - a.total));
       } else setByMember([]);
-    } catch (e) { setError(String((e as Error).message ?? e)); }
-  }, [householdId, householdLoaded, scope]); // the Me / Household switch changes every number on this screen
+    } catch (e) { if (my === seq.current) setError(String((e as Error).message ?? e)); }
+  }, [householdId, scope]);
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  // Budgets are personal: always measured against own receipts, even in Household mode.
   const statuses = useMemo(() => (mine ? budgetStatus(budgets, mine.currency, mine.thisMonth.total, mine.byCategory) : []), [mine, budgets]);
   const overall = statuses.find((s) => s.budget.category === null) ?? null;
   const perCategory = statuses.filter((s) => s.budget.category !== null);
@@ -113,7 +112,12 @@ export default function HomeScreen() {
 
   return (
     <ScrollView contentContainerStyle={ui.screen} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} />}>
-      <ErrorText error={error} />
+      {error ? (
+        <Card>
+          <ErrorText error={error} />
+          <Pressable onPress={load} style={{ alignSelf: 'flex-start', marginTop: Spacing.one }}><ThemedText style={{ color: Brand.primary, fontWeight: '700' }}>{t('Try again')}</ThemedText></Pressable>
+        </Card>
+      ) : null}
 
       {/* 1. The promise: tell us what you need, we find the cheapest store */}
       <View style={s.hero}>
@@ -138,37 +142,17 @@ export default function HomeScreen() {
         ) : null}
       </View>
 
-      {/* 2. The engine: scanning feeds the price pool (and the private reports) */}
-      <Card onPress={() => router.navigate('/scan')}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
-          <View style={s.scanIcon}><Ionicons name="camera" size={26} color="#fff" /></View>
-          <View style={{ flex: 1, gap: 2 }}>
-            <ThemedText style={{ fontSize: 17, fontWeight: '700' }}>{t('Keep prices fresh')}</ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">{t('Scan your receipts: every one adds anonymous prices for everyone and tracks your own spending, privately.')}</ThemedText>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
-        </View>
-      </Card>
-
-      <View style={{ flexDirection: 'row', gap: Spacing.two }}>
-        <Pressable onPress={() => router.navigate('/prices')} style={({ pressed }) => [s.smallCard, { backgroundColor: theme.backgroundElement }, pressed && { opacity: 0.85 }]}>
-          <Ionicons name="pricetags" size={20} color={Brand.primary} />
-          <ThemedText type="smallBold" style={{ flex: 1 }}>{t('Browse community prices')}</ThemedText>
-        </Pressable>
-        <Pressable onPress={shareApp} style={({ pressed }) => [s.smallCard, { backgroundColor: theme.backgroundElement }, pressed && { opacity: 0.85 }]}>
-          <Ionicons name="share-social" size={20} color={Brand.primary} />
-          <ThemedText type="smallBold" style={{ flex: 1 }}>{t('Invite friends')}</ThemedText>
-        </Pressable>
-      </View>
-
-      {/* 3. Your usual items: cheapest price now, green/red since you last bought, bell for drops */}
-      <WatchCard onEmptyScan={() => router.navigate('/scan')} />
-
-      {/* 4. Private spending, only once there is something to show */}
+      {/* 2. Numbers first: this month, this week */}
+      {!d && !error ? <Card><ThemedText themeColor="textSecondary">{t('Loading…')}</ThemedText></Card> : null}
       {d && !hasReceipts && !household ? <EmptyChartsCard onScan={() => router.navigate('/scan')} /> : null}
       {hasReceipts || household ? <SectionTitle action={t('All reports')} onAction={() => go('/reports')}>{t('Your spending')}</SectionTitle> : null}
       {household ? <ScopeToggle /> : null}
       {hasReceipts && d ? <HeadlineCard d={d} monthName={monthName} overall={overall} onBudget={() => go('/reports/budgets')} /> : null}
+      {hasReceipts && d ? <WeeklyCard d={d} onStory={() => go('/recap')} /> : null}
+
+      {/* 3. Your usual items: cheapest price now, green/red since you last bought, bell for drops */}
+      <WatchCard onEmptyScan={() => router.navigate('/scan')} />
+
       {household && scope === 'household' && byMember.length > 1 && d ? (
         <Card>
           <SectionTitle>{t('Household this month')}</SectionTitle>
@@ -177,17 +161,13 @@ export default function HomeScreen() {
           ))}
         </Card>
       ) : null}
-      {!d && !error ? <Card><ThemedText themeColor="textSecondary">{t('Loading…')}</ThemedText></Card> : null}
-
       {mine ? <BudgetRings statuses={perCategory} currency={mine.currency} onPress={() => go('/reports/budgets')} /> : null}
       {household && scope === 'household' && (overall || perCategory.length) ? (
         <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'center', marginTop: -Spacing.two }}>{t('Budgets are personal: they compare against your own receipts.')}</ThemedText>
       ) : null}
-      {hasReceipts && d ? <WeeklyCard d={d} onStory={() => go('/recap')} /> : null}
       {hasReceipts && recapPref === null ? (
         <RecapAskCard onYes={onRecapYes} onNo={async () => { await setRecapPref('off'); setRecapPrefState('off'); }} />
       ) : null}
-      <DueSoonCard items={recurring} />
 
       {hasReceipts && d ? (
         <Card>
@@ -227,8 +207,14 @@ export default function HomeScreen() {
       ) : null}
 
       <InflationTeaser pct={inflationPct} categories={catInflation} onPress={() => go('/reports/inflation')} />
-      {hasReceipts ? <AchievementsCard /> : null}
       <CityIndexTeaser onPress={() => go('/reports/price-index')} />
+      <DueSoonCard items={recurring} />
+      {hasReceipts ? <AchievementsCard /> : null}
+
+      <Pressable onPress={shareApp} style={({ pressed }) => [s.invite, pressed && { opacity: 0.8 }]}>
+        <Ionicons name="share-social" size={18} color={Brand.primary} />
+        <ThemedText type="smallBold" style={{ color: Brand.primary }}>{t('Invite friends')}</ThemedText>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -241,6 +227,5 @@ const s = StyleSheet.create({
   fakeInput: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: '#fff', borderRadius: 14, paddingHorizontal: 14, height: 52 },
   micBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
   basketPill: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: Brand.primaryDark, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12, marginTop: Spacing.one },
-  scanIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: Brand.primary, alignItems: 'center', justifyContent: 'center' },
-  smallCard: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.two, borderRadius: 14, padding: Spacing.two + 4 },
+  invite: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: Spacing.two },
 });

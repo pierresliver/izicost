@@ -15,7 +15,7 @@ end $$;
 -- the app's RPCs and the helpers its invoker-security RPCs / trigger need
 do $$ declare f text; begin
   foreach f in array array[
-    'basket_quote(uuid, text, text)', 'check_price_alerts()',
+    'basket_quote(uuid, text, text, boolean)', 'merge_shopping_lists(uuid, uuid[])', 'check_price_alerts()',
     'canonical_city(text)', 'city_from_text(text, text)', 'parse_size(text)', 'per_unit_price(numeric, numeric, text)',
     'product_key(text)', 'product_key_clean(text)', 'receipt_item_to_price_point()',
     'search_prices(text, text, text, uuid[], integer)', 'product_prices(text)', 'product_trend(text, text, text)',
@@ -25,7 +25,11 @@ do $$ declare f text; begin
     'leave_household()', 'remove_household_member(uuid)', 'rotate_household_code()', 'rename_household(text)', 'set_my_display_name(text)',
     'watchlist_autofill(int)', 'watchlist_overview()'
   ] loop
-    execute format('grant execute on function public.%s to authenticated', f);
+    begin
+      execute format('grant execute on function public.%s to authenticated', f);
+    exception when undefined_function then
+      raise notice 'skipping %, not (yet) defined', f;  -- signatures evolve in later migrations; never leave the allowlist half-applied
+    end;
   end loop;
 end $$;
 -- internal only (never granted): assert_real_account, household_default_name, household_invite_code, upsert_product, quick_add_price

@@ -38,18 +38,18 @@ const daysAgo = (n) => { const d = new Date(); d.setUTCHours(0, 0, 0, 0); d.setU
 
 // ── the fake world ────────────────────────────────────────────────────────────────────────────
 const STORES = [
-  { name: "Shoprite", branch: "Av. da Marginal 9519, Costa do Sol", city: "Maputo", mult: 1.00, tax: "40009901" },
-  { name: "Spar", branch: "Av. Julius Nyerere, Sommerschield", city: "Maputo", mult: 1.05, tax: "40009902" },
-  { name: "Premier Superspar", branch: "Av. 24 de Julho, Polana", city: "Maputo", mult: 1.03, tax: "40009903" },
-  { name: "Recheio", branch: "Av. de Angola, Maputo", city: "Maputo", mult: 0.93, tax: "40009904" },
-  { name: "Lokal", branch: "Rua da Resistência, Maputo", city: "Maputo", mult: 1.08, tax: "40009905" },
-  { name: "Woolworths", branch: "Maputo Shopping, Av. da Marginal", city: "Maputo", mult: 1.25, tax: "40009906" },
-  { name: "Shoprite", branch: "Av. da Namaacha, Matola", city: "Matola", mult: 0.99, tax: "40009907" },
-  { name: "Spar", branch: "Matola Shopping", city: "Matola", mult: 1.04, tax: "40009908" },
-  { name: "Shoprite", branch: "Av. Eduardo Mondlane, Beira", city: "Beira", mult: 1.04, tax: "40009909" },
-  { name: "Spar", branch: "Rua Major Serpa Pinto, Beira", city: "Beira", mult: 1.09, tax: "40009910" },
-  { name: "Shoprite", branch: "Av. do Trabalho, Nampula", city: "Nampula", mult: 1.09, tax: "40009911" },
-  { name: "Recheio", branch: "Av. Eduardo Mondlane, Nampula", city: "Nampula", mult: 1.02, tax: "40009912" },
+  { name: "Shoprite", branch: "Av. da Marginal 9519, Costa do Sol", city: "Maputo", mult: 1.00, tax: "40009901", lat: -25.9225, lng: 32.6045 },
+  { name: "Spar", branch: "Av. Julius Nyerere, Sommerschield", city: "Maputo", mult: 1.05, tax: "40009902", lat: -25.953, lng: 32.596 },
+  { name: "Premier Superspar", branch: "Av. 24 de Julho, Polana", city: "Maputo", mult: 1.03, tax: "40009903", lat: -25.966, lng: 32.59 },
+  { name: "Recheio", branch: "Av. de Angola, Maputo", city: "Maputo", mult: 0.93, tax: "40009904", lat: -25.933, lng: 32.58 },
+  { name: "Lokal", branch: "Rua da Resistência, Maputo", city: "Maputo", mult: 1.08, tax: "40009905", lat: -25.96, lng: 32.585 },
+  { name: "Woolworths", branch: "Maputo Shopping, Av. da Marginal", city: "Maputo", mult: 1.25, tax: "40009906", lat: -25.97, lng: 32.594 },
+  { name: "Shoprite", branch: "Av. da Namaacha, Matola", city: "Matola", mult: 0.99, tax: "40009907", lat: -25.962, lng: 32.458 },
+  { name: "Spar", branch: "Matola Shopping", city: "Matola", mult: 1.04, tax: "40009908", lat: -25.966, lng: 32.47 },
+  { name: "Shoprite", branch: "Av. Eduardo Mondlane, Beira", city: "Beira", mult: 1.04, tax: "40009909", lat: -19.833, lng: 34.848 },
+  { name: "Spar", branch: "Rua Major Serpa Pinto, Beira", city: "Beira", mult: 1.09, tax: "40009910", lat: -19.843, lng: 34.838 },
+  { name: "Shoprite", branch: "Av. do Trabalho, Nampula", city: "Nampula", mult: 1.09, tax: "40009911", lat: -15.117, lng: 39.266 },
+  { name: "Recheio", branch: "Av. Eduardo Mondlane, Nampula", city: "Nampula", mult: 1.02, tax: "40009912", lat: -15.12, lng: 39.26 },
 ];
 // name as printed, clean product name, category, subcategory, base price (MZN), monthly drift, by weight?
 const PRODUCTS = [
@@ -105,8 +105,8 @@ async function seedAll() {
   if (already[0]?.n) { console.log("Seed data already present. Run 'node scripts/seed-demo.js clean' first."); process.exit(1); }
 
   // stores
-  const storeRows = STORES.map((s) => `(${q(s.name)}, ${q(s.name.toLowerCase())}, ${q(s.branch)}, ${q(s.tax)}, 'supermarket', 'MZ', ${q(s.city)})`).join(",\n");
-  const stores = await sql(`insert into public.stores (name, name_key, branch_address, tax_id, store_type, country, city) values ${storeRows} returning id, tax_id`);
+  const storeRows = STORES.map((s) => `(${q(s.name)}, ${q(s.name.toLowerCase())}, ${q(s.branch)}, ${q(s.tax)}, 'supermarket', 'MZ', ${q(s.city)}, ${s.lat}, ${s.lng})`).join(",\n");
+  const stores = await sql(`insert into public.stores (name, name_key, branch_address, tax_id, store_type, country, city, lat, lng) values ${storeRows} returning id, tax_id`);
   for (const s of STORES) s.id = stores.find((r) => r.tax_id === s.tax).id;
   await sql(`insert into public.seed_log (kind, ref) values ${STORES.map((s) => `('store', ${q(s.id)})`).join(",")}`);
 

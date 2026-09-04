@@ -1,5 +1,7 @@
 // Shopping basket — the user's private list (RLS, own rows) and the community basket quote.
 // The quote itself reads the ANONYMISED community view; the list never leaves the user's rows.
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { ensureSession, supabase } from '@/lib/supabase';
 
 export type BasketList = { id: string; name: string };
@@ -22,6 +24,62 @@ type RawItem = Omit<BasketItem, 'product_key' | 'qty'> & { qty: unknown; product
 function toItem(r: RawItem): BasketItem {
   const p = Array.isArray(r.products) ? r.products[0] : r.products;
   return { id: r.id, list_id: r.list_id, product_id: r.product_id, name: r.name, qty: num(r.qty), checked: r.checked, created_at: r.created_at, product_key: p?.product_key ?? null };
+}
+
+const ACTIVE_KEY = 'izicost.basket.activeList';
+
+/** All of the user's lists, oldest first (the first one is the default "My basket"). */
+export async function listLists(): Promise<(BasketList & { item_count: number })[]> {
+  const uid = await ensureSession();
+  const { data, error } = await supabase.from('shopping_lists').select('id, name, shopping_list_items(count)').eq('user_id', uid).order('created_at');
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as unknown as (BasketList & { shopping_list_items: { count: number }[] })[]).map((l) => ({ id: l.id, name: l.name, item_count: l.shopping_list_items?.[0]?.count ?? 0 }));
+}
+
+export async function createList(name: string): Promise<BasketList> {
+  const uid = await ensureSession();
+  const clean = name.trim().replace(/\s+/g, ' ').slice(0, 60) || 'My basket';
+  const { data, error } = await supabase.from('shopping_lists').insert({ user_id: uid, name: clean }).select('id, name').single();
+  if (error || !data) throw new Error(error?.message ?? 'could not create the list');
+  await setActiveList(data.id);
+  return data as BasketList;
+}
+
+export async function renameList(id: string, name: string): Promise<void> {
+  const uid = await ensureSession();
+  const { error } = await supabase.from('shopping_lists').update({ name: name.trim().replace(/\s+/g, ' ').slice(0, 60) || 'My basket' }).eq('id', id).eq('user_id', uid);
+  if (error) throw new Error(error.message);
+}
+
+export async function deleteList(id: string): Promise<void> {
+  const uid = await ensureSession();
+  const { error } = await supabase.from('shopping_lists').delete().eq('id', id).eq('user_id', uid);
+  if (error) throw new Error(error.message);
+  if ((await AsyncStorage.getItem(ACTIVE_KEY).catch(() => null)) === id) await AsyncStorage.removeItem(ACTIVE_KEY).catch(() => {});
+}
+
+/** Moves every item of the source lists into the target (quantities add up), deletes the sources. Returns items moved. */
+export async function mergeLists(targetId: string, sourceIds: string[]): Promise<number> {
+  await ensureSession();
+  const { data, error } = await supabase.rpc('merge_shopping_lists', { p_target: targetId, p_sources: sourceIds });
+  if (error) throw new Error(error.message);
+  await setActiveList(targetId);
+  return Number(data ?? 0);
+}
+
+export async function setActiveList(id: string): Promise<void> {
+  await AsyncStorage.setItem(ACTIVE_KEY, id).catch(() => {});
+}
+
+/** The list the basket screen and the quote work on: the remembered one when it still exists, else the default. */
+export async function getActiveList(): Promise<BasketList> {
+  const uid = await ensureSession();
+  const remembered = await AsyncStorage.getItem(ACTIVE_KEY).catch(() => null);
+  if (remembered) {
+    const { data } = await supabase.from('shopping_lists').select('id, name').eq('id', remembered).eq('user_id', uid).maybeSingle();
+    if (data) return data as BasketList;
+  }
+  return getDefaultList();
 }
 
 /** The user's one list — created silently the first time. */
@@ -75,9 +133,9 @@ export async function countOpenItems(): Promise<number> {
   return count ?? 0;
 }
 
-/** Product page shortcut: add to the default list. */
+/** Product page shortcut: add to the active list. */
 export async function addToBasket(name: string, productId?: string | null): Promise<BasketItem> {
-  const list = await getDefaultList();
+  const list = await getActiveList();
   return addItem(list.id, { name, productId });
 }
 
@@ -107,10 +165,10 @@ export async function searchProducts(query: string, limit = 8): Promise<ProductH
   return ((data ?? []) as ProductHit[]).map((p) => ({ ...p, size_value: numOrNull(p.size_value) }));
 }
 
-/** One row per store with at least one of the list's products in the community pool. */
-export async function basketQuote(listId: string, city: string | null, currency: string): Promise<StoreQuote[]> {
+/** One row per store with at least one of the list's products in the community pool. `typical` = 60-day medians instead of latest prices. */
+export async function basketQuote(listId: string, city: string | null, currency: string, typical = false): Promise<StoreQuote[]> {
   await ensureSession();
-  const { data, error } = await supabase.rpc('basket_quote', { p_list: listId, p_city: city, p_currency: currency });
+  const { data, error } = await supabase.rpc('basket_quote', { p_list: listId, p_city: city, p_currency: currency, p_typical: typical });
   if (error) throw new Error(error.message);
   return ((data ?? []) as StoreQuote[]).map((r) => ({
     ...r, lat: numOrNull(r.lat), lng: numOrNull(r.lng), basket_total: num(r.basket_total),
