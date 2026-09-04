@@ -21,6 +21,8 @@ import { useScope, type ScopeMode } from '@/features/prices/use-scope';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
+import { BigNumber, Rows, ShareButton, ShareCard, ShareCardModal } from '@/features/share/share-card';
+import '@/features/share/i18n';
 
 const NEAR_KM = 15;
 
@@ -47,6 +49,7 @@ export default function QuoteScreen() {
   const [pos, setPos] = useState<LatLng | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => { if (params.city) { scope.setOtherCity({ city: params.city, country: params.country ?? null }); scope.setMode('bycity'); } }, [params.city]); // eslint-disable-line react-hooks/exhaustive-deps
   useFocusEffect(useCallback(() => { priceCities().then(setCities).catch(() => {}); }, []));
@@ -143,8 +146,18 @@ export default function QuoteScreen() {
               <>
                 <View style={styles.sectionHead}>
                   <ThemedText type="smallBold" style={{ fontSize: 16, flex: 1 }}>{t('Best single store')}</ThemedText>
-                  <ThemedText type="small" themeColor="textSecondary">{t('Tap a store to see its prices')}</ThemedText>
+                  <ShareButton onPress={() => setShareOpen(true)} label={t('Share')} />
                 </View>
+                <ShareCardModal visible={shareOpen} onClose={() => setShareOpen(false)}>
+                  <ShareCard title={t('Where is it cheapest?')} subtitle={t('%n% items', { n: items.filter((i) => !i.checked).length })}>
+                    {saving !== null && saving > 0.5 && ranked[1] ? (
+                      <BigNumber value={formatMoney(saving, cur)} label={`${t('You save')} ${t('by shopping at %store%', { store: ranked[0].store_name })} ${t('vs %store%', { store: ranked[1].store_name })}`} tone="down" />
+                    ) : (
+                      <BigNumber value={formatMoney(ranked[0].basket_total, cur)} label={`${ranked[0].store_name}${ranked[0].city ? ` · ${ranked[0].city}` : ''}`} tone="down" />
+                    )}
+                    <Rows highlightFirst rows={ranked.slice(0, 4).map((q) => ({ left: q.store_name, sub: `${q.items_found}/${q.items_total} ${t('items found')}${q.city ? ` · ${q.city}` : ''}`, right: formatMoney(q.basket_total, cur) }))} />
+                  </ShareCard>
+                </ShareCardModal>
                 {ranked.map((q, i) => (
                   <StoreQuoteCard key={q.store_id} quote={q} rank={i + 1} currency={cur} saving={i === 0 ? saving : null} nextStore={ranked[1]?.store_name ?? null} />
                 ))}

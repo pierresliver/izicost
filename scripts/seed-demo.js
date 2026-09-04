@@ -188,13 +188,17 @@ async function cleanAll() {
          d1 as (delete from public.receipts where notes = 'SEED' returning id),
          d2 as (delete from public.price_points where store_id in (select id from s) returning id),
          d3 as (delete from public.watch_items where product_id in (select ref::uuid from public.seed_log where kind = 'product') returning id),
-         d4 as (delete from public.stores where id in (select id from s) returning id),
-         d5 as (delete from public.products p where p.id in (select ref::uuid from public.seed_log where kind = 'product')
+         d4 as (delete from public.stores where id in (select id from s) returning id)
+    select (select count(*) from d1) receipts, (select count(*) from d2) price_points, (select count(*) from d3) watch_items,
+           (select count(*) from d4) stores`);
+  // products go in a second statement: inside one statement every CTE sees the same snapshot, so the
+  // "no price points left" check would still see the rows d2 just deleted
+  const p = await sql(`
+    with d5 as (delete from public.products p where p.id in (select ref::uuid from public.seed_log where kind = 'product')
                   and not exists (select 1 from public.price_points pp where pp.product_id = p.id) returning id),
          d6 as (delete from public.seed_log returning kind)
-    select (select count(*) from d1) receipts, (select count(*) from d2) price_points, (select count(*) from d3) watch_items,
-           (select count(*) from d4) stores, (select count(*) from d5) products`);
-  console.log("removed:", JSON.stringify(n[0]));
+    select (select count(*) from d5) products`);
+  console.log("removed:", JSON.stringify({ ...n[0], ...p[0] }));
 }
 
 (async () => {

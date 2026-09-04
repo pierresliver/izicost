@@ -152,6 +152,11 @@ export function registerTranslations(dict: Record<string, string>): void {
   Object.assign(PT, dict);
 }
 
+/** Headless code (background tasks) can call this so t() uses the language the user chose in the app. */
+export async function loadLangOverride(): Promise<void> {
+  try { const v = await AsyncStorage.getItem(STORAGE_KEY); if (v === 'en' || v === 'pt') currentLang = v; } catch { /* keep device language */ }
+}
+
 /** Translate. Supports %name% placeholders via the second argument. */
 export function t(en: string, vars?: Record<string, string | number>): string {
   let s = currentLang === 'pt' ? PT[en] ?? en : en;

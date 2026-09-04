@@ -16,6 +16,7 @@ import { priceCities, searchPrices, type CityRow, type SearchRow } from '@/featu
 import { CityPicker } from '@/features/prices/components/city-picker';
 import { ProductResultCard } from '@/features/prices/components/price-card';
 import { Segmented } from '@/features/prices/components/segmented';
+import { Ticker } from '@/features/prices/components/ticker';
 import '@/features/prices/i18n';
 import { useScope, type ScopeMode } from '@/features/prices/use-scope';
 import { useTheme } from '@/hooks/use-theme';
@@ -67,6 +68,7 @@ export default function PricesScreen() {
 
   const header = (
     <View style={{ gap: Spacing.two, marginBottom: Spacing.two }}>
+      <Ticker />
       <AlertBanner hits={alerts.hits} onDismiss={alerts.dismiss} />
       <View style={[styles.basketCard, { backgroundColor: theme.backgroundElement }]}>
         <Pressable onPress={() => router.push(BASKET_HREF)} style={({ pressed }) => [styles.basketMain, pressed && { opacity: 0.8 }]} accessibilityRole="button">

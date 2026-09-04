@@ -17,7 +17,7 @@ import { formatMoney } from '@/lib/receipts';
 
 import { autofill, isNewDrop, markNotified, movement, setNotify, unwatch, watchlist, type Movement, type WatchRow } from '../api';
 import '../i18n';
-import { enableDrops, getDropPref, notifyDrops, type DropPref } from '../notify';
+import { enableDrops, ensureDropsArmed, getDropPref, notifyDrops, type DropPref } from '../notify';
 import { Sparkline } from './sparkline';
 
 const MAX_ROWS = 10;
@@ -31,6 +31,7 @@ export function WatchCard({ onEmptyScan }: { onEmptyScan: () => void }) {
 
   const load = useCallback(async () => {
     try {
+      ensureDropsArmed().catch(() => {});
       await autofill(8).catch(() => 0); // idempotent: usual items appear by themselves
       const [list, p] = await Promise.all([watchlist(), getDropPref()]);
       setRows(list); setPref(p); setError(null);
@@ -95,7 +96,7 @@ export function WatchCard({ onEmptyScan }: { onEmptyScan: () => void }) {
             <WatchRowView key={r.watch_id} row={r} m={movement(r)} onOpen={() => router.push({ pathname: '/product/[key]', params: { key: r.product_key } })} onBell={() => toggleBell(r)} onRemove={() => remove(r)} />
           ))}
           <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 11, lineHeight: 14 }}>
-            {t('Alerts arrive when you open the app; alerts while the app is closed are coming later.')}
+            {pref === 'on' ? t('Alerts on: the app checks prices every few hours, even when closed.') : t('Turn on a bell to get alerts when an item gets cheaper.')}
           </ThemedText>
         </>
       )}

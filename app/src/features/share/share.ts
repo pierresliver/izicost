@@ -6,11 +6,13 @@ import { t } from '@/lib/i18n';
 
 import './i18n';
 
+import { LATEST_APK_URL } from '@/features/update/api';
+
 /**
- * Where the invite points. Empty until there is a public download page or Play Store listing —
- * then put the link here (one place) and every invite message picks it up.
+ * Where the invite points: the public download of the latest build (see scripts/publish-release.js).
+ * Replace with the Play Store link once the app is listed.
  */
-export const APP_LINK = '';
+export const APP_LINK = LATEST_APK_URL;
 
 export function inviteMessage(): string {
   const intro = t('I use IziCost to see where groceries are cheapest near me. Scan a receipt, and everyone sees where each product costs less — the more of us that scan, the better it gets.');

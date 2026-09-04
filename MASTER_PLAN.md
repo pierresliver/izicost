@@ -404,6 +404,36 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   chart report + Home teaser ("Maputo ▲4% in Sep"); **price by store over time** on the product page (migration 015
   `product_store_trend`: weekly medians per store, 180 days) so PS can watch how each shop moves picanha / whisky.
   Both new RPCs security definer, authenticated only. Empty states explain what data is still needed.
+**Day 3 (2026-09-04) — "make it shareable, alive and talked about":**
+- ✅ **Demo data** (`scripts/seed-demo.js`, `clean` to remove): 12 fake branches in Maputo/Matola/Beira/Nampula, 30 products,
+  ~4,400 community price points over 90 days, ~26 receipts per test account (`notes='SEED'`). PS's phone had a fresh
+  account with 0 receipts → that is why Home showed no charts.
+- ✅ **Alerts while the app is closed (stage B, no Firebase needed):** `expo-background-task` wakes the app every few
+  hours, checks the watch list and fires local notifications; armed when a bell is turned on. Tapping any
+  notification opens the right screen (`data.route`). "Lowest in 60 days" gets its own 🔥 title.
+- ✅ **Share cards** (`features/share/share-card.tsx`, react-native-view-shot + share sheet): branded PNG with the
+  invite line — on product pages (cheapest + per-store list), the basket result ("you save X at A vs B"), the
+  inflation number + category movers, the city index, and every slide of the weekly story.
+- ✅ **Open data in the app** (PS: push app users, not a web page): Price index report now has a staples table per
+  city (migration 016 `city_staples`: 30-day medians, spread, counts, change vs the 60 days before), a **CSV download**
+  (index + staples for every city, free to use with a mention) and a share card. **Live ticker** on the Prices tab
+  (`community_ticker`: this week's movers per city + prices arriving today).
+- ✅ **Weekly story** (`app/recap.tsx`): full-screen swipeable slides — your week, biggest shop, best find, category
+  movers, **household leaderboard** — each shareable; opened from Home's weekly card and the Sunday notification.
+- ✅ **Badges** on Home (receipts scanned, weeks in a row, stores explored, with progress rings); month total counts up.
+- ✅ **Update button** (PS asked, like IziCamera): Me tab shows the installed version, "Check for updates", and a
+  Download button when `latest.json` in the public `releases` bucket (migration 017) has a higher versionCode;
+  `scripts/publish-release.js <apk>` publishes. The invite link now points at the latest APK. Caveat: the Free plan
+  caps files at 50 MB, so the published download must be the slim arm64 build (`build-apk.ps1 -Abi arm64-v8a -Slim`);
+  PS's test builds stay dual-ABI. Build 4 (74 MB) could not be published for that reason.
+- ✅ **Day 3 reviews:** security agent (medium: the "before" medians in the new RPCs skipped the `min_reports()` floor →
+  fixed; URL allowlist tightened; date index for the ticker; releases bucket verified write-proof for anon and
+  guests). Correctness agent (high: the background task was defined from the router layout, which never loads in a
+  headless wake → moved to `app/index.js` as the app entry; high: streak badge used UTC dates → always 0 in UTC+2 →
+  local dates; notification taps parked until the stack is mounted and de-duplicated; alerts re-armed at startup for
+  users who were already "on"; headless notifications honour the chosen language; recap skips an empty week; update
+  card distinguishes "could not check"; seed clean-up deletes products in a second statement; ticker "today" = today).
+  Build 5 needed for all of Day 3 (new native modules: background task, view capture).
 - ✅ Checks: typecheck clean; `expo lint` set up (eslint + eslint-config-expo added; today's files clean, 16
   pre-existing "setState in effect" style warnings left in older files); translation audit 0 missing (now also
   scans .ts files); review agent's 11 findings fixed (offline splitter, cancel-during-parse race, sheet never

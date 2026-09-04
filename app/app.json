@@ -63,7 +63,8 @@
           "microphonePermission": "IziCost uses the microphone so you can say your shopping list instead of typing it.",
           "speechRecognitionPermission": "IziCost uses speech recognition to turn what you say into a shopping list."
         }
-      ]
+      ],
+      "expo-background-task"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -63,13 +63,14 @@ type HeadlineProps = { d: Dashboard; monthName: string; overall: BudgetStatus | 
 export function HeadlineCard({ d, monthName, overall, onBudget }: HeadlineProps) {
   const p = useChartPalette();
   const n = d.thisMonth.count;
+  const shownTotal = useAnimatedNumber(d.thisMonth.total, 900); // counts up when the screen opens
   const others = d.others.map((o) => formatMoney(o.total, o.currency)).join(', ');
   return (
     <Card>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
         <View style={{ flex: 1, gap: 2 }}>
           <ThemedText type="small" themeColor="textSecondary">{t('This month')} · {monthName}</ThemedText>
-          <ThemedText style={ui.big}>{formatMoney(d.thisMonth.total, d.currency)}</ThemedText>
+          <ThemedText style={ui.big}>{formatMoney(shownTotal, d.currency)}</ThemedText>
           <Delta pct={d.deltaPct} label={d.deltaPct === null ? t('no receipts last month') : d.deltaPct === 0 ? t('same as last month') : t('vs last month')} />
           <ThemedText type="small" themeColor="textSecondary">
             {n === 1 ? t('You scanned 1 receipt this month') : t('You scanned %n% receipts this month', { n })}
@@ -129,7 +130,7 @@ export function BudgetRings({ statuses, currency, onPress }: { statuses: BudgetS
 }
 
 /** Last 7 days vs the previous 7. */
-export function WeeklyCard({ d }: { d: Dashboard }) {
+export function WeeklyCard({ d, onStory }: { d: Dashboard; onStory?: () => void }) {
   const { current, previous, currentCount } = d.week;
   const pct = previous > 0 ? ((current - previous) / previous) * 100 : null;
   const max = Math.max(current, previous, 1);
@@ -152,6 +153,13 @@ export function WeeklyCard({ d }: { d: Dashboard }) {
           </ThemedText>
         </View>
       </View>
+      {onStory ? (
+        <Pressable onPress={onStory} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: Spacing.one }}>
+          <Ionicons name="sparkles" size={16} color={Brand.primary} />
+          <ThemedText type="small" style={{ color: Brand.primary, fontWeight: '700' }}>{t('See this week’s story')}</ThemedText>
+          <Ionicons name="chevron-forward" size={14} color={Brand.primary} />
+        </Pressable>
+      ) : null}
     </Card>
   );
 }

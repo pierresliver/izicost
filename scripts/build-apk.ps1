@@ -5,6 +5,13 @@
 # Prerequisites (already on this PC): JDK 22 at C:\Program Files\Java\jdk-22, Android SDK at D:\Android\Sdk.
 # The APK is signed with the debug keystore, which is fine for testing. Before a Play Store release
 # we create a permanent keystore (like IziCamera's) and switch the signing config.
+# Options:  -Abi 'arm64-v8a'   build for one processor type only (smaller file)
+#           -Slim              also enable ProGuard + resource shrinking (smaller again; the published download uses this)
+# Example (the download build): powershell -ExecutionPolicy Bypass -File scripts\build-apk.ps1 -Abi arm64-v8a -Slim
+param(
+  [string]$Abi = 'armeabi-v7a,arm64-v8a',
+  [switch]$Slim
+)
 $ErrorActionPreference = 'Stop'
 $env:JAVA_HOME = 'C:\Program Files\Java\jdk-22'
 $env:ANDROID_HOME = 'D:\Android\Sdk'
@@ -33,7 +40,12 @@ if ($needPrebuild) {
 # Test builds for real phones only (drops the x86 emulator ABIs: ~40% smaller). prebuild resets this file.
 $gp = Join-Path $app 'android\gradle.properties'
 $gpText = Get-Content $gp -Raw
-$gpText = [regex]::Replace($gpText, '(?m)^reactNativeArchitectures=.*$', 'reactNativeArchitectures=armeabi-v7a,arm64-v8a')
+$gpText = [regex]::Replace($gpText, '(?m)^reactNativeArchitectures=.*$', "reactNativeArchitectures=$Abi")
+foreach ($k in @('android.enableProguardInReleaseBuilds', 'android.enableShrinkResourcesInReleaseBuilds')) {
+  $v = if ($Slim) { 'true' } else { 'false' }
+  if ($gpText -match "(?m)^$([regex]::Escape($k))=") { $gpText = [regex]::Replace($gpText, "(?m)^$([regex]::Escape($k))=.*$", "$k=$v") }
+  else { $gpText = $gpText.TrimEnd() + "`n$k=$v`n" }
+}
 [System.IO.File]::WriteAllText($gp, $gpText, (New-Object System.Text.UTF8Encoding($false)))
 
 Write-Host '>> gradle assembleRelease...' -ForegroundColor Cyan
@@ -42,7 +54,9 @@ if ($LASTEXITCODE -ne 0) { throw 'gradle build failed' }
 
 $ver = (node -p "require('./app.json').expo.version")
 $stamp = Get-Date -Format 'yyyy-MM-dd-HHmm'
-$out = Join-Path $root "builds\izicost-v$ver-$stamp.apk"
+$suffix = if ($Abi -notmatch ',') { "-$($Abi -replace '-v8a','')" } else { '' }
+if ($Slim) { $suffix += '-slim' }
+$out = Join-Path $root "builds\izicost-v$ver-$stamp$suffix.apk"
 New-Item -ItemType Directory -Force (Join-Path $root 'builds') | Out-Null
 Copy-Item 'android\app\build\outputs\apk\release\app-release.apk' $out -Force
 Write-Host ">> BUILD OK: $out" -ForegroundColor Green

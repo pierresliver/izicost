@@ -23,6 +23,7 @@ registerTranslations({
     'As notificações do IziCost estão desativadas. Ative-as nas definições do telemóvel para receber alertas de preço.',
   'Price drops': 'Descidas de preço',
   '📉 %name% is cheaper': '📉 %name% está mais barato',
+  '🔥 %name%: lowest price in 60 days': '🔥 %name%: preço mais baixo em 60 dias',
   '%price% at %where% — you paid %was% last time.': '%price% em %where% — pagou %was% da última vez.',
   '%price% at %where% — below the usual price.': '%price% em %where% — abaixo do preço habitual.',
   'Watch this item': 'Vigiar este artigo',
@@ -32,6 +33,6 @@ registerTranslations({
   'Remove %name% from My items?': 'Remover %name% de Os meus artigos?',
   'It will not be added back automatically.': 'Não voltará a ser adicionado automaticamente.',
   'See all': 'Ver tudo',
-  'Alerts arrive when you open the app; alerts while the app is closed are coming later.':
-    'Os alertas chegam quando abre a app; alertas com a app fechada chegam mais tarde.',
+  'Alerts on: the app checks prices every few hours, even when closed.': 'Alertas ligados: a app verifica os preços de poucas em poucas horas, mesmo fechada.',
+  'Turn on a bell to get alerts when an item gets cheaper.': 'Ligue um sino para receber alertas quando um artigo ficar mais barato.',
 });

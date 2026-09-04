@@ -19,6 +19,7 @@ import { fetchReceipts, loadDashboard, type Dashboard } from '@/features/reports
 import { budgetStatus, listBudgets, type Budget } from '@/features/reports/budgets';
 import { BarChart, RingChart } from '@/features/reports/charts';
 import { monthEnd, monthLong, monthShort, monthStart, ym } from '@/features/reports/dates';
+import { AchievementsCard } from '@/features/reports/achievements';
 import { BudgetRings, EmptyChartsCard, HeadlineCard, WeeklyCard } from '@/features/reports/home-cards';
 import { DueSoonCard, InflationTeaser, RecapAskCard } from '@/features/reports/home-insights';
 import { categoryInflation, detectRecurring, fetchHistory, personalInflation, type CategoryInflation, type Recurring } from '@/features/reports/insights';
@@ -182,7 +183,7 @@ export default function HomeScreen() {
       {household && scope === 'household' && (overall || perCategory.length) ? (
         <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'center', marginTop: -Spacing.two }}>{t('Budgets are personal: they compare against your own receipts.')}</ThemedText>
       ) : null}
-      {hasReceipts && d ? <WeeklyCard d={d} /> : null}
+      {hasReceipts && d ? <WeeklyCard d={d} onStory={() => go('/recap')} /> : null}
       {hasReceipts && recapPref === null ? (
         <RecapAskCard onYes={onRecapYes} onNo={async () => { await setRecapPref('off'); setRecapPrefState('off'); }} />
       ) : null}
@@ -226,6 +227,7 @@ export default function HomeScreen() {
       ) : null}
 
       <InflationTeaser pct={inflationPct} categories={catInflation} onPress={() => go('/reports/inflation')} />
+      {hasReceipts ? <AchievementsCard /> : null}
       <CityIndexTeaser onPress={() => go('/reports/price-index')} />
     </ScrollView>
   );

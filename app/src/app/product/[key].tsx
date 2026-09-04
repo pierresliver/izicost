@@ -27,6 +27,7 @@ import '@/features/prices/i18n';
 import { unwatch, watchIdFor, watchProduct } from '@/features/watch/api';
 import '@/features/watch/i18n';
 import { enableDrops, getDropPref } from '@/features/watch/notify';
+import { BigNumber, Rows, ShareButton, ShareCard, ShareCardModal } from '@/features/share/share-card';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
@@ -121,6 +122,7 @@ export default function ProductScreen() {
   const mineDiff = mine && cheapest && mine.currency === currency ? mine.price - cheapest.price : null;
 
   // "My items" watch: star on/off for this product in the current currency
+  const [shareOpen, setShareOpen] = useState(false);
   const [watchId, setWatchId] = useState<string | null>(null);
   const [watchBusy, setWatchBusy] = useState(false);
   const watchPid = product?.id ?? cheapest?.product_id ?? null;
@@ -159,10 +161,21 @@ export default function ProductScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Stack.Screen options={{ title: title || t('Product') }} />
-      <View style={{ gap: 2 }}>
-        <ThemedText style={{ fontSize: 24, lineHeight: 30, fontWeight: '700' }}>{title}</ThemedText>
-        {size ? <ThemedText themeColor="textSecondary">{size}</ThemedText> : null}
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.two }}>
+        <View style={{ gap: 2, flex: 1 }}>
+          <ThemedText style={{ fontSize: 24, lineHeight: 30, fontWeight: '700' }}>{title}</ThemedText>
+          {size ? <ThemedText themeColor="textSecondary">{size}</ThemedText> : null}
+        </View>
+        {cheapest ? <ShareButton onPress={() => setShareOpen(true)} /> : null}
       </View>
+      {cheapest ? (
+        <ShareCardModal visible={shareOpen} onClose={() => setShareOpen(false)}>
+          <ShareCard title={title} subtitle={size || undefined}>
+            <BigNumber value={formatMoney(cheapest.price, cheapest.currency)} label={`${t('Cheapest now')} · ${[cheapest.store_name, cheapest.city].filter(Boolean).join(' · ')}`} tone="down" />
+            <Rows highlightFirst rows={rows.slice(0, 5).map((r) => ({ left: r.store_name, sub: r.city ?? undefined, right: formatMoney(r.price, r.currency) }))} />
+          </ShareCard>
+        </ShareCardModal>
+      ) : null}
       {error ? <ThemedText style={{ color: Brand.danger }}>{error}</ThemedText> : null}
 
       {cheapest ? (

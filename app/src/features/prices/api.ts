@@ -110,6 +110,33 @@ export async function productStoreTrend(key: string, currency: string): Promise<
   return ((data ?? []) as StoreTrendPoint[]).map((r) => ({ ...r, median_price: Number(r.median_price), report_count: Number(r.report_count) }));
 }
 
+export type StapleRow = {
+  product_key: string; display_name: string; size_value: number | null; size_unit: string | null; category: string | null;
+  median_price: number; min_price: number; max_price: number; report_count: number; store_count: number;
+  median_before: number | null; change_pct: number | null;
+};
+
+/** A city's staples table: median price per product over the last 30 days, spread, counts, change vs the 60 days before. */
+export async function cityStaples(city: string, currency = 'MZN'): Promise<StapleRow[]> {
+  await ensureSession();
+  const { data, error } = await supabase.rpc('city_staples', { p_city: city, p_currency: currency });
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as StapleRow[]).map((r) => ({
+    ...r, size_value: numOrNull(r.size_value), median_price: Number(r.median_price), min_price: Number(r.min_price), max_price: Number(r.max_price),
+    report_count: Number(r.report_count), store_count: Number(r.store_count), median_before: numOrNull(r.median_before), change_pct: numOrNull(r.change_pct),
+  }));
+}
+
+export type TickerRow = { kind: 'move' | 'activity'; city: string; display_name: string | null; product_key: string | null; change_pct: number | null; price: number | null; currency: string | null; n: number };
+
+/** This week's biggest movers per city plus how many prices arrived today. */
+export async function communityTicker(limit = 12): Promise<TickerRow[]> {
+  await ensureSession();
+  const { data, error } = await supabase.rpc('community_ticker', { p_limit: limit });
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as TickerRow[]).map((r) => ({ ...r, change_pct: numOrNull(r.change_pct), price: numOrNull(r.price), n: Number(r.n) }));
+}
+
 export type CityIndexPoint = { city: string; country: string | null; currency: string; month: string; index: number; change_pct: number; products: number };
 
 /** Community price index per city and month (base 100 at the first month), from the anonymised pool. */

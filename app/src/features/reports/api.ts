@@ -56,10 +56,10 @@ export function groupSlices<T>(rows: T[], key: (r: T) => string, value: (r: T) =
 }
 
 /** Personal-only things (budgets, the weekly recap) pass `onlyMe` so they ignore the Me / Household switch. */
-export type ScopeOpts = { onlyMe?: boolean };
+export type ScopeOpts = { onlyMe?: boolean; allHousehold?: boolean };
 
 export async function fetchReceipts(from?: string, to?: string, opts: ScopeOpts = {}): Promise<ReceiptLite[]> {
-  const me = opts.onlyMe ? await ensureSession() : await scopeUserId(); // "Me" = only my rows; "Household" = whatever RLS lets me see
+  const me = opts.onlyMe ? await ensureSession() : opts.allHousehold ? (await ensureSession(), null) : await scopeUserId(); // "Me" = only my rows; "Household" = whatever RLS lets me see
   let q = supabase.from('receipts').select('id, user_id, store_name, currency, total, purchased_on');
   if (me) q = q.eq('user_id', me);
   if (from) q = q.gte('purchased_on', from);

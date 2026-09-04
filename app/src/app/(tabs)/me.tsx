@@ -13,6 +13,7 @@ import { Brand, Spacing } from '@/constants/theme';
 import { HouseholdCard } from '@/features/household/components/household-card';
 import '@/features/household/i18n';
 import { shareApp } from '@/features/share/share';
+import { UpdateCard } from '@/features/update/components/update-card';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
 import { ensureSession, supabase } from '@/lib/supabase';
@@ -177,6 +178,9 @@ export default function MeScreen() {
           <ThemedText type="small" themeColor="textSecondary">{t('Your receipts, totals and reports are private to you.')}</ThemedText>
           <ThemedText type="small" themeColor="textSecondary">{t('Community prices share only the price of a product at a store on a date, never who bought it or what else was in the basket.')}</ThemedText>
         </ThemedView>
+
+        {/* App version + update check */}
+        <UpdateCard />
 
         <Pressable style={styles.linkBtn} onPress={async () => { await AsyncStorage.removeItem(ONBOARDING_KEY); router.replace('/'); Alert.alert(t('Introduction'), t('The introduction will show the next time the app starts.')); }}>
           <ThemedText themeColor="textSecondary">{t('Show the introduction again')}</ThemedText>

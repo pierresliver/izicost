@@ -71,6 +71,7 @@ export async function rescheduleWeeklyRecap(weekTotal: number, weekReceipts: num
       content: {
         title: t('Your week in numbers'),
         body: t('Your week: %amount% across %n% receipts', { amount: formatMoney(weekTotal, currency), n: weekReceipts }),
+        data: { route: '/recap' },
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.WEEKLY,

@@ -13,6 +13,9 @@ import { Card, Delta, Empty, ErrorText, Loading, SectionTitle, styles as ui, use
 import { t, useLang } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
 import { ScopeCaption } from '@/features/household/components/scope-caption';
+import { BigNumber, Rows, ShareButton, ShareCard, ShareCardModal } from '@/features/share/share-card';
+import '@/features/share/i18n';
+import { useState } from 'react';
 
 export default function InflationScreen() {
   useLang();
@@ -22,6 +25,7 @@ export default function InflationScreen() {
   }, []);
   const pct = data?.overallPct ?? null;
   const up = (pct ?? 0) > 0;
+  const [shareOpen, setShareOpen] = useState(false);
 
   return (
     <ScrollView contentContainerStyle={ui.screen} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}>
@@ -31,6 +35,13 @@ export default function InflationScreen() {
       {!data && !error ? <Loading /> : null}
       {data ? (
         <Card style={{ alignItems: 'center', paddingVertical: Spacing.four }}>
+          {pct !== null ? <View style={{ alignSelf: 'flex-end' }}><ShareButton onPress={() => setShareOpen(true)} /></View> : null}
+          <ShareCardModal visible={shareOpen} onClose={() => setShareOpen(false)}>
+            <ShareCard title={t('Personal inflation')} subtitle={t('latest price vs 1–3 months ago')}>
+              <BigNumber value={pct === null ? '—' : `${up ? '+' : ''}${(Math.round(pct * 10) / 10).toLocaleString()}%`} label={t('My basket costs %pct%% %dir% than 1–3 months ago', { pct: Math.abs(Math.round((pct ?? 0) * 10) / 10), dir: up ? t('more') : t('less') })} tone={pct === null ? 'neutral' : up ? 'up' : 'down'} />
+              {data?.categories.length ? <Rows rows={data.categories.slice(0, 4).map((c) => ({ left: t(c.category), sub: c.items === 1 ? t('1 item') : t('%n% items', { n: c.items }), right: `${c.changePct > 0 ? '▲ +' : '▼ '}${Math.abs(Math.round(c.changePct * 10) / 10)}%` }))} /> : null}
+            </ShareCard>
+          </ShareCardModal>
           <Ionicons name={up ? 'trending-up' : 'trending-down'} size={36} color={pct === null ? Brand.primary : up ? Brand.danger : Brand.success} />
           <ThemedText style={ui.big}>{pct === null ? '—' : `${up ? '+' : ''}${(Math.round(pct * 10) / 10).toLocaleString()}%`}</ThemedText>
           <ThemedText themeColor="textSecondary" style={{ textAlign: 'center' }}>
