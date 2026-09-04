@@ -1,5 +1,6 @@
 // The money card: one store's quote for the whole basket, ranked.
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -32,6 +33,7 @@ export function StoreQuoteCard({ quote, rank, currency, saving, nextStore, estim
   estimate?: { total: number; filled: number } | null;
 }) {
   const theme = useTheme();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const best = rank === 1;
   const full = quote.items_found === quote.items_total;
@@ -48,13 +50,16 @@ export function StoreQuoteCard({ quote, rank, currency, saving, nextStore, estim
             {rank !== null ? <ThemedText type="smallBold" style={{ color: badgeFg, fontSize: 13 }}>{rank}</ThemedText>
               : <Ionicons name="remove" size={14} color={badgeFg} />}
           </View>
-          <View style={{ flex: 1, gap: 1 }}>
-            <ThemedText style={{ fontSize: 17, lineHeight: 22, fontWeight: '700' }} numberOfLines={2}>{quote.store_name}</ThemedText>
+          <Pressable onPress={() => router.push({ pathname: '/store/[id]', params: { id: quote.store_id } } as never)} style={{ flex: 1, gap: 1 }} accessibilityRole="button">
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <ThemedText style={{ fontSize: 17, lineHeight: 22, fontWeight: '700', flexShrink: 1 }} numberOfLines={2}>{quote.store_name}</ThemedText>
+              <Ionicons name="chevron-forward" size={14} color={theme.textSecondary} />
+            </View>
             {place ? <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>{place}</ThemedText> : null}
             {quote.branch_address && quote.branch_address !== quote.city ? (
               <ThemedText type="small" themeColor="textSecondary" numberOfLines={1} style={{ fontSize: 12 }}>{quote.branch_address}</ThemedText>
             ) : null}
-          </View>
+          </Pressable>
           <View style={{ alignItems: 'flex-end' }}>
             <BigPrice value={quote.basket_total} currency={currency} size={best ? 28 : 22} color={best ? Brand.primary : undefined} />
             {estimate && estimate.filled > 0 ? (

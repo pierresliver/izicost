@@ -7,6 +7,9 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } fro
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Brand, Spacing } from '@/constants/theme';
+import { addReceiptItems, getActiveList } from '@/features/basket/api';
+import '@/features/basket/i18n';
+import { BASKET_QUOTE_HREF } from '@/features/basket/routes';
 import { memberName } from '@/features/household/api';
 import '@/features/household/i18n';
 import { splitImagePaths } from '@/features/scan/api';
@@ -30,6 +33,7 @@ export default function ReceiptDetail() {
   const [viewer, setViewer] = useState<number | null>(null);
   const [editing, setEditing] = useState<string | null>(null); // item id whose category chips are open
   const [mine, setMine] = useState(true); // a household member's receipt is read-only for me
+  const [buying, setBuying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -60,6 +64,22 @@ export default function ReceiptDetail() {
       setItems(before);
       Alert.alert(t('Could not save'), String((e as Error).message ?? e));
     }
+  }
+
+  /** "Buy again": every line of this receipt goes onto the active shopping list. */
+  async function buyAgain() {
+    if (buying || !items.length) return;
+    setBuying(true);
+    try {
+      const list = await getActiveList();
+      const n = await addReceiptItems(list.id, items.map((it) => ({ name: (it.product_name?.trim() || it.name_as_printed || '').trim(), qty: it.qty })));
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      Alert.alert(t('Added to “%list%”', { list: list.name }), t('%n% items are on the list. Compare stores now?', { n }), [
+        { text: t('Later'), style: 'cancel' },
+        { text: t('Compare stores'), onPress: () => router.push(BASKET_QUOTE_HREF) },
+      ]);
+    } catch (e) { const m = String((e as Error).message ?? e); Alert.alert(t('Error'), /at most 200 items/i.test(m) ? t('A list holds at most 200 items.') : m); }
+    finally { setBuying(false); }
   }
 
   function onDelete() {
@@ -133,6 +153,12 @@ export default function ReceiptDetail() {
         })}
       </ThemedView>
 
+      {items.length ? (
+        <Pressable onPress={buyAgain} disabled={buying} style={({ pressed }) => [styles.buyAgain, (pressed || buying) && { opacity: 0.7 }]}>
+          <Ionicons name="repeat" size={20} color="#fff" />
+          <ThemedText style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>{t('Buy again: add these items to my list')}</ThemedText>
+        </Pressable>
+      ) : null}
       {receipt.notes ? <ThemedText type="small" themeColor="textSecondary">{receipt.notes}</ThemedText> : null}
 
       <ThemedText type="smallBold" style={styles.section}>{photos.length > 1 ? `${t('Photo')} (${photos.length})` : t('Photo')}</ThemedText>
@@ -161,7 +187,8 @@ export default function ReceiptDetail() {
 
 const styles = StyleSheet.create({
   container: { padding: Spacing.three, gap: Spacing.three, paddingBottom: Spacing.six },
-  card: { borderRadius: 14, padding: Spacing.three, gap: 4 },
+  card: { borderRadius: 16, padding: Spacing.three, gap: 4 },
+  buyAgain: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.two, backgroundColor: Brand.primary, borderRadius: 14, paddingVertical: 14 },
   storeName: { fontSize: 24, lineHeight: 30, fontWeight: '700' },
   total: { fontSize: 28, lineHeight: 34, fontWeight: '800', marginTop: Spacing.two },
   sectionRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: Spacing.two, flexWrap: 'wrap' },

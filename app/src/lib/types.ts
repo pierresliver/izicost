@@ -48,6 +48,7 @@ export type ReceiptItemRow = {
   id: string;
   line_no: number;
   name_as_printed: string;
+  product_name: string | null;
   qty: number | null;
   unit_price: number | null;
   line_total: number | null;

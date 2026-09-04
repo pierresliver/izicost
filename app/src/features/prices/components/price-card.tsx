@@ -56,7 +56,7 @@ export function ProductResultCard({ row, onPress }: { row: SearchRow; onPress: (
 }
 
 /** One store's current price on the product page. */
-export function StorePriceRow({ row, rank, best, onReport }: { row: CommunityPrice; rank: number; best: boolean; onReport: () => void }) {
+export function StorePriceRow({ row, rank, best, onReport, onOpenStore }: { row: CommunityPrice; rank: number; best: boolean; onReport: () => void; onOpenStore?: () => void }) {
   const theme = useTheme();
   const unit = unitPriceLabel(row.unit_price, row.size_unit, row.currency);
   return (
@@ -65,12 +65,15 @@ export function StorePriceRow({ row, rank, best, onReport }: { row: CommunityPri
         <View style={[styles.rank, { backgroundColor: best ? Brand.primary : theme.backgroundSelected }]}>
           <ThemedText type="smallBold" style={{ color: best ? '#fff' : theme.textSecondary, fontSize: 12 }}>{rank}</ThemedText>
         </View>
-        <View style={{ flex: 1, gap: 1 }}>
-          <ThemedText type="smallBold" style={{ fontSize: 15 }} numberOfLines={1}>{row.store_name}</ThemedText>
+        <Pressable onPress={onOpenStore} disabled={!onOpenStore} style={{ flex: 1, gap: 1 }} accessibilityRole={onOpenStore ? 'button' : undefined}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <ThemedText type="smallBold" style={{ fontSize: 15, flexShrink: 1 }} numberOfLines={1}>{row.store_name}</ThemedText>
+            {onOpenStore ? <Ionicons name="chevron-forward" size={14} color={theme.textSecondary} /> : null}
+          </View>
           <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>
             {[row.branch_address, row.city].filter(Boolean).join(' · ') || t('unknown')}
           </ThemedText>
-        </View>
+        </Pressable>
         <View style={{ alignItems: 'flex-end' }}>
           <BigPrice value={row.price} currency={row.currency} size={22} color={best ? Brand.primary : undefined} />
           {unit ? <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 12 }}>{unit}</ThemedText> : null}

@@ -79,6 +79,7 @@ function Root() {
         <Stack.Screen name="product/[key]" options={{ title: t('Prices') }} />
         <Stack.Screen name="quick-add" options={{ title: t('Add a market price'), presentation: 'modal' }} />
         <Stack.Screen name="recap" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="store/[id]" options={{ title: t('Store') }} />
       </Stack>
     </ThemeProvider>
   );

@@ -10,9 +10,11 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Brand, Spacing } from '@/constants/theme';
 import {
-  addItem, createList, deleteList, getActiveList, listItems, listLists, mergeLists, removeChecked, removeItem, renameList, searchProducts, setActiveList, updateItem,
-  type BasketItem, type BasketList, type ProductHit,
+  addItem, createList, deleteList, getActiveList, listItems, listLists, mergeLists, removeChecked, removeItem, renameList, searchProducts, setActiveList, shareList, updateItem, watchListItems,
+  type BasketItem, type BasketList, type ListRow, type ProductHit,
 } from '@/features/basket/api';
+import { useHousehold } from '@/features/household/api';
+import '@/features/household/i18n';
 import { BasketItemRow } from '@/features/basket/components/basket-item-row';
 import { VoiceSheet, type VoicePhase } from '@/features/basket/components/voice-sheet';
 import '@/features/basket/i18n';
@@ -24,13 +26,12 @@ import { sizeLabel } from '@/features/prices/format';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
 
-type ListRow = BasketList & { item_count: number };
-
 export default function BasketScreen() {
   const { lang } = useLang();
   const router = useRouter();
   const theme = useTheme();
   const params = useLocalSearchParams<{ voice?: string }>();
+  const { household } = useHousehold();
   const [lists, setLists] = useState<ListRow[]>([]);
   const [list, setList] = useState<BasketList | null>(null);
   const [items, setItems] = useState<BasketItem[]>([]);
@@ -197,7 +198,7 @@ export default function BasketScreen() {
     if (l) setMenuFor(l);
   }
   function openMerge() {
-    if (lists.length < 2) { Alert.alert(t('Merge lists'), t('You need at least two lists to merge.')); return; }
+    if (lists.filter((l) => l.mine && l.id !== list?.id).length < 1) { Alert.alert(t('Merge lists'), t('You need at least two lists to merge.')); return; }
     setMergePick(new Set()); setMergeOpen(true);
   }
   async function doMerge() {
@@ -219,6 +220,7 @@ export default function BasketScreen() {
             const on = l.id === list?.id;
             return (
               <Pressable key={l.id} onPress={() => (on ? listMenu(l) : switchList(l))} onLongPress={() => listMenu(l)} style={[styles.chip, { backgroundColor: on ? Brand.primary : theme.backgroundElement }]}>
+                {l.household_id ? <Ionicons name="people" size={13} color={on ? '#fff' : Brand.primary} /> : null}
                 <ThemedText type="small" style={{ color: on ? '#fff' : theme.text, fontWeight: on ? '700' : '500' }} numberOfLines={1}>{l.name}</ThemedText>
                 <View style={[styles.count, { backgroundColor: on ? 'rgba(255,255,255,0.25)' : theme.backgroundSelected }]}>
                   <ThemedText type="small" style={{ color: on ? '#fff' : theme.textSecondary, fontSize: 11, lineHeight: 14 }}>{on ? items.length : l.item_count}</ThemedText>
@@ -271,7 +273,7 @@ export default function BasketScreen() {
     </View>
   );
 
-  const others = lists.filter((l) => l.id !== list?.id);
+  const others = lists.filter((l) => l.id !== list?.id && l.mine);
   return (
     <ThemedView style={{ flex: 1 }}>
       <Stack.Screen options={{ title: list?.name ?? t('My basket') }} />
@@ -325,11 +327,15 @@ export default function BasketScreen() {
         <Pressable style={styles.backdrop} onPress={() => setMenuFor(null)} />
         <View style={[styles.sheet, { backgroundColor: theme.background }]}>
           <ThemedText type="smallBold" style={{ fontSize: 17 }} numberOfLines={1}>{menuFor?.name}</ThemedText>
+          {menuFor && !menuFor.mine ? <ThemedText type="small" themeColor="textSecondary">{t('Shared with you by your household. Only its owner can rename, share or delete it.')}</ThemedText> : null}
           {[
             { icon: 'add-circle-outline' as const, label: t('New list'), onPress: () => { setMenuFor(null); setPrompt('new'); } },
-            { icon: 'pencil-outline' as const, label: t('Rename list'), onPress: () => { const target = menuFor; setMenuFor(null); setRenameTarget(target); setPrompt('rename'); } },
-            { icon: 'git-merge-outline' as const, label: t('Merge lists'), onPress: () => { const target = menuFor; setMenuFor(null); if (target && target.id !== list?.id) switchList(target).then(openMerge); else openMerge(); } },
-            ...(lists.length > 1 ? [{ icon: 'trash-outline' as const, label: t('Delete list'), danger: true, onPress: () => { const target = menuFor; setMenuFor(null); if (target) confirmDelete(target); } }] : []),
+            { icon: 'notifications-outline' as const, label: t('Alert me when any item gets cheaper'), onPress: () => { const target = menuFor; setMenuFor(null); if (target) run(async () => { const n = await watchListItems(target.id); Alert.alert(t('Alerts on'), n ? t('%n% items added to My items with the bell on.', { n }) : t('None of these items is in the catalogue yet. Alerts start once a receipt with them is scanned.')); }); } },
+            ...(menuFor?.mine ? [{ icon: 'pencil-outline' as const, label: t('Rename list'), onPress: () => { const target = menuFor; setMenuFor(null); setRenameTarget(target); setPrompt('rename'); } }] : []),
+            ...(menuFor?.mine && menuFor.household_id ? [{ icon: 'people-outline' as const, label: t('Stop sharing with the household'), onPress: () => { const target = menuFor; setMenuFor(null); if (target) run(() => shareList(target.id, null)); } }] : []),
+            ...(menuFor?.mine && !menuFor.household_id && household ? [{ icon: 'people' as const, label: t('Share with the household'), onPress: () => { const target = menuFor; setMenuFor(null); if (target) run(() => shareList(target.id, household.id)); } }] : []),
+            ...(menuFor?.mine ? [{ icon: 'git-merge-outline' as const, label: t('Merge lists'), onPress: () => { const target = menuFor; setMenuFor(null); if (target && target.id !== list?.id) switchList(target).then(openMerge); else openMerge(); } }] : []),
+            ...(menuFor?.mine && lists.filter((l) => l.mine).length > 1 ? [{ icon: 'trash-outline' as const, label: t('Delete list'), danger: true, onPress: () => { const target = menuFor; setMenuFor(null); if (target) confirmDelete(target); } }] : []),
           ].map((o) => (
             <Pressable key={o.label} onPress={o.onPress} style={styles.menuRow}>
               <Ionicons name={o.icon} size={20} color={'danger' in o && o.danger ? Brand.danger : Brand.primary} />

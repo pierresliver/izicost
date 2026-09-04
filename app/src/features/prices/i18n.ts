@@ -3,6 +3,19 @@
 import { registerTranslations } from '@/lib/i18n';
 
 registerTranslations({
+  // store page
+  'vs the typical price in %city% · %n% products compared': 'vs o preço habitual em %city% · %n% produtos comparados',
+  'cheaper here': 'mais baratos aqui',
+  'dearer here': 'mais caros aqui',
+  'Not enough reports yet to compare this shop with its city.': 'Ainda não há registos suficientes para comparar esta loja com a sua cidade.',
+  'How this shop moves its prices': 'Como esta loja mexe nos preços',
+  'Prices here are %pct%% %dir% than when we first saw them, across %n% products.': 'Os preços aqui estão %pct%% %dir% do que quando os vimos pela primeira vez, em %n% produtos.',
+  'higher': 'mais altos',
+  'lower': 'mais baixos',
+  'Prices at this shop': 'Preços nesta loja',
+  'Latest community price here, and how it compares with the typical price in the city. Tap a product for its page.': 'Último preço da comunidade aqui, e como se compara com o preço habitual na cidade. Toque num produto para ver a sua página.',
+  'city %price%': 'cidade %price%',
+  'Store not found.': 'Loja não encontrada.',
   // radius
   'Radius': 'Raio',
   'Stores within %km% km': 'Lojas num raio de %km% km',

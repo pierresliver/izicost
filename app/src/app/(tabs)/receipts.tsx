@@ -73,7 +73,7 @@ function iconFor(storeType: string | null): keyof typeof Ionicons.glyphMap {
 
 const styles = StyleSheet.create({
   list: { padding: Spacing.three, gap: Spacing.two, paddingBottom: Spacing.six },
-  card: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, borderRadius: 14, padding: Spacing.three },
+  card: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, borderRadius: 16, padding: Spacing.three },
   icon: { width: 36, alignItems: 'center' },
   empty: { textAlign: 'center', marginTop: Spacing.six },
 });

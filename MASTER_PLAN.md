@@ -453,6 +453,26 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   signatures; server messages translated). Security agent (low: trigger helpers and the price-point trigger get
   explicit revokes — migration 020; `nearby_stores` radius clamped 0.5–50 km; merge takes ≤20 lists; rename/delete
   filter by owner). Verified: zero own functions callable without a session; trigger still fires; merge test passes.
+- ✅ **Round 3 (PS: "go for it, then build"):** **shared household lists** (migration 021: `shopping_lists.household_id`,
+  `can_use_list()`; members read/add/tick/remove items of a shared list, only the owner renames/shares/deletes;
+  basket quote works on shared lists; list menu "Share with the household"), **Buy again** on receipt detail (all lines
+  → active list, weights rounded to packs, then "Compare stores?"), **price alerts for a whole list**
+  (`watch_list_items`: every product of the list joins My items with the bell on), **store page** (`/store/[id]`:
+  median % vs its city with cheaper/dearer counts, weekly store index "how this shop moves its prices", per-product
+  list vs city typical, share card; linked from product pages and basket results), small polish (card corners unified).
+- ✅ **Round 3 reviews:** correctness (high: a shared list stayed usable by the household after its owner left →
+  migration 022 unshares on leave/remove and requires the owner to still be a member; merging a shared list kept
+  only the owner's items → fixed; store page hard-wired to MZN → follows the store's country; Buy again used the raw
+  OCR name → uses the confirmed name; weights round up; cap checked first; menu/merge gates; chip order).
+  Security (medium: a member could move items between lists or change their author via a direct update, bypassing the
+  200 cap → migration 023 trigger: author immutable, moves only inside the server merge via a transaction flag;
+  store index honours `min_reports()`). Verified live.
+- ✅ **Build 5:** `builds/izicost-v0.4.0-2026-09-04-1146.apk` (Day 3 rounds 1–2). **Build 6** = 0.4.1 / versionCode 6
+  with round 3 (shared lists, buy again, list alerts, store page).
+- 💡 **Next (PS ideas, agreed):** *Shelf scan* — photos of shelf labels instead of receipts (interval capture every N
+  seconds with the phone in a pocket, sharpness filter before upload, branch confirmed from GPS, source 'shelf',
+  "trusted seeder" flag for PS); then *brands* — brand on every product, a generic product behind each brand, a brand
+  chip ("any brand" / a specific one) on list items, comparison and product page by brand.
 - 🐞 **Basket add failed** ("infinite recursion detected in policy for shopping_list_items", PS's 20-item voice list):
   the 200-item cap from 006 counted the table inside its own policy. Migration 018 moves the cap to a definer
   trigger; verified from the PC (6 adds OK, other user still refused). Server-side only — no new build needed.

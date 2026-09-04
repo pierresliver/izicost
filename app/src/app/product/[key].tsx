@@ -237,7 +237,7 @@ export default function ProductScreen() {
             </View>
           </View>
           {listRows.map((r, i) => (
-            <StorePriceRow key={`${r.store_id}|${r.currency}`} row={r} rank={i + 1} best={i === 0} onReport={() => onReport(r)} />
+            <StorePriceRow key={`${r.store_id}|${r.currency}`} row={r} rank={i + 1} best={i === 0} onReport={() => onReport(r)} onOpenStore={() => router.push({ pathname: '/store/[id]', params: { id: r.store_id } } as never)} />
           ))}
         </>
       ) : null}

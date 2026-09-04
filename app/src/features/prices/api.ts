@@ -100,6 +100,36 @@ export async function priceCities(): Promise<CityRow[]> {
   return (data ?? []) as CityRow[];
 }
 
+export type StoreInfo = { id: string; name: string; branch_address: string | null; city: string | null; country: string | null; store_type: string | null; lat: number | null; lng: number | null };
+export type StoreOverviewRow = {
+  product_key: string; display_name: string; size_value: number | null; size_unit: string | null; category: string | null;
+  price: number; observed_on: string; report_count: number; city_median: number | null; diff_pct: number | null;
+};
+export type StoreIndexPoint = { week_start: string; index: number; products: number };
+
+export async function getStore(id: string): Promise<StoreInfo | null> {
+  await ensureSession();
+  const { data, error } = await supabase.from('stores').select('id, name, branch_address, city, country, store_type, lat, lng').eq('id', id).maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ? { ...(data as StoreInfo), lat: numOrNull(data.lat), lng: numOrNull(data.lng) } : null;
+}
+
+/** What one shop charges for each product it sells, against the 30-day median of its city. */
+export async function storeOverview(storeId: string, currency = 'MZN'): Promise<StoreOverviewRow[]> {
+  await ensureSession();
+  const { data, error } = await supabase.rpc('store_overview', { p_store: storeId, p_currency: currency });
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as StoreOverviewRow[]).map((r) => ({ ...r, size_value: numOrNull(r.size_value), price: Number(r.price), report_count: Number(r.report_count), city_median: numOrNull(r.city_median), diff_pct: numOrNull(r.diff_pct) }));
+}
+
+/** How one shop moves its prices over time: weekly index, base 100 at each product's first week there. */
+export async function storeIndex(storeId: string, currency = 'MZN'): Promise<StoreIndexPoint[]> {
+  await ensureSession();
+  const { data, error } = await supabase.rpc('store_index', { p_store: storeId, p_currency: currency });
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as StoreIndexPoint[]).map((r) => ({ ...r, index: Number(r.index), products: Number(r.products) }));
+}
+
 export type StoreTrendPoint = { store_id: string; store_name: string; city: string | null; week_start: string; median_price: number; report_count: number };
 
 /** Weekly median price of one product per store, last 180 days ("how each shop moves its price"). */

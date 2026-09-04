@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { ensureSession, supabase } from '@/lib/supabase';
 
-export type BasketList = { id: string; name: string };
+export type BasketList = { id: string; name: string; household_id?: string | null; user_id?: string };
 export type BasketItem = {
   id: string; list_id: string; product_id: string | null; name: string; qty: number; checked: boolean; created_at: string;
   product_key: string | null;
@@ -28,12 +28,52 @@ function toItem(r: RawItem): BasketItem {
 
 const ACTIVE_KEY = 'izicost.basket.activeList';
 
-/** All of the user's lists, oldest first (the first one is the default "My basket"). */
-export async function listLists(): Promise<(BasketList & { item_count: number })[]> {
+export type ListRow = BasketList & { item_count: number; household_id: string | null; user_id: string; mine: boolean };
+
+/** Every list the user can use: own lists plus lists shared with the household (RLS decides), oldest first. */
+export async function listLists(): Promise<ListRow[]> {
   const uid = await ensureSession();
-  const { data, error } = await supabase.from('shopping_lists').select('id, name, shopping_list_items(count)').eq('user_id', uid).order('created_at');
+  const { data, error } = await supabase.from('shopping_lists').select('id, name, household_id, user_id, shopping_list_items(count)').order('created_at');
   if (error) throw new Error(error.message);
-  return ((data ?? []) as unknown as (BasketList & { shopping_list_items: { count: number }[] })[]).map((l) => ({ id: l.id, name: l.name, item_count: l.shopping_list_items?.[0]?.count ?? 0 }));
+  return ((data ?? []) as unknown as (BasketList & { household_id: string | null; user_id: string; shopping_list_items: { count: number }[] })[])
+    .map((l) => ({ id: l.id, name: l.name, household_id: l.household_id, user_id: l.user_id, mine: l.user_id === uid, item_count: l.shopping_list_items?.[0]?.count ?? 0 }))
+    .sort((a, b) => Number(b.mine) - Number(a.mine)); // my lists first (stable: oldest first within each group)
+}
+
+/** Share one of my lists with my household (or stop sharing with null). Only the creator can. */
+export async function shareList(id: string, householdId: string | null): Promise<void> {
+  const uid = await ensureSession();
+  const { data, error } = await supabase.from('shopping_lists').update({ household_id: householdId }).eq('id', id).eq('user_id', uid).select('id');
+  if (error) throw new Error(error.message);
+  if (!data?.length) throw new Error('not your list');
+}
+
+/** Price alerts for every item of a list: each product joins "My items" with the bell on. Returns how many. */
+export async function watchListItems(listId: string, currency: string | null = null): Promise<number> {
+  await ensureSession();
+  const { data, error } = await supabase.rpc('watch_list_items', { p_list: listId, p_currency: currency }); // null = the currency my receipts use
+  if (error) throw new Error(error.message);
+  return Number(data ?? 0);
+}
+
+/**
+ * "Buy again": add the lines of a past receipt to a list. Weights round UP to whole packs (2.4 kg -> 3), the same
+ * name on two lines becomes one line, and the 200-item cap is checked first. Returns distinct items added.
+ */
+export async function addReceiptItems(listId: string, lines: { name: string; qty: number | null }[]): Promise<number> {
+  const merged = new Map<string, number>();
+  for (const l of lines) {
+    const name = l.name.trim().replace(/\s+/g, ' ');
+    if (!name) continue;
+    const qty = l.qty && l.qty > 0 ? Math.max(1, Math.ceil(l.qty)) : 1;
+    merged.set(name.toLowerCase(), (merged.get(name.toLowerCase()) ?? 0) + qty);
+  }
+  const current = (await listItems(listId)).length;
+  if (current + merged.size > 200) throw new Error('a basket holds at most 200 items');
+  const names = new Map<string, string>();
+  for (const l of lines) { const n = l.name.trim().replace(/\s+/g, ' '); if (n) names.set(n.toLowerCase(), n); }
+  for (const [key, qty] of merged) await addItem(listId, { name: names.get(key) ?? key, qty });
+  return merged.size;
 }
 
 export async function createList(name: string): Promise<BasketList> {
@@ -71,12 +111,12 @@ export async function setActiveList(id: string): Promise<void> {
   await AsyncStorage.setItem(ACTIVE_KEY, id).catch(() => {});
 }
 
-/** The list the basket screen and the quote work on: the remembered one when it still exists, else the default. */
+/** The list the basket screen and the quote work on: the remembered one when it is still usable (own or shared), else the default. */
 export async function getActiveList(): Promise<BasketList> {
-  const uid = await ensureSession();
+  await ensureSession();
   const remembered = await AsyncStorage.getItem(ACTIVE_KEY).catch(() => null);
   if (remembered) {
-    const { data } = await supabase.from('shopping_lists').select('id, name').eq('id', remembered).eq('user_id', uid).maybeSingle();
+    const { data } = await supabase.from('shopping_lists').select('id, name, household_id, user_id').eq('id', remembered).maybeSingle(); // RLS: own or household
     if (data) return data as BasketList;
   }
   return getDefaultList();
