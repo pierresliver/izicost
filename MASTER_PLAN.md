@@ -434,6 +434,9 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   users who were already "on"; headless notifications honour the chosen language; recap skips an empty week; update
   card distinguishes "could not check"; seed clean-up deletes products in a second statement; ticker "today" = today).
   Build 5 needed for all of Day 3 (new native modules: background task, view capture).
+- 🐞 **Basket add failed** ("infinite recursion detected in policy for shopping_list_items", PS's 20-item voice list):
+  the 200-item cap from 006 counted the table inside its own policy. Migration 018 moves the cap to a definer
+  trigger; verified from the PC (6 adds OK, other user still refused). Server-side only — no new build needed.
 - ✅ Checks: typecheck clean; `expo lint` set up (eslint + eslint-config-expo added; today's files clean, 16
   pre-existing "setState in effect" style warnings left in older files); translation audit 0 missing (now also
   scans .ts files); review agent's 11 findings fixed (offline splitter, cancel-during-parse race, sheet never
