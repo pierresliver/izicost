@@ -439,8 +439,12 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   list; LATERAL join in `basket_quote` / `item_brand_options` (the candidate function ran once per price row);
   brand picker uses the region's currency, de-duplicates brands, reverts on failure; whole-word brand match when
   parsing speech. All live suites re-run: pass.
-- ⏳ **Build 7 + the slim download** wait for PS's yes (PS: "only build when you finish everything"). The slim build
-  script now sets `android.enableMinifyInReleaseBuilds` (SDK 57 name; the old ProGuard flag alone made Gradle fail).
+- ✅ **Build 7 (PS's yes, 2026-09-04 ~15:30):** `builds/izicost-v0.5.0-2026-09-04-1549.apk` (0.5.0 / versionCode 7,
+  74 MB) handed to PS. **Slim download published:** `builds/izicost-v0.5.0-2026-09-04-1606-arm64-slim.apk` (44 MB)
+  → public `releases` bucket as `izicost-latest.apk` + `latest.json` (Update button and invite link now work). The
+  slim build script now sets `android.enableMinifyInReleaseBuilds` (SDK 57 name; the old ProGuard flag alone made
+  Gradle fail). **PS never installed builds 5 and 6** (phone was still on 0.3.1 / build 4), so build 7 is the first
+  look at everything since Day 3: the build-7 findings cover Day 3 + rounds 2–3 + Day 4.
 - 💡 Open: PS's own account is one of the three flagged ids (280099df / 992a80f4 / add533b1) — confirm which by email;
   move the 5 old guest receipts (d36d289a) to it; `shelf_scan_open` stays '0'; the "photo N" link opens nothing yet.
 
