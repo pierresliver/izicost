@@ -12,14 +12,15 @@ Day 3 (2026-09-04, see the "Day 3" block in section 12) added: demo data (`node 
 
 Later on Day 3 (round 2): Near-me radius chooser (2/5/10/25 km), several shopping lists with merge, Latest/Typical price and Items-found/Estimated-total ranking on the basket result, "Worth the trip", dashboard de-duplicated with numbers first and the endless "Loading…" fixed, basket-add recursion bug fixed (migration 018). Round 3: shared household shopping lists, "Buy again" from a receipt, price alerts for a whole list, the store page (how each shop moves its prices) linked from products and basket results. Migrations 001–021 applied.
 
-Builds: build 4 = builds\izicost-v0.3.1-2026-09-03-2010.apk is on my phone; my dad also tests. Everything from Day 3 needs build 5 (two new native modules: background task, view capture) — I said "add everything to build 5".
+Builds: build 6 = builds\izicost-v0.4.1-2026-09-04-1206.apk has everything up to round 3 and is on my phone (build 5 = 0.4.0 without round 3 also exists); my dad also tests.
 
 Rule: **never start an APK build without my explicit yes in this session.**
 
 Today:
-1. I will give you my findings from testing (build 4 or 5). Fix them all. Ask for screenshots if something is unclear.
+1. I will give you my findings from testing build 6. Fix them all. Ask for screenshots if something is unclear.
 2. My old guest account (id d36d289a-…, last seen 2026-09-02) still holds yesterday's 5 receipts; my new account has none. If I give you the email of my new account, move those receipts (and their items) to it on the server, then check Home fills up.
-3. When the fixes are done, ask me before making build 5 (scripts\build-apk.ps1); copy it to builds\ and tell me the file name.
+3. When the fixes are done, ask me before making build 7 (scripts\build-apk.ps1); copy it to builds\ and tell me the file name. Also publish the slim download (`build-apk.ps1 -Abi arm64-v8a -Slim`, then `node scripts/publish-release.js <apk>`) so the in-app Update button and the invite link work.
+3b. Agreed next features: **Shelf scan** (interval photo capture every N seconds with the phone in a pocket, sharpness filter, AI reads shelf labels, branch from GPS, review screen, source 'shelf', trusted-seeder flag for me) and then **brands** (brand on every product, generic product behind each brand, brand chip on list items, comparison by brand). Details in MASTER_PLAN section 12, Day 3 "Next".
 4. Visual polish pass, screen by screen: consistent spacing, brand green, clean cards, dark mode correct, nice empty states. The app must look better than the competitor apps in research/COMPETITOR_RESEARCH.md section 3. The dashboard must feel fun, dynamic and interactive (charts that move, colours, 🎉 moments).
 5. Seeding plan for the price pool (prices show from the first report, but a new city still starts empty): tester group, promotion flyers, etc. Decide with me.
 6. Check the background price alerts really fire on my phone with the app closed (Android may delay them); if unreliable, plan real push (Firebase) as stage C.

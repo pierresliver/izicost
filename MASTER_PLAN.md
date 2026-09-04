@@ -467,8 +467,8 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   Security (medium: a member could move items between lists or change their author via a direct update, bypassing the
   200 cap → migration 023 trigger: author immutable, moves only inside the server merge via a transaction flag;
   store index honours `min_reports()`). Verified live.
-- ✅ **Build 5:** `builds/izicost-v0.4.0-2026-09-04-1146.apk` (Day 3 rounds 1–2). **Build 6** = 0.4.1 / versionCode 6
-  with round 3 (shared lists, buy again, list alerts, store page).
+- ✅ **Build 5:** `builds/izicost-v0.4.0-2026-09-04-1146.apk` (Day 3 rounds 1–2). **Build 6** = `builds/izicost-v0.4.1-2026-09-04-1206.apk`
+  (0.4.1 / versionCode 6) with round 3 (shared lists, buy again, list alerts, store page) — handed to PS.
 - 💡 **Next (PS ideas, agreed):** *Shelf scan* — photos of shelf labels instead of receipts (interval capture every N
   seconds with the phone in a pocket, sharpness filter before upload, branch confirmed from GPS, source 'shelf',
   "trusted seeder" flag for PS); then *brands* — brand on every product, a generic product behind each brand, a brand
