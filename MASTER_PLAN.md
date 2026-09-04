@@ -459,6 +459,12 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   and the Home bar chart now cover **12 months** (label every other month when > 8 bars) — needs build 8.
 - ✅ **Build 8 (PS's yes, ~16:45):** `builds/izicost-v0.5.1-2026-09-04-1706.apk` (0.5.1 / versionCode 8) = build 7 +
   12-month charts; slim `builds/izicost-v0.5.1-2026-09-04-1722-arm64-slim.apk` (44 MB) published as the download.
+- 🐞 **Build-8 screenshots (17:39):** "Este mês 0.00 MZN" and the category ring at 0 while the Set bar and the legend
+  showed 1 900 — my 12-month change left `thisMonth = monthPoints[5]` (and `trend[5]` in detail.ts) hard-coded from
+  the 6-month layout → March. Fixed (`length - 1`); needs build 9. The phone showed only the 5 real receipts because
+  **PS's phone IS the old guest d36d289a** (no account was ever created), which the seed skips on purpose; added
+  `seed-demo.js user <id>` and gave that account the demo year (110 receipts + 9 photos; real receipts untouched).
+  Creating the account in the Me tab upgrades this guest in place, so no receipt move is needed after all.
 - 🐞 **Correction (evening):** the three "real" accounts were NOT PS's household — they were my own Day-3 test
   accounts (hhtest.*@example.com) that the household test never cleaned up. Deleted them (with their seed receipts)
   and their seeder flags. **PS has no account yet: the phone is still a guest** (pcmdsiziadvertising@gmail.com is not

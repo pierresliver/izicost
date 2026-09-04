@@ -49,7 +49,7 @@ export async function loadCategoryOverview(): Promise<CategoryOverview> {
     arr[idx] += it.line_total ?? 0;
   }
   const categories = Object.entries(byCat)
-    .map(([name, trend]) => ({ name, trend, thisMonth: trend[5] }))
+    .map(([name, trend]) => ({ name, trend, thisMonth: trend[trend.length - 1] }))
     .sort((a, b) => b.thisMonth - a.thisMonth || b.trend.reduce((s, x) => s + x, 0) - a.trend.reduce((s, x) => s + x, 0));
   return { currency, months, categories };
 }

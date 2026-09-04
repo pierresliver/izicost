@@ -2,6 +2,8 @@
 //   node scripts/seed-demo.js          -> seed: fake branches + ~17000 community price points over 365 days in
 //                                         Maputo/Matola/Beira/Nampula, ~100 receipts per test account (denser in
 //                                         the last two weeks), and PS's own sample receipt photos attached to them
+//   node scripts/seed-demo.js user <id or prefix>  -> add the year of demo receipts to ONE account that already has
+//                                                   real receipts (the seed skips those by default), e.g. PS's phone
 //   node scripts/seed-demo.js clean    -> remove everything the seed created (nothing else)
 // Everything is flagged: seed stores carry tax ids 4000990xx, seed receipts have notes = 'SEED', and only
 // products that did not exist before are recorded for deletion. Uses the management API (postgres role),
@@ -167,8 +169,25 @@ async function seedAll() {
   }
   console.log(`community: ${STORES.length} branches, ${PRODUCTS.length} products, ${pts.length} price points over ${DAYS} days`);
 
-  // personal receipts for every test account (everything except the old guest that holds real receipts)
+  // personal receipts for every test account (everything except accounts that hold real receipts)
   const users = await sql(`select id from auth.users u where not exists (select 1 from public.receipts r where r.user_id = u.id and coalesce(r.notes,'') <> 'SEED') order by created_at`);
+  const { receipts, photoPaths } = await seedUsers(users);
+  await sql(`insert into public.seed_log (kind, ref) values ('window', ${q(t0)})`);
+  console.log(`personal: ${receipts} receipts across ${users.length} accounts (notes = 'SEED')`);
+
+  const check = await sql(`select (select count(*) from public.community_prices) as community_prices, (select count(*) from public.city_price_index(12)) as city_index_rows, (select count(*) from public.receipts where notes='SEED') as seed_receipts`);
+  console.log("check:", JSON.stringify(check[0]));
+}
+
+/** A year of shopping for each given account: supermarket receipts every few days, extras, sample photos. */
+async function seedUsers(users) {
+  for (const s of STORES) {
+    if (!s.id) { const row = await sql(`select id from public.stores where tax_id = ${q(s.tax)}`); s.id = row[0]?.id; }
+    if (!s.id) throw new Error("seed stores missing: run 'node scripts/seed-demo.js' first");
+  }
+  for (const p of PRODUCTS) {
+    if (!p.id) { const row = await sql(`select id from public.products where product_key = public.product_key_clean(${q(p[1])})`); p.id = row[0]?.id; }
+  }
   let receipts = 0;
   const photoPaths = [];
   for (const u of users) {
@@ -223,11 +242,16 @@ async function seedAll() {
   }
   if (photoPaths.length) await sql(`insert into public.seed_log (kind, ref) values ${photoPaths.map((p) => `('photo', ${q(p)})`).join(",")}`);
   console.log(`photos: ${photoPaths.length} sample photos uploaded${serviceKey ? "" : " (skipped: no SUPABASE_SECRET_KEY)"}`);
-  await sql(`insert into public.seed_log (kind, ref) values ('window', ${q(t0)})`);
-  console.log(`personal: ${receipts} receipts across ${users.length} accounts (notes = 'SEED')`);
+  return { receipts, photoPaths };
+}
 
-  const check = await sql(`select (select count(*) from public.community_prices) as community_prices, (select count(*) from public.city_price_index(12)) as city_index_rows, (select count(*) from public.receipts where notes='SEED') as seed_receipts`);
-  console.log("check:", JSON.stringify(check[0]));
+async function seedOneUser(prefix) {
+  const rows = await sql(`select id from auth.users where id::text like ${q(prefix.toLowerCase() + "%")}`);
+  if (rows.length !== 1) throw new Error(`expected exactly one account for ${prefix}, found ${rows.length}`);
+  const has = await sql(`select count(*)::int as n from public.receipts where user_id = ${q(rows[0].id)} and notes = 'SEED'`);
+  if (has[0].n) { console.log(`account ${prefix} already has ${has[0].n} demo receipts`); return; }
+  const { receipts } = await seedUsers(rows);
+  console.log(`personal: ${receipts} demo receipts added to ${prefix}… (real receipts untouched)`);
 }
 
 async function cleanAll() {
@@ -253,6 +277,8 @@ async function cleanAll() {
 
 (async () => {
   try {
-    if (process.argv[2] === "clean") await cleanAll(); else await seedAll();
+    if (process.argv[2] === "clean") await cleanAll();
+    else if (process.argv[2] === "user") await seedOneUser(process.argv[3] || "");
+    else await seedAll();
   } catch (e) { console.error("FAILED:", e.message); process.exit(1); }
 })();

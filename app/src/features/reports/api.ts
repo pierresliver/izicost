@@ -119,7 +119,7 @@ export async function loadDashboard(opts: ScopeOpts = {}): Promise<Dashboard> {
     const rs = inCur.filter((r) => monthOf(r) === m);
     return { ym: m, total: rs.reduce((s, r) => s + (r.total ?? 0), 0), count: rs.length };
   });
-  const thisMonth = monthPoints[5], lastMonth = monthPoints[4];
+  const thisMonth = monthPoints[monthPoints.length - 1], lastMonth = monthPoints[monthPoints.length - 2];
   const deltaPct = lastMonth.total > 0 ? ((thisMonth.total - lastMonth.total) / lastMonth.total) * 100 : null;
 
   const thisRows = inCur.filter((r) => monthOf(r) === ym(now));
