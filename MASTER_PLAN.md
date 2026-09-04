@@ -469,6 +469,15 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   (a sweep found the third leftover, `trend[5]` in `app/reports/category.tsx`), plus PS's two asks: the month headline
   card now opens that month's report page (chevron shown) and the weekly summary card opens the week story.
   File: `builds/izicost-v0.5.2-2026-09-04-<time>.apk` (0.5.2 / versionCode 9); slim published as the download.
+- 🐞🐞 **Build 9 first attempt was BROKEN (18:26):** I stopped a running build to add the tappable cards and restarted
+  it. The stop landed in the middle of `expo prebuild`, which had already rewritten `android/app/build.gradle` with the
+  bare template; the restart saw build.gradle newer than app.json, skipped prebuild and built the template:
+  package `com.helloworld`, versionCode 1, light theme, no IziCost config. It installed on PS's phone as a SECOND app
+  (empty, white, new guest 925a0c8b) next to the real IziCost (build 8, all data intact). PS: uninstall the white one.
+  File renamed `builds/BROKEN-do-not-install-…-helloworld.apk`. Fixes: `expo prebuild --clean` re-run; the build
+  script now refuses to build when build.gradle lacks the app's applicationId and, after Gradle, checks the APK's
+  package + versionCode with `aapt` before copying it to builds\. Lesson (also in memory): never stop a build
+  mid-way — let it finish or kill Gradle AND re-run prebuild --clean.
 - 🐞 **Correction (evening):** the three "real" accounts were NOT PS's household — they were my own Day-3 test
   accounts (hhtest.*@example.com) that the household test never cleaned up. Deleted them (with their seed receipts)
   and their seeder flags. **PS has no account yet: the phone is still a guest** (pcmdsiziadvertising@gmail.com is not

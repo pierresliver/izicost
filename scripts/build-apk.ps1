@@ -48,9 +48,29 @@ foreach ($k in @('android.enableMinifyInReleaseBuilds', 'android.enableProguardI
 }
 [System.IO.File]::WriteAllText($gp, $gpText, (New-Object System.Text.UTF8Encoding($false)))
 
+# Guard: an interrupted prebuild leaves the template project behind ("com.helloworld"). Never build that.
+$expectedId = (node -p "require('./app.json').expo.android.package")
+$expectedCode = (node -p "require('./app.json').expo.android.versionCode")
+$gradleText = Get-Content 'android\app\build.gradle' -Raw
+if ($gradleText -notmatch [regex]::Escape($expectedId)) {
+  throw "android/app/build.gradle does not carry applicationId $expectedId (interrupted prebuild?). Run: npx expo prebuild --platform android --no-install --clean  (in app\) and build again."
+}
+
 Write-Host '>> gradle assembleRelease...' -ForegroundColor Cyan
 & 'android\gradlew.bat' -p android assembleRelease
 if ($LASTEXITCODE -ne 0) { throw 'gradle build failed' }
+
+# Guard: the APK must really be IziCost with the version from app.json (checked with aapt from the Android SDK).
+$aapt = Get-ChildItem 'D:\Android\Sdk\build-tools\*\aapt.exe' -ErrorAction SilentlyContinue | Sort-Object FullName | Select-Object -Last 1
+if ($aapt) {
+  $badging = (& $aapt.FullName dump badging 'android\app\build\outputs\apk\release\app-release.apk' 2>$null | Select-String '^package:' | Select-Object -First 1).ToString()
+  if ($badging -notmatch [regex]::Escape("name='$expectedId'") -or $badging -notmatch [regex]::Escape("versionCode='$expectedCode'")) {
+    throw "APK check FAILED: $badging (expected $expectedId versionCode $expectedCode). Nothing copied to builds\."
+  }
+  Write-Host ">> APK check OK: $badging" -ForegroundColor Green
+} else {
+  Write-Host '>> aapt not found: APK package check skipped' -ForegroundColor Yellow
+}
 
 $ver = (node -p "require('./app.json').expo.version")
 $stamp = Get-Date -Format 'yyyy-MM-dd-HHmm'
