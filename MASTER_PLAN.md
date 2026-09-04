@@ -486,6 +486,10 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   "no price yet" and explains why; the brand chip moved under the item name (it was squeezing names to "sal fino de
   mes…"); the Home pill "N items in your basket" opens the basket (it went straight to the comparison); basket icon
   in the Home and Prices headers (PS: "hard to find the basket"); list menu gains "Empty this list" (`clearList`).
+- 🏁 **Session ended 2026-09-04 ~19:40.** On PS's phone: build 9 (`izicost-v0.5.2-2026-09-04-1904.apk`); slim 0.5.2
+  published. Waiting on PS: uninstall the white `com.helloworld` app; create the account (Me tab) → then
+  `trust-seeder.js` for Shelf scan; yes/no for build 10 (basket fixes). Migrations 001–028 applied; demo data (12
+  months, photos) still in the DB. Repo clean, last commit pushed.
 - 🐞 **Correction (evening):** the three "real" accounts were NOT PS's household — they were my own Day-3 test
   accounts (hhtest.*@example.com) that the household test never cleaned up. Deleted them (with their seed receipts)
   and their seeder flags. **PS has no account yet: the phone is still a guest** (pcmdsiziadvertising@gmail.com is not
