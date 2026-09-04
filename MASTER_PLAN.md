@@ -457,6 +457,8 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   points, and **PS's own phase-0 receipt photos** attached as sample photos (93 uploads, 9.5 MB; `clean` deletes
   them too; the photos do not match the fake lines — say so to testers). Reseeded 2026-09-04 evening. (3) Reports
   and the Home bar chart now cover **12 months** (label every other month when > 8 bars) — needs build 8.
+- ✅ **Build 8 (PS's yes, ~16:45):** `builds/izicost-v0.5.1-2026-09-04-1706.apk` (0.5.1 / versionCode 8) = build 7 +
+  12-month charts; slim `builds/izicost-v0.5.1-2026-09-04-1722-arm64-slim.apk` (44 MB) published as the download.
 - 💡 Open: PS's own account is one of the three flagged ids (280099df / 992a80f4 / add533b1) — confirm which by email;
   move the 5 old guest receipts (d36d289a) to it; `shelf_scan_open` stays '0'; the "photo N" link opens nothing yet.
 
