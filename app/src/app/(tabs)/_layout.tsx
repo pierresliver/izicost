@@ -1,9 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { Tabs, useRouter } from 'expo-router';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Brand } from '@/constants/theme';
+import '@/features/basket/i18n';
+import { BASKET_HREF } from '@/features/basket/routes';
 import { t, useLang } from '@/lib/i18n';
+
+/** The basket is the heart of the app: one tap away from the Home and Prices headers. */
+function BasketButton() {
+  const router = useRouter();
+  return (
+    <Pressable onPress={() => router.push(BASKET_HREF)} hitSlop={8} style={({ pressed }) => [styles.basketBtn, pressed && { opacity: 0.8 }]} accessibilityRole="button" accessibilityLabel={t('My basket')}>
+      <Ionicons name="basket" color="#fff" size={20} />
+    </Pressable>
+  );
+}
 
 export default function TabLayout() {
   useLang(); // re-render tab labels when the language changes
@@ -19,6 +31,7 @@ export default function TabLayout() {
         options={{
           title: t('Home'),
           headerTitle: 'IziCost',
+          headerRight: () => <BasketButton />,
           tabBarIcon: ({ color, size }) => <Ionicons name="home" color={color} size={size} />,
         }}
       />
@@ -26,6 +39,7 @@ export default function TabLayout() {
         name="prices"
         options={{
           title: t('Prices'),
+          headerRight: () => <BasketButton />,
           tabBarIcon: ({ color, size }) => <Ionicons name="pricetags" color={color} size={size} />,
         }}
       />
@@ -60,6 +74,7 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
+  basketBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: Brand.primary, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   scanButton: {
     width: 62,
     height: 62,

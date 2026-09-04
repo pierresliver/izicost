@@ -13,7 +13,7 @@ import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View } from '
 import { ThemedText } from '@/components/themed-text';
 import { Brand, Spacing } from '@/constants/theme';
 import { countOpenItems } from '@/features/basket/api';
-import { BASKET_HREF, BASKET_QUOTE_HREF } from '@/features/basket/routes';
+import { BASKET_HREF } from '@/features/basket/routes';
 import { memberName, refreshHousehold, useHousehold } from '@/features/household/api';
 import { ScopeToggle } from '@/features/household/components/scope-toggle';
 import { CityIndexTeaser } from '@/features/prices/components/city-index-teaser';
@@ -133,10 +133,10 @@ export default function HomeScreen() {
           </Pressable>
         </View>
         {basketCount > 0 ? (
-          <Pressable onPress={() => router.push(BASKET_QUOTE_HREF)} style={({ pressed }) => [s.basketPill, pressed && { opacity: 0.85 }]}>
+          <Pressable onPress={() => router.push(BASKET_HREF)} style={({ pressed }) => [s.basketPill, pressed && { opacity: 0.85 }]}>
             <Ionicons name="basket" size={18} color="#fff" />
             <ThemedText style={{ color: '#fff', fontWeight: '700', flex: 1 }}>{basketCount === 1 ? t('1 item in your basket') : t('%n% items in your basket', { n: basketCount })}</ThemedText>
-            <ThemedText style={{ color: '#fff', fontWeight: '700' }}>{t('Compare stores now')}</ThemedText>
+            <ThemedText style={{ color: '#fff', fontWeight: '700' }}>{t('Open')}</ThemedText>
             <Ionicons name="chevron-forward" size={16} color="#fff" />
           </Pressable>
         ) : null}

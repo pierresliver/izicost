@@ -478,6 +478,14 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   script now refuses to build when build.gradle lacks the app's applicationId and, after Gradle, checks the APK's
   package + versionCode with `aapt` before copying it to builds\. Lesson (also in memory): never stop a build
   mid-way — let it finish or kill Gradle AND re-run prebuild --clean.
+- 🐞 **Build-9 findings (19:16):** "12 items in your basket" → "no community prices yet": all 12 lines were free text
+  and matching needed an exact product key ("cebola amarela 1kg" ≠ "Cebola kg"). Migration 028: `list_item_candidates`
+  also matches free-text lines by first word + pg_trgm similarity ≥ 0.3 + compatible sizes (`sizes_compatible()`,
+  so "água 500ml" never meets "Água Vumba 5L"); PS's two onion lines now price at Shoprite/Recheio; the other 10 are
+  simply not in the pool. Server-side, live on build 9. In the app (build 10): the empty result lists every item with
+  "no price yet" and explains why; the brand chip moved under the item name (it was squeezing names to "sal fino de
+  mes…"); the Home pill "N items in your basket" opens the basket (it went straight to the comparison); basket icon
+  in the Home and Prices headers (PS: "hard to find the basket"); list menu gains "Empty this list" (`clearList`).
 - 🐞 **Correction (evening):** the three "real" accounts were NOT PS's household — they were my own Day-3 test
   accounts (hhtest.*@example.com) that the household test never cleaned up. Deleted them (with their seed receipts)
   and their seeder flags. **PS has no account yet: the phone is still a guest** (pcmdsiziadvertising@gmail.com is not

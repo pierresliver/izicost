@@ -158,10 +158,25 @@ export default function QuoteScreen() {
         ) : !inScope.length ? (
           <View style={styles.center}>
             <View style={styles.emptyIcon}><Ionicons name="basket" size={30} color={Brand.primary} /></View>
-            <ThemedText type="smallBold" style={{ fontSize: 17, textAlign: 'center' }}>{t('No community prices for your basket here yet')}</ThemedText>
-            <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'center' }}>
-              {t('Prices come from receipts scanned in the last 60 days. Try another city, or scan receipts to add prices.')}
+            <ThemedText type="smallBold" style={{ fontSize: 17, textAlign: 'center' }}>
+              {quotes.length ? t('No community prices for your basket here yet') : missing.length === 1 ? t('None of your items has a community price yet') : t('None of your %n% items has a community price yet', { n: missing.length })}
             </ThemedText>
+            <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'center' }}>
+              {quotes.length
+                ? t('Prices come from receipts scanned in the last 60 days. Try another city, or scan receipts to add prices.')
+                : t('Prices come from receipts and shelf scans of the last 60 days. Nobody has reported these products yet, or they are written differently from how the shops print them. Short, common names match best ("cebola", "leite 1L").')}
+            </ThemedText>
+            {!quotes.length && missing.length ? (
+              <ThemedView type="backgroundElement" style={{ borderRadius: 14, padding: Spacing.two, gap: 4, alignSelf: 'stretch' }}>
+                {missing.map((name) => (
+                  <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Ionicons name="help-circle-outline" size={14} color={theme.textSecondary} />
+                    <ThemedText type="small" numberOfLines={1} style={{ flex: 1 }}>{name}</ThemedText>
+                    <ThemedText type="small" themeColor="textSecondary">{t('no price yet')}</ThemedText>
+                  </View>
+                ))}
+              </ThemedView>
+            ) : null}
           </View>
         ) : (
           <>

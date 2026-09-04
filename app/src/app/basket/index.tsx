@@ -10,7 +10,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Brand, Spacing } from '@/constants/theme';
 import {
-  addItem, createList, deleteList, getActiveList, itemBrandOptions, listItems, listLists, mergeLists, removeChecked, removeItem, renameList, searchProducts, setActiveList, shareList, updateItem, watchListItems,
+  addItem, clearList, createList, deleteList, getActiveList, itemBrandOptions, listItems, listLists, mergeLists, removeChecked, removeItem, renameList, searchProducts, setActiveList, shareList, updateItem, watchListItems,
   type BasketItem, type BasketList, type BrandOption, type ListRow, type ProductHit,
 } from '@/features/basket/api';
 import { formatMoney } from '@/lib/receipts';
@@ -367,6 +367,14 @@ export default function BasketScreen() {
           {menuFor && !menuFor.mine ? <ThemedText type="small" themeColor="textSecondary">{t('Shared with you by your household. Only its owner can rename, share or delete it.')}</ThemedText> : null}
           {[
             { icon: 'add-circle-outline' as const, label: t('New list'), onPress: () => { setMenuFor(null); setPrompt('new'); } },
+            ...(menuFor && menuFor.item_count > 0 ? [{ icon: 'remove-circle-outline' as const, label: t('Empty this list'), danger: true, onPress: () => {
+              const target = menuFor; setMenuFor(null);
+              if (!target) return;
+              Alert.alert(t('Remove all %n% items from "%name%"?', { n: target.item_count, name: target.name }), t('The list stays; only its items are removed.'), [
+                { text: t('Cancel'), style: 'cancel' },
+                { text: t('Empty'), style: 'destructive', onPress: () => run(async () => { await clearList(target.id); if (target.id === list?.id) setItems([]); }) },
+              ]);
+            } }] : []),
             { icon: 'notifications-outline' as const, label: t('Alert me when any item gets cheaper'), onPress: () => { const target = menuFor; setMenuFor(null); if (target) run(async () => { const n = await watchListItems(target.id); Alert.alert(t('Alerts on'), n ? t('%n% items added to My items with the bell on.', { n }) : t('None of these items is in the catalogue yet. Alerts start once a receipt with them is scanned.')); }); } },
             ...(menuFor?.mine ? [{ icon: 'pencil-outline' as const, label: t('Rename list'), onPress: () => { const target = menuFor; setMenuFor(null); setRenameTarget(target); setPrompt('rename'); } }] : []),
             ...(menuFor?.mine && menuFor.household_id ? [{ icon: 'people-outline' as const, label: t('Stop sharing with the household'), onPress: () => { const target = menuFor; setMenuFor(null); if (target) run(() => shareList(target.id, null)); } }] : []),

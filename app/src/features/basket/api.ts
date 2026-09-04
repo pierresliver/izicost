@@ -202,6 +202,12 @@ export async function removeItem(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+/** Remove every line of a list (the list itself stays). */
+export async function clearList(listId: string): Promise<void> {
+  const { error } = await supabase.from('shopping_list_items').delete().eq('list_id', listId);
+  if (error) throw new Error(error.message);
+}
+
 export async function removeChecked(listId: string): Promise<void> {
   const { error } = await supabase.from('shopping_list_items').delete().eq('list_id', listId).eq('checked', true);
   if (error) throw new Error(error.message);
