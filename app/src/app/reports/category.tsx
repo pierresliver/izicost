@@ -21,7 +21,7 @@ export default function CategoryScreen() {
   const { category = 'other' } = useLocalSearchParams<{ category?: string }>();
   const { data, error, refreshing, refresh } = useLoader(() => loadCategory(category), [category]);
   const color = categoryColor(category, p);
-  const thisMonth = data?.trend[5]?.total ?? 0;
+  const thisMonth = data?.trend[data.trend.length - 1]?.total ?? 0;
 
   return (
     <ScrollView contentContainerStyle={ui.screen} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}>

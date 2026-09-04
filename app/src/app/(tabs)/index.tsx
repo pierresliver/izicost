@@ -147,7 +147,7 @@ export default function HomeScreen() {
       {d && !hasReceipts && !household ? <EmptyChartsCard onScan={() => router.navigate('/scan')} /> : null}
       {hasReceipts || household ? <SectionTitle action={t('All reports')} onAction={() => go('/reports')}>{t('Your spending')}</SectionTitle> : null}
       {household ? <ScopeToggle /> : null}
-      {hasReceipts && d ? <HeadlineCard d={d} monthName={monthName} overall={overall} onBudget={() => go('/reports/budgets')} /> : null}
+      {hasReceipts && d ? <HeadlineCard d={d} monthName={monthName} overall={overall} onBudget={() => go('/reports/budgets')} onOpen={() => go(`/reports/month?ym=${d.months[d.months.length - 1].ym}`)} /> : null}
       {hasReceipts && d ? <WeeklyCard d={d} onStory={() => go('/recap')} /> : null}
 
       {/* 3. Your usual items: cheapest price now, green/red since you last bought, bell for drops */}

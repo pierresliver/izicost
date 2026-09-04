@@ -57,19 +57,22 @@ function levelColor(level: BudgetStatus['level'], p: ReturnType<typeof useChartP
   return level === 'over' ? p.danger : level === 'warn' ? p.warning : p.primary;
 }
 
-type HeadlineProps = { d: Dashboard; monthName: string; overall: BudgetStatus | null; onBudget: () => void };
+type HeadlineProps = { d: Dashboard; monthName: string; overall: BudgetStatus | null; onBudget: () => void; onOpen?: () => void };
 
 /** This month's total, delta vs last month, receipt count, other-currency note, and the overall budget ring. */
-export function HeadlineCard({ d, monthName, overall, onBudget }: HeadlineProps) {
+export function HeadlineCard({ d, monthName, overall, onBudget, onOpen }: HeadlineProps) {
   const p = useChartPalette();
   const n = d.thisMonth.count;
   const shownTotal = useAnimatedNumber(d.thisMonth.total, 900); // counts up when the screen opens
   const others = d.others.map((o) => formatMoney(o.total, o.currency)).join(', ');
   return (
-    <Card>
+    <Card onPress={onOpen}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.three }}>
         <View style={{ flex: 1, gap: 2 }}>
-          <ThemedText type="small" themeColor="textSecondary">{t('This month')} · {monthName}</ThemedText>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <ThemedText type="small" themeColor="textSecondary" style={{ flex: 1 }}>{t('This month')} · {monthName}</ThemedText>
+            {onOpen ? <Ionicons name="chevron-forward" size={16} color={p.label} /> : null}
+          </View>
           <ThemedText style={ui.big}>{formatMoney(shownTotal, d.currency)}</ThemedText>
           <Delta pct={d.deltaPct} label={d.deltaPct === null ? t('no receipts last month') : d.deltaPct === 0 ? t('same as last month') : t('vs last month')} />
           <ThemedText type="small" themeColor="textSecondary">
@@ -137,7 +140,7 @@ export function WeeklyCard({ d, onStory }: { d: Dashboard; onStory?: () => void 
   const p = useChartPalette();
   const grow = useAnimatedNumber(1); // the two bars slide in
   return (
-    <Card>
+    <Card onPress={onStory}>
       <SectionTitle>{t('Weekly recap')}</SectionTitle>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: Spacing.three }}>
         <View style={{ flex: 1, gap: 2 }}>

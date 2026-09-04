@@ -465,6 +465,10 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   **PS's phone IS the old guest d36d289a** (no account was ever created), which the seed skips on purpose; added
   `seed-demo.js user <id>` and gave that account the demo year (110 receipts + 9 photos; real receipts untouched).
   Creating the account in the Me tab upgrades this guest in place, so no receipt move is needed after all.
+- ✅ **Build 9 (PS's yes, ~17:50):** the "this month" index fix on Home, the category ring and the category detail page
+  (a sweep found the third leftover, `trend[5]` in `app/reports/category.tsx`), plus PS's two asks: the month headline
+  card now opens that month's report page (chevron shown) and the weekly summary card opens the week story.
+  File: `builds/izicost-v0.5.2-2026-09-04-<time>.apk` (0.5.2 / versionCode 9); slim published as the download.
 - 🐞 **Correction (evening):** the three "real" accounts were NOT PS's household — they were my own Day-3 test
   accounts (hhtest.*@example.com) that the household test never cleaned up. Deleted them (with their seed receipts)
   and their seeder flags. **PS has no account yet: the phone is still a guest** (pcmdsiziadvertising@gmail.com is not
