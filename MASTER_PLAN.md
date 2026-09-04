@@ -459,8 +459,12 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   and the Home bar chart now cover **12 months** (label every other month when > 8 bars) — needs build 8.
 - ✅ **Build 8 (PS's yes, ~16:45):** `builds/izicost-v0.5.1-2026-09-04-1706.apk` (0.5.1 / versionCode 8) = build 7 +
   12-month charts; slim `builds/izicost-v0.5.1-2026-09-04-1722-arm64-slim.apk` (44 MB) published as the download.
-- 💡 Open: PS's own account is one of the three flagged ids (280099df / 992a80f4 / add533b1) — confirm which by email;
-  move the 5 old guest receipts (d36d289a) to it; `shelf_scan_open` stays '0'; the "photo N" link opens nothing yet.
+- 🐞 **Correction (evening):** the three "real" accounts were NOT PS's household — they were my own Day-3 test
+  accounts (hhtest.*@example.com) that the household test never cleaned up. Deleted them (with their seed receipts)
+  and their seeder flags. **PS has no account yet: the phone is still a guest** (pcmdsiziadvertising@gmail.com is not
+  in auth.users). Next: PS creates the account in the Me tab (the guest is upgraded in place, same id, receipts kept),
+  then `node scripts/trust-seeder.js pcmdsiziadvertising@gmail.com` and move the 5 old guest receipts (d36d289a,
+  photos too: storage move + `image_path` rewrite). `shelf_scan_open` stays '0'; the "photo N" link opens nothing yet.
 
 **Day 3 (2026-09-04) — "make it shareable, alive and talked about":**
 - ✅ **Demo data** (`scripts/seed-demo.js`, `clean` to remove): 12 fake branches in Maputo/Matola/Beira/Nampula, 30 products,
