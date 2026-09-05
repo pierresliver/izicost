@@ -31,6 +31,8 @@ if (-not $needPrebuild) {
   if ($appJsonTime -gt $gradleTime) { $needPrebuild = $true }
 }
 if ($needPrebuild) {
+  # a Gradle daemon from the previous build may still hold files under android\ (EBUSY on prebuild's clean-up)
+  if (Test-Path 'android\gradlew.bat') { & 'android\gradlew.bat' --stop | Out-Null }
   Write-Host '>> running expo prebuild (android)...' -ForegroundColor Cyan
   npx expo prebuild --platform android --no-install
   if ($LASTEXITCODE -ne 0) { throw 'prebuild failed' }
