@@ -508,6 +508,9 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   sheet), share with any app, download as a .txt (`features/basket/share-list.ts`; share button in the header).
   Typecheck clean, lint baseline unchanged (9 old errors), translations 0 missing, RPC suite passes. Two review agents
   (functional + security) launched before build 11.
+- 🏁 **Session ended 2026-09-05 ~13:15.** PS on build 13 (`izicost-v0.5.6-2026-09-05-1300.apk`); slim 0.5.6 published;
+  migrations 001–029 applied; demo data (12 months, photos, PS's complete-basket prices) still in the DB. Waiting on
+  PS's build-13 findings; build 14 only on PS's yes; fixes only, no new or removed features without consent.
 - ✅ **Builds 12 → 13:** build 12 (`superseded-izicost-v0.5.5-2026-09-05-1235.apk`) had the fix round but the city
   ticker line only showed when "My city" was set on Prices (PS's was not) → **build 13** `builds/izicost-v0.5.6-2026-09-05-1300.apk`
   (0.5.6 / versionCode 13, aapt-checked) adds the fallback: the city line uses the city where the user shops most
