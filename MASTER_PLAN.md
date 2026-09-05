@@ -508,6 +508,11 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   sheet), share with any app, download as a .txt (`features/basket/share-list.ts`; share button in the header).
   Typecheck clean, lint baseline unchanged (9 old errors), translations 0 missing, RPC suite passes. Two review agents
   (functional + security) launched before build 11.
+- ✅ **Builds 12 → 13:** build 12 (`superseded-izicost-v0.5.5-2026-09-05-1235.apk`) had the fix round but the city
+  ticker line only showed when "My city" was set on Prices (PS's was not) → **build 13** `builds/izicost-v0.5.6-2026-09-05-1300.apk`
+  (0.5.6 / versionCode 13, aapt-checked) adds the fallback: the city line uses the city where the user shops most
+  (`topReceiptCity()`, Maputo for PS). Build 13's first attempt failed on an EBUSY lock (Gradle daemon of build 12 held
+  a dex file during prebuild's clean-up); the script now runs `gradlew --stop` before prebuild. Slim 0.5.6 published.
 - ✅ **Build 11 (~11:39):** `builds/izicost-v0.5.4-2026-09-05-1139.apk` (0.5.4 / versionCode 11, aapt-checked); slim published.
 - 🐞 **Build-11 findings (11:46), fixes only, nothing else changed:** (1) two live lines at the top of Home — my city
   and all cities — instead of chips; (2) **tab labels / screen titles sometimes in English under Portuguese content**:
