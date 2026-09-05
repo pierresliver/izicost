@@ -45,7 +45,7 @@ export function compactValue(v: number): string {
   return String(Math.round(v));
 }
 
-/** Vertical bars with rounded tops, a baseline, labels below and a value above each bar (every other one when crowded). Bars grow in. */
+/** Vertical bars with rounded tops, a baseline, a label below and a value above every bar. Bars grow in. */
 export function BarChart({ data, height = 150, color, onPressBar, formatValue }: BarChartProps) {
   const p = useChartPalette();
   const [width, onLayout] = useWidth();
@@ -77,14 +77,12 @@ export function BarChart({ data, height = 150, color, onPressBar, formatValue }:
             <G key={d.key} onPress={onPressBar ? () => onPressBar(d) : undefined}>
               <Rect x={i * slot} y={0} width={slot} height={height} fill="transparent" />
               {h > 0 ? <Path d={path} fill={fill} opacity={dim ? 0.45 : 1} /> : null}
-              {d.value > 0 && grow > 0.95 && (n <= 8 || d.highlight || (n - 1 - i) % 2 === 0) ? (
-                <SvgText x={x + barW / 2} y={y - 5} fontSize={n > 8 ? 9 : 11} fontWeight={d.highlight ? '700' : '500'} fill={p.label} textAnchor="middle">{n > 8 ? compactValue(d.value) : fmt(d.value)}</SvgText>
+              {d.value > 0 && grow > 0.95 ? (
+                <SvgText x={x + barW / 2} y={y - 4} fontSize={n > 8 ? 8 : 11} fontWeight={d.highlight ? '700' : '500'} fill={p.label} textAnchor="middle">{n > 8 ? compactValue(d.value) : fmt(d.value)}</SvgText>
               ) : null}
-              {n <= 8 || d.highlight || (n - 1 - i) % 2 === 0 ? (
-                <SvgText x={x + barW / 2} y={height - 6} fontSize={n > 8 ? 10 : 11} fill={p.label} textAnchor="middle" fontWeight={d.highlight ? '700' : '400'}>
-                  {d.label}
-                </SvgText>
-              ) : null}
+              <SvgText x={x + barW / 2} y={height - 6} fontSize={n > 8 ? 9 : 11} fill={p.label} textAnchor="middle" fontWeight={d.highlight ? '700' : '400'}>
+                {d.label}
+              </SvgText>
             </G>
           );
         })}

@@ -508,6 +508,14 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   sheet), share with any app, download as a .txt (`features/basket/share-list.ts`; share button in the header).
   Typecheck clean, lint baseline unchanged (9 old errors), translations 0 missing, RPC suite passes. Two review agents
   (functional + security) launched before build 11.
+- ✅ **Build 11 (~11:39):** `builds/izicost-v0.5.4-2026-09-05-1139.apk` (0.5.4 / versionCode 11, aapt-checked); slim published.
+- 🐞 **Build-11 findings (11:46), fixes only, nothing else changed:** (1) two live lines at the top of Home — my city
+  and all cities — instead of chips; (2) **tab labels / screen titles sometimes in English under Portuguese content**:
+  React Compiler memoises `t('…')` calls without reactive inputs, so strings rendered at the first paint kept the
+  device language after the saved choice loaded. Fix in `lib/i18n.tsx`: nothing renders until the saved language is
+  read (splash stays up) and a language change remounts the tree (`<Fragment key={lang}>`); (3) demo prices for PS's
+  own 12 basket lines at three seed shops (`scripts/seed-basket-demo.js <id>`), so complete baskets show in "Onde é
+  mais barato" — live already; (4) 12-month chart: a label and a value on every bar.
 - ✅ **Build 10 (PS: "ok go", ~09:30):** `builds/izicost-v0.5.3-2026-09-05-0955.apk` (0.5.3 / versionCode 10, aapt-checked) with the basket fixes of the previous evening; PS installed it by 10:19.
 
 - 🏁 **Session ended 2026-09-04 ~19:40.** On PS's phone: build 9 (`izicost-v0.5.2-2026-09-04-1904.apk`); slim 0.5.2

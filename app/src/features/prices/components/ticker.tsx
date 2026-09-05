@@ -15,7 +15,7 @@ import { communityTicker, type TickerRow } from '../api';
 import '../i18n';
 
 /** `city` limits the feed to one city (null = every city); `highlight` marks products on the basket / My items with a star. */
-export function Ticker({ city = null, highlight, showEmpty = false }: { city?: string | null; highlight?: Set<string>; showEmpty?: boolean } = {}) {
+export function Ticker({ city = null, label, highlight, showEmpty = false }: { city?: string | null; label?: string; highlight?: Set<string>; showEmpty?: boolean } = {}) {
   const theme = useTheme();
   const router = useRouter();
   const [rows, setRows] = useState<TickerRow[]>([]);
@@ -41,7 +41,7 @@ export function Ticker({ city = null, highlight, showEmpty = false }: { city?: s
     if (!showEmpty) return null;
     return (
       <View style={[styles.box, { backgroundColor: theme.backgroundElement }]}>
-        <View style={styles.live}><View style={[styles.dot, { backgroundColor: theme.textSecondary }]} /><ThemedText type="small" style={{ color: Brand.primary, fontWeight: '800', fontSize: 10 }}>{t('LIVE')}</ThemedText></View>
+        <View style={styles.live}><View style={[styles.dot, { backgroundColor: theme.textSecondary }]} /><ThemedText type="small" style={{ color: Brand.primary, fontWeight: '800', fontSize: 10 }} numberOfLines={1}>{label ? `${t('LIVE')} · ${label}` : t('LIVE')}</ThemedText></View>
         <ThemedText type="small" themeColor="textSecondary" numberOfLines={1} style={{ flex: 1 }}>{city ? t('Quiet week in %city%: no notable price moves yet.', { city }) : t('Quiet week: no notable price moves yet.')}</ThemedText>
       </View>
     );
@@ -67,7 +67,7 @@ export function Ticker({ city = null, highlight, showEmpty = false }: { city?: s
 
   return (
     <View style={[styles.box, { backgroundColor: theme.backgroundElement }]} onLayout={(e) => setBoxW(e.nativeEvent.layout.width)}>
-      <View style={styles.live}><View style={styles.dot} /><ThemedText type="small" style={{ color: Brand.primary, fontWeight: '800', fontSize: 10 }}>{t('LIVE')}</ThemedText></View>
+      <View style={styles.live}><View style={styles.dot} /><ThemedText type="small" style={{ color: Brand.primary, fontWeight: '800', fontSize: 10 }} numberOfLines={1}>{label ? `${t('LIVE')} · ${label}` : t('LIVE')}</ThemedText></View>
       <View style={{ flex: 1, overflow: 'hidden' }}>
         <Animated.View style={{ flexDirection: 'row', transform: [{ translateX: x }] }}>
           <View style={{ flexDirection: 'row' }} onLayout={(e) => setContentW(e.nativeEvent.layout.width)}>{strip('a')}</View>
@@ -80,7 +80,7 @@ export function Ticker({ city = null, highlight, showEmpty = false }: { city?: s
 
 const styles = StyleSheet.create({
   box: { flexDirection: 'row', alignItems: 'center', borderRadius: 12, height: 34, paddingLeft: 10, gap: 8, overflow: 'hidden' },
-  live: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  live: { flexDirection: 'row', alignItems: 'center', gap: 4, maxWidth: '45%', flexShrink: 1 },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Brand.danger },
   item: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: Spacing.one },
 });

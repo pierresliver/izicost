@@ -164,23 +164,30 @@ export function t(en: string, vars?: Record<string, string | number>): string {
   return s;
 }
 
-const Ctx = createContext<{ lang: Lang; setLang: (l: Lang) => void }>({ lang: 'en', setLang: () => {} });
+const Ctx = createContext<{ lang: Lang; setLang: (l: Lang) => void; restoreAfterSwitch: string | null }>({ lang: 'en', setLang: () => {}, restoreAfterSwitch: null });
+let switchedFrom: string | null = null; // the screen the user was on when they changed the language (survives the remount)
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => { currentLang = deviceLang(); return currentLang; });
+  const [lang, setLangState] = useState<Lang>(currentLang);
+  const [ready, setReady] = useState(false); // the saved choice is read before anything renders: no wrong-language first paint
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((v) => {
-      if (v === 'en' || v === 'pt') { currentLang = v; setLangState(v); }
-    }).catch(() => {});
+    // 1.5 s at most: a storage module that never answers must not keep the splash screen up forever
+    Promise.race([AsyncStorage.getItem(STORAGE_KEY), new Promise<null>((r) => setTimeout(() => r(null), 1500))])
+      .then((v) => { if (v === 'en' || v === 'pt') { currentLang = v; setLangState(v); } })
+      .catch(() => {})
+      .finally(() => setReady(true));
   }, []);
   const value = useMemo(
     () => ({
       lang,
-      setLang: (l: Lang) => { currentLang = l; setLangState(l); AsyncStorage.setItem(STORAGE_KEY, l).catch(() => {}); },
+      setLang: (l: Lang) => { if (l === lang) return; switchedFrom = '/me'; currentLang = l; setLangState(l); AsyncStorage.setItem(STORAGE_KEY, l).catch(() => {}); },
+      restoreAfterSwitch: switchedFrom,
     }),
     [lang],
   );
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  if (!ready) return null; // the splash screen is still up
+  // key = lang: switching the language remounts the screens, so titles and tab labels computed once are recomputed
+  return <Ctx.Provider value={value}><React.Fragment key={lang}>{children}</React.Fragment></Ctx.Provider>;
 }
 
 export function useLang() {

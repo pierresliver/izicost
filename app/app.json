@@ -2,7 +2,7 @@
   "expo": {
     "name": "IziCost",
     "slug": "izicost",
-    "version": "0.5.4",
+    "version": "0.5.5",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "izicost",
@@ -20,7 +20,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.pierresliver2026.izicost",
-      "versionCode": 11
+      "versionCode": 12
     },
     "web": {
       "output": "static",

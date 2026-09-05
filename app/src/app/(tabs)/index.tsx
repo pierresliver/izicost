@@ -12,8 +12,6 @@ import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View } from '
 
 import { ThemedText } from '@/components/themed-text';
 import { Brand, Spacing } from '@/constants/theme';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import { ThemedView } from '@/components/themed-view';
 import { basketProductKeys, countOpenItems } from '@/features/basket/api';
 import { Ticker } from '@/features/prices/components/ticker';
@@ -34,7 +32,7 @@ import { DueSoonCard, InflationTeaser, RecapAskCard } from '@/features/reports/h
 import { categoryInflation, detectRecurring, fetchHistory, personalInflation, type CategoryInflation, type Recurring } from '@/features/reports/insights';
 import { enableWeeklyRecap, getRecapPref, rescheduleWeeklyRecap, setRecapPref, type RecapPref } from '@/features/reports/notifications';
 import { assignColors, useChartPalette } from '@/features/reports/palette';
-import { Card, Chip, ErrorText, Row, SectionTitle, styles as ui } from '@/features/reports/ui';
+import { Card, ErrorText, Row, SectionTitle, styles as ui } from '@/features/reports/ui';
 import { shareApp } from '@/features/share/share';
 import { WatchCard } from '@/features/watch/components/watch-card';
 import { t, useLang } from '@/lib/i18n';
@@ -58,13 +56,11 @@ export default function HomeScreen() {
   const [recapPref, setRecapPrefState] = useState<RecapPref>('off');
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  // live ticker at the top: my city or every city (remembered), with a star on products I care about
+  // two live lines at the top (my city, all cities) with a star on products I care about
   const priceScope = useScope();
-  const [tickerScope, setTickerScope] = useState<'city' | 'all'>('all');
   const [highlightKeys, setHighlightKeys] = useState<Set<string>>(() => new Set());
   useFocusEffect(useCallback(() => {
     let alive = true;
-    AsyncStorage.getItem(TICKER_KEY).then((v) => { if (alive && (v === 'city' || v === 'all')) setTickerScope(v); }).catch(() => {});
     Promise.all([watchlist().catch(() => []), basketProductKeys().catch(() => [])]).then(([w, b]) => {
       if (alive) setHighlightKeys(new Set([...w.map((r) => r.product_key), ...b]));
     });
@@ -140,12 +136,9 @@ export default function HomeScreen() {
 
       {/* 0. The market, live: this week's movers in my city or everywhere; ★ = on my basket or My items */}
       <View style={{ gap: 6 }}>
-        <Ticker city={tickerScope === 'city' ? priceScope.myCity?.city ?? null : null} highlight={highlightKeys} showEmpty />
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Chip label={priceScope.myCity ? t('%city% only', { city: priceScope.myCity.city }) : t('My city')} active={tickerScope === 'city'} onPress={() => { if (!priceScope.myCity) { router.push('/prices'); return; } setTickerScope('city'); AsyncStorage.setItem(TICKER_KEY, 'city').catch(() => {}); }} />
-          <Chip label={t('All cities')} active={tickerScope === 'all'} onPress={() => { setTickerScope('all'); AsyncStorage.setItem(TICKER_KEY, 'all').catch(() => {}); }} />
-          <ThemedText type="small" themeColor="textSecondary" style={{ flex: 1, textAlign: 'right', fontSize: 11 }}>{t('★ = on your basket or My items')}</ThemedText>
-        </View>
+        {priceScope.myCity ? <Ticker city={priceScope.myCity.city} label={priceScope.myCity.city} highlight={highlightKeys} showEmpty /> : null}
+        <Ticker city={null} label={t('All cities')} highlight={highlightKeys} showEmpty />
+        <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'right', fontSize: 11 }}>{t('★ = on your basket or My items')}</ThemedText>
       </View>
 
       {/* 1. The promise: tell us what you need, we find the cheapest store */}
@@ -271,8 +264,6 @@ export default function HomeScreen() {
     </ScrollView>
   );
 }
-
-const TICKER_KEY = 'izicost.home.tickerScope';
 
 const s = StyleSheet.create({
   reportsBtn: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: Brand.primary, borderRadius: 14, paddingVertical: 12, paddingHorizontal: Spacing.three },

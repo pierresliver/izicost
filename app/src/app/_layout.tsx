@@ -1,7 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, useRootNavigationState, useRouter, type Href } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { hasSeenOnboarding, Onboarding } from '@/components/onboarding';
@@ -18,24 +18,28 @@ export default function RootLayout() {
   );
 }
 
+// Module level on purpose: a language switch remounts Root (see LanguageProvider), and neither the "already handled"
+// notification taps nor the onboarding answer must be forgotten by that remount.
+const handledTaps = new Set<string>();
+let onboardingSeen: boolean | null = null;
+
 function Root() {
-  useLang(); // re-render screen titles when the language changes
+  const { restoreAfterSwitch } = useLang();
   const colorScheme = useColorScheme();
   const router = useRouter();
-  const [showIntro, setShowIntro] = useState<boolean | null>(null);
+  const [showIntro, setShowIntro] = useState<boolean | null>(onboardingSeen === null ? null : !onboardingSeen);
 
   // Tapping a notification opens the screen it is about (price drop -> product page, recap -> the story).
   // The route is parked until the root stack is mounted (a cold start can deliver the tap before that), and
   // each tap is handled once (Android reports a cold-start tap through both channels).
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
-  const handled = useRef<Set<string>>(new Set());
   const navState = useRootNavigationState();
   useEffect(() => {
     const open = (r: Notifications.NotificationResponse | null) => {
       if (!r) return;
       const id = r.notification.request.identifier;
-      if (handled.current.has(id)) return;
-      handled.current.add(id);
+      if (handledTaps.has(id)) return;
+      handledTaps.add(id);
       const route = r.notification.request.content.data?.route;
       if (typeof route === 'string' && route.startsWith('/')) setPendingRoute(route);
     };
@@ -56,8 +60,15 @@ function Root() {
   useEffect(() => {
     // Guest mode: start a silent anonymous session so the user can scan immediately.
     if (supabaseConfigured) ensureSession().catch((e) => console.warn('session', e));
-    hasSeenOnboarding().then((seen) => { setShowIntro(!seen); SplashScreen.hideAsync(); });
+    if (onboardingSeen !== null) { SplashScreen.hideAsync(); return; } // remount after a language switch: answer already known
+    hasSeenOnboarding().then((seen) => { onboardingSeen = seen; setShowIntro(!seen); SplashScreen.hideAsync(); });
   }, []);
+  // After the user changed the language in the Me tab the remount lands on Home: go back to Me.
+  useEffect(() => {
+    if (!restoreAfterSwitch || showIntro !== false || !navState?.key) return;
+    const id = setTimeout(() => { try { router.replace(restoreAfterSwitch as Href); } catch { /* route gone */ } }, 50);
+    return () => clearTimeout(id);
+  }, [restoreAfterSwitch, showIntro, navState?.key, router]);
 
   if (showIntro === null) return null; // splash still showing
   const theme = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
