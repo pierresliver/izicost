@@ -2,6 +2,11 @@
 import { registerTranslations } from '@/lib/i18n';
 
 registerTranslations({
+  'Tap an item to open it · hold it to remove it': 'Toque num artigo para o abrir · mantenha premido para o remover',
+  'Add an item to watch': 'Adicionar um artigo para vigiar',
+  'Search a product, e.g. picanha': 'Procurar um produto, ex.: picanha',
+  'No product with that name in the catalogue yet.': 'Ainda não há nenhum produto com esse nome no catálogo.',
+  'Could not add': 'Não foi possível adicionar',
   'My items': 'Os meus artigos',
   'Price watch': 'Vigia de preços',
   'Your usual items fill this list by themselves. Green went down, red went up, since you last bought it.':

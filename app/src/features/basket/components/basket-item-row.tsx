@@ -10,18 +10,26 @@ import { t } from '@/lib/i18n';
 
 import type { BasketItem } from '../api';
 
-export function BasketItemRow({ item, onToggle, onQty, onRemove, onOpen, onBrand }: {
+export function BasketItemRow({ item, onToggle, onQty, onRemove, onOpen, onBrand, selectMode, selected, onSelect, onLongPress }: {
   item: BasketItem; onToggle: () => void; onQty: (qty: number) => void; onRemove: () => void; onOpen?: () => void; onBrand?: () => void;
+  /** Selection mode: the tick becomes a checkbox, the stepper and bin hide, tapping the checkbox or the name selects. */
+  selectMode?: boolean; selected?: boolean; onSelect?: () => void; onLongPress?: () => void;
 }) {
   const theme = useTheme();
   const qtyText = Number.isInteger(item.qty) ? String(item.qty) : String(item.qty).replace('.', ',');
   return (
     <ThemedView type="backgroundElement" style={[styles.row, item.checked && { opacity: 0.55 }]}>
-      <Pressable onPress={onToggle} hitSlop={8} accessibilityRole="checkbox" accessibilityState={{ checked: item.checked }}>
-        <Ionicons name={item.checked ? 'checkmark-circle' : 'ellipse-outline'} size={26} color={item.checked ? Brand.success : theme.textSecondary} />
-      </Pressable>
+      {selectMode ? (
+        <Pressable onPress={onSelect} hitSlop={8} accessibilityRole="checkbox" accessibilityState={{ checked: !!selected }}>
+          <Ionicons name={selected ? 'checkbox' : 'square-outline'} size={26} color={selected ? Brand.primary : theme.textSecondary} />
+        </Pressable>
+      ) : (
+        <Pressable onPress={onToggle} onLongPress={onLongPress} hitSlop={8} accessibilityRole="checkbox" accessibilityState={{ checked: item.checked }}>
+          <Ionicons name={item.checked ? 'checkmark-circle' : 'ellipse-outline'} size={26} color={item.checked ? Brand.success : theme.textSecondary} />
+        </Pressable>
+      )}
       <View style={{ flex: 1, gap: 3 }}>
-        <Pressable onPress={onOpen} disabled={!onOpen}>
+        <Pressable onPress={selectMode ? onSelect : onOpen} onLongPress={onLongPress} delayLongPress={400} disabled={!selectMode && !onOpen && !onLongPress}>
           <ThemedText style={[{ fontSize: 16, lineHeight: 20, fontWeight: '600' }, item.checked && { textDecorationLine: 'line-through' }]} numberOfLines={2}>{item.name}</ThemedText>
         </Pressable>
         {onBrand ? (
@@ -33,7 +41,7 @@ export function BasketItemRow({ item, onToggle, onQty, onRemove, onOpen, onBrand
           </Pressable>
         ) : null}
       </View>
-      <View style={[styles.stepper, { backgroundColor: theme.backgroundSelected }]}>
+      {selectMode ? null : <><View style={[styles.stepper, { backgroundColor: theme.backgroundSelected }]}>
         <Pressable onPress={() => onQty(Math.max(1, Math.ceil(item.qty) - 1))} hitSlop={6} style={styles.stepBtn} disabled={item.qty <= 1}>
           <Ionicons name="remove" size={16} color={item.qty <= 1 ? theme.textSecondary : theme.text} />
         </Pressable>
@@ -44,7 +52,7 @@ export function BasketItemRow({ item, onToggle, onQty, onRemove, onOpen, onBrand
       </View>
       <Pressable onPress={onRemove} hitSlop={8} accessibilityLabel={t('Remove')}>
         <Ionicons name="trash-outline" size={18} color={theme.textSecondary} />
-      </Pressable>
+      </Pressable></>}
     </ThemedView>
   );
 }

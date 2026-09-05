@@ -3,6 +3,16 @@
 import { registerTranslations } from '@/lib/i18n';
 
 registerTranslations({
+  // near me / ticker
+  '1 store within %km% km': '1 loja num raio de %km% km',
+  '%n% stores within %km% km': '%n% lojas num raio de %km% km',
+  'No known store within %km% km of you': 'Nenhuma loja conhecida num raio de %km% km de si',
+  'Widen the circle or look at your whole city.': 'Alargue o raio ou veja a sua cidade inteira.',
+  'Widen to %km% km': 'Alargar para %km% km',
+  '%city% only': 'Só %city%',
+  '★ = on your basket or My items': '★ = no seu cesto ou em Os meus artigos',
+  'Quiet week in %city%: no notable price moves yet.': 'Semana calma em %city%: ainda sem variações de preço de nota.',
+  'Quiet week: no notable price moves yet.': 'Semana calma: ainda sem variações de preço de nota.',
   // compare brands
   'Compare brands': 'Comparar marcas',
   'Same product, other brands, cheapest first. Tap one to see where.': 'O mesmo produto, outras marcas, a mais barata primeiro. Toque numa para ver onde.',

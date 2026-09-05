@@ -13,7 +13,7 @@ import { basketQuote, getActiveList, listItems, type BasketItem, type StoreQuote
 import { SplitCard } from '@/features/basket/components/split-card';
 import { Pill, StoreQuoteCard } from '@/features/basket/components/store-quote-card';
 import '@/features/basket/i18n';
-import { bestPerItem, estimateFull, missingItems, rankQuotes, savingVsNext, splitPlan, tripAdvice, type LatLng } from '@/features/basket/optimise';
+import { bestPerItem, estimateFull, missingItems, priceLevel, rankQuotes, savingVsNext, splitPlan, tripAdvice, type LatLng } from '@/features/basket/optimise';
 import { priceCities, type CityRow } from '@/features/prices/api';
 import { CityPicker } from '@/features/prices/components/city-picker';
 import { RadiusPicker } from '@/features/prices/components/radius-picker';
@@ -37,7 +37,7 @@ async function silentPosition(): Promise<LatLng | null> {
   } catch { return null; }
 }
 
-type RankBy = 'found' | 'estimate';
+type RankBy = 'found' | 'estimate' | 'level';
 
 export default function QuoteScreen() {
   useLang();
@@ -69,6 +69,7 @@ export default function QuoteScreen() {
       case 'near':
         if (scope.nearStatus === 'locating' || scope.nearStatus === 'idle') return { ready: false, city: null, country: null };
         if (scope.nearStatus === 'ok') return { ready: true, city: null, country: null };
+        if (scope.nearStatus === 'empty') return { ready: true, city: null, country: scope.myCity?.country ?? null }; // nothing in range: results are hidden below
         return { ready: true, city: scope.myCity?.city ?? null, country: scope.myCity?.country ?? null };
     }
   }, [scope.mode, scope.myCity, scope.otherCity, scope.nearStatus]);
@@ -89,15 +90,23 @@ export default function QuoteScreen() {
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   const nearFilter = scope.mode === 'near' && scope.nearStatus === 'ok' && pos ? scope.radiusKm : undefined;
-  const { ranked: byFound, partial: partialByFound } = useMemo(() => rankQuotes(quotes, pos, nearFilter), [quotes, pos, nearFilter]);
+  const nearEmpty = scope.mode === 'near' && scope.nearStatus === 'empty';
+  const { ranked: byFound, partial: partialByFound } = useMemo(() => (nearEmpty ? { ranked: [], partial: [] } : rankQuotes(quotes, pos, nearFilter)), [quotes, pos, nearFilter, nearEmpty]);
   const inScope = useMemo(() => [...byFound, ...partialByFound], [byFound, partialByFound]);
   const estimates = useMemo(() => estimateFull(inScope), [inScope]); // typical prices from the stores in scope only
   // "Estimated total" puts every store in scope on one list, cheapest full basket first.
+  const levels = useMemo(() => priceLevel(inScope), [inScope]);
   const { ranked, partial } = useMemo(() => {
     if (rankBy === 'found') return { ranked: byFound, partial: partialByFound };
+    if (rankBy === 'level') {
+      // complete baskets first, then the store that is closest to the cheapest price on everything it sells
+      const all = [...byFound, ...partialByFound].sort((a, b) => b.items_found - a.items_found || (levels.get(a.store_id) ?? 1e9) - (levels.get(b.store_id) ?? 1e9));
+      return { ranked: all, partial: [] as typeof all };
+    }
     const all = [...byFound, ...partialByFound].sort((a, b) => (estimates.get(a.store_id)?.total ?? 1e12) - (estimates.get(b.store_id)?.total ?? 1e12));
     return { ranked: all, partial: [] as typeof all };
-  }, [rankBy, byFound, partialByFound, estimates]);
+  }, [rankBy, byFound, partialByFound, estimates, levels]);
+  const levelText = (id: string) => { const v = levels.get(id); return v === null || v === undefined ? '—' : v <= 0 ? t('cheapest') : `+${v.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`; };
   const plan = useMemo(() => splitPlan(inScope, byFound[0] ?? inScope[0]), [inScope, byFound]); // a split helps even when every store is partial
   const perItem = useMemo(() => bestPerItem(inScope), [inScope]);
   const missing = useMemo(() => missingItems(inScope, items.filter((i) => !i.checked)), [inScope, items]); // ticked items are not quoted
@@ -114,6 +123,7 @@ export default function QuoteScreen() {
       case 'near':
         if (scope.nearStatus === 'locating' || scope.nearStatus === 'idle') return t('Finding stores near you…');
         if (scope.nearStatus === 'ok') return nearFilter ? t('Stores within %km% km', { km: scope.radiusKm }) : t('No location — showing everywhere');
+        if (scope.nearStatus === 'empty') return t('No known store within %km% km of you', { km: scope.radiusKm });
         return scope.myCity ? t('No location — showing %city%', { city: scope.myCity.city }) : t('No location — showing everywhere');
       case 'mycity': return scope.myCity?.city ?? t('Choose your city');
       case 'bycity': return scope.otherCity?.city ?? t('Choose a city');
@@ -145,7 +155,7 @@ export default function QuoteScreen() {
             <Segmented<'latest' | 'typical'> options={[{ key: 'latest', label: t('Latest price') }, { key: 'typical', label: t('Typical price') }]} value={typical ? 'typical' : 'latest'} onChange={(k) => setTypical(k === 'typical')} />
           </View>
           <View style={{ flex: 1 }}>
-            <Segmented<RankBy> options={[{ key: 'found', label: t('Items found') }, { key: 'estimate', label: t('Estimated total') }]} value={rankBy} onChange={setRankBy} />
+            <Segmented<RankBy> options={[{ key: 'found', label: t('Items found') }, { key: 'estimate', label: t('Estimated total') }, { key: 'level', label: t('Price level') }]} value={rankBy} onChange={setRankBy} />
           </View>
         </View>
 
@@ -155,6 +165,22 @@ export default function QuoteScreen() {
           <ThemedText style={{ color: Brand.danger }}>{error}</ThemedText>
         ) : !openItems ? (
           <ThemedText themeColor="textSecondary" style={{ textAlign: 'center', marginTop: Spacing.four }}>{t('Add items to your basket first.')}</ThemedText>
+        ) : nearEmpty ? (
+          <View style={styles.center}>
+            <View style={styles.emptyIcon}><Ionicons name="navigate" size={30} color={Brand.primary} /></View>
+            <ThemedText type="smallBold" style={{ fontSize: 17, textAlign: 'center' }}>{t('No known store within %km% km of you', { km: scope.radiusKm })}</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'center' }}>{t('Widen the circle or look at your whole city.')}</ThemedText>
+            <View style={{ flexDirection: 'row', gap: Spacing.two }}>
+              {scope.radiusKm < 25 ? (
+                <Pressable onPress={() => scope.setRadiusKm(scope.radiusKm < 5 ? 5 : scope.radiusKm < 10 ? 10 : 25)} style={styles.nearBtn}>
+                  <ThemedText type="small" style={{ color: Brand.primary, fontWeight: '700' }}>{t('Widen to %km% km', { km: scope.radiusKm < 5 ? 5 : scope.radiusKm < 10 ? 10 : 25 })}</ThemedText>
+                </Pressable>
+              ) : null}
+              <Pressable onPress={() => scope.setMode('mycity')} style={styles.nearBtn}>
+                <ThemedText type="small" style={{ color: Brand.primary, fontWeight: '700' }}>{t('My city')}</ThemedText>
+              </Pressable>
+            </View>
+          </View>
         ) : !inScope.length ? (
           <View style={styles.center}>
             <View style={styles.emptyIcon}><Ionicons name="basket" size={30} color={Brand.primary} /></View>
@@ -199,10 +225,11 @@ export default function QuoteScreen() {
             {ranked.length ? (
               <>
                 <View style={styles.sectionHead}>
-                  <ThemedText type="smallBold" style={{ fontSize: 16, flex: 1 }}>{rankBy === 'found' ? t('Best single store') : t('Estimated total')}</ThemedText>
+                  <ThemedText type="smallBold" style={{ fontSize: 16, flex: 1 }}>{rankBy === 'found' ? t('Best single store') : rankBy === 'level' ? t('Price level') : t('Estimated total')}</ThemedText>
                   <ShareButton onPress={() => setShareOpen(true)} label={t('Share')} />
                 </View>
                 {rankBy === 'estimate' ? <ThemedText type="small" themeColor="textSecondary">{t('Missing items are counted at their typical price so every store can be compared on the full list.')}</ThemedText> : null}
+                {rankBy === 'level' ? <ThemedText type="small" themeColor="textSecondary">{t('How far above the cheapest available price each store is, on average, for the items it has. Stores with the whole basket come first.')}</ThemedText> : null}
                 <ShareCardModal visible={shareOpen} onClose={() => setShareOpen(false)}>
                   <ShareCard title={t('Where is it cheapest?')} subtitle={t('%n% items', { n: openItems })}>
                     {rankBy === 'estimate' ? (
@@ -212,11 +239,11 @@ export default function QuoteScreen() {
                     ) : (
                       <BigNumber value={formatMoney(ranked[0].basket_total, cur)} label={`${ranked[0].store_name}${ranked[0].city ? ` · ${ranked[0].city}` : ''}`} tone="down" />
                     )}
-                    <Rows highlightFirst rows={ranked.slice(0, 4).map((q) => ({ left: q.store_name, sub: `${q.items_found}/${q.items_total} ${t('items found')}${q.city ? ` · ${q.city}` : ''}`, right: formatMoney(rankBy === 'estimate' ? estimates.get(q.store_id)?.total ?? q.basket_total : q.basket_total, cur) }))} />
+                    <Rows highlightFirst rows={ranked.slice(0, 4).map((q) => ({ left: q.store_name, sub: `${q.items_found}/${q.items_total} ${t('items found')}${q.city ? ` · ${q.city}` : ''}`, right: rankBy === 'level' ? levelText(q.store_id) : formatMoney(rankBy === 'estimate' ? estimates.get(q.store_id)?.total ?? q.basket_total : q.basket_total, cur) }))} />
                   </ShareCard>
                 </ShareCardModal>
                 {ranked.map((q, i) => (
-                  <StoreQuoteCard key={q.store_id} quote={q} rank={i + 1} currency={cur} saving={i === 0 ? saving : null} nextStore={ranked[1]?.store_name ?? null} estimate={estimates.get(q.store_id) ?? null} />
+                  <StoreQuoteCard key={q.store_id} quote={q} rank={i + 1} currency={cur} saving={i === 0 ? saving : null} nextStore={ranked[1]?.store_name ?? null} estimate={estimates.get(q.store_id) ?? null} levelPct={levels.get(q.store_id) ?? null} />
                 ))}
               </>
             ) : null}
@@ -227,7 +254,7 @@ export default function QuoteScreen() {
                   <ThemedText type="smallBold" style={{ fontSize: 16 }}>{t('Partial matches')}</ThemedText>
                   <ThemedText type="small" themeColor="textSecondary">{t('These stores have fewer than half of your items.')}</ThemedText>
                 </View>
-                {partial.map((q) => <StoreQuoteCard key={q.store_id} quote={q} rank={null} currency={cur} estimate={estimates.get(q.store_id) ?? null} />)}
+                {partial.map((q) => <StoreQuoteCard key={q.store_id} quote={q} rank={null} currency={cur} estimate={estimates.get(q.store_id) ?? null} levelPct={levels.get(q.store_id) ?? null} />)}
               </>
             ) : null}
 
@@ -273,4 +300,5 @@ const styles = StyleSheet.create({
   card: { borderRadius: 16, padding: Spacing.three, gap: Spacing.two },
   itemLine: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   missing: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: Spacing.two },
+  nearBtn: { borderWidth: 1.5, borderColor: Brand.primary, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
 });

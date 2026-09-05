@@ -14,7 +14,8 @@ import { formatMoney } from '@/lib/receipts';
 import { communityTicker, type TickerRow } from '../api';
 import '../i18n';
 
-export function Ticker() {
+/** `city` limits the feed to one city (null = every city); `highlight` marks products on the basket / My items with a star. */
+export function Ticker({ city = null, highlight, showEmpty = false }: { city?: string | null; highlight?: Set<string>; showEmpty?: boolean } = {}) {
   const theme = useTheme();
   const router = useRouter();
   const [rows, setRows] = useState<TickerRow[]>([]);
@@ -22,7 +23,11 @@ export function Ticker() {
   const [boxW, setBoxW] = useState(0);
   const x = useMemo(() => new Animated.Value(0), []);
 
-  useFocusEffect(useCallback(() => { communityTicker(12).then(setRows).catch(() => {}); }, []));
+  useFocusEffect(useCallback(() => {
+    let alive = true;
+    communityTicker(12, city).then((r) => { if (alive) setRows(r); }).catch(() => {});
+    return () => { alive = false; };
+  }, [city]));
 
   useEffect(() => {
     if (!contentW || !boxW || contentW <= boxW) return;
@@ -32,7 +37,15 @@ export function Ticker() {
     return () => loop.stop();
   }, [contentW, boxW, x]);
 
-  if (!rows.length) return null;
+  if (!rows.length) {
+    if (!showEmpty) return null;
+    return (
+      <View style={[styles.box, { backgroundColor: theme.backgroundElement }]}>
+        <View style={styles.live}><View style={[styles.dot, { backgroundColor: theme.textSecondary }]} /><ThemedText type="small" style={{ color: Brand.primary, fontWeight: '800', fontSize: 10 }}>{t('LIVE')}</ThemedText></View>
+        <ThemedText type="small" themeColor="textSecondary" numberOfLines={1} style={{ flex: 1 }}>{city ? t('Quiet week in %city%: no notable price moves yet.', { city }) : t('Quiet week: no notable price moves yet.')}</ThemedText>
+      </View>
+    );
+  }
   const items = rows.map((r) => {
     if (r.kind === 'activity') return { key: `a-${r.city}`, text: t('%n% prices today · %city%', { n: r.n, city: r.city }), color: theme.textSecondary, icon: 'pulse' as const, product_key: null as string | null };
     const up = (r.change_pct ?? 0) > 0;
@@ -40,10 +53,12 @@ export function Ticker() {
       key: `m-${r.city}-${r.product_key}`,
       text: `${r.display_name} ${up ? '▲' : '▼'}${Math.abs(Math.round(r.change_pct ?? 0))}% · ${formatMoney(r.price, r.currency)} · ${r.city}`,
       color: up ? Brand.danger : Brand.success, icon: (up ? 'trending-up' : 'trending-down') as 'trending-up' | 'trending-down', product_key: r.product_key,
+      mine: !!(r.product_key && highlight?.has(r.product_key)),
     };
   });
   const strip = (suffix: string) => items.map((it) => (
     <Pressable key={`${it.key}-${suffix}`} onPress={it.product_key ? () => router.push({ pathname: '/product/[key]', params: { key: it.product_key! } }) : undefined} style={styles.item}>
+      {it.mine ? <Ionicons name="star" size={11} color={Brand.primary} /> : null}
       <Ionicons name={it.icon} size={13} color={it.color} />
       <ThemedText type="small" style={{ color: it.color, fontWeight: '700' }} numberOfLines={1}>{it.text}</ThemedText>
       <ThemedText type="small" themeColor="textSecondary">  ·  </ThemedText>

@@ -2,7 +2,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -16,6 +16,17 @@ import { formatMoney } from '@/lib/receipts';
 
 import type { RankedQuote } from '../optimise';
 
+/** "Why this price?": which catalogue product (and brand) the line was matched to, and how fresh the price is. */
+function explainLine(i: RankedQuote['items'][number], currency: string, router: ReturnType<typeof useRouter>) {
+  const matched = i.product_name && i.product_name.toLowerCase() !== i.name.toLowerCase() ? t('Matched to: %product%', { product: i.product_name }) : t('Matched to the product you named');
+  const brand = i.brand ? `\n${t('Brand: %brand%', { brand: i.brand })}` : '';
+  const facts = `\n${t('Unit price %price% · seen %when% · %n% reports', { price: formatMoney(i.price, currency), when: freshnessText(daysAgo(i.observed_on)), n: i.report_count })}`;
+  Alert.alert(i.name, `${matched}${brand}${facts}`, [
+    { text: t('Close'), style: 'cancel' },
+    ...(i.product_key ? [{ text: t('Open product'), onPress: () => router.push({ pathname: '/product/[key]', params: { key: i.product_key! } }) }] : []),
+  ]);
+}
+
 export function Pill({ text, tone }: { text: string; tone: 'success' | 'warning' | 'muted' }) {
   const theme = useTheme();
   const bg = tone === 'success' ? 'rgba(30,158,90,0.16)' : tone === 'warning' ? 'rgba(224,161,0,0.18)' : theme.backgroundSelected;
@@ -27,10 +38,12 @@ export function Pill({ text, tone }: { text: string; tone: 'success' | 'warning'
   );
 }
 
-export function StoreQuoteCard({ quote, rank, currency, saving, nextStore, estimate }: {
+export function StoreQuoteCard({ quote, rank, currency, saving, nextStore, estimate, levelPct }: {
   quote: RankedQuote; rank: number | null; currency: string; saving?: number | null; nextStore?: string | null;
   /** Whole-basket estimate (missing items at the typical price), shown under the real total when items are missing. */
   estimate?: { total: number; filled: number } | null;
+  /** Average % above the cheapest available price for the items this store has (0 = cheapest on everything). */
+  levelPct?: number | null;
 }) {
   const theme = useTheme();
   const router = useRouter();
@@ -80,16 +93,23 @@ export function StoreQuoteCard({ quote, rank, currency, saving, nextStore, estim
         </View>
         {open ? (
           <View style={[styles.lines, { borderTopColor: theme.backgroundSelected }]}>
+            {levelPct !== null && levelPct !== undefined ? (
+              <ThemedText type="small" themeColor="textSecondary" style={{ paddingBottom: 4 }}>
+                {levelPct <= 0 ? t('Cheapest available price on everything it has.') : t('On average %pct%% above the cheapest available price for these items.', { pct: levelPct.toLocaleString(undefined, { maximumFractionDigits: 1 }) })}
+              </ThemedText>
+            ) : null}
             {quote.items.map((i) => (
-              <View key={i.item_id} style={styles.line}>
+              <Pressable key={i.item_id} onPress={() => explainLine(i, currency, router)} style={({ pressed }) => [styles.line, pressed && { opacity: 0.7 }]} accessibilityRole="button" accessibilityHint={t('Why this price?')}>
                 <ThemedText type="small" style={{ flex: 1 }} numberOfLines={1}>
                   {i.name}{i.qty !== 1 ? ` × ${i.qty}` : ''}
                   {i.brand && !i.name.toLowerCase().includes(i.brand.toLowerCase()) ? <ThemedText type="small" themeColor="textSecondary"> · {i.brand}</ThemedText> : null}
                 </ThemedText>
                 <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 12 }}>{t('seen %when%', { when: freshnessText(daysAgo(i.observed_on)) })}</ThemedText>
                 <ThemedText type="smallBold" style={{ minWidth: 80, textAlign: 'right' }}>{formatMoney(i.line_total, currency)}</ThemedText>
-              </View>
+                <Ionicons name="information-circle-outline" size={14} color={theme.textSecondary} />
+              </Pressable>
             ))}
+            <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 11, textAlign: 'center', paddingTop: 4 }}>{t('Tap a line to see which product was matched')}</ThemedText>
           </View>
         ) : null}
       </ThemedView>

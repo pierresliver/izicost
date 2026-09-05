@@ -94,7 +94,8 @@ export function useScope(): ScopeState {
       case 'bycity': return otherCity ? { city: otherCity.city, country: otherCity.country } : null;
       case 'near':
         if (nearStatus === 'ok' && nearStoreIds?.length) return { storeIds: nearStoreIds };
-        if (nearStatus === 'denied' || nearStatus === 'empty') return myCity ? { city: myCity.city, country: myCity.country } : {};
+        if (nearStatus === 'empty') return { storeIds: [] };          // honest: nothing inside the circle (the screen offers to widen it)
+        if (nearStatus === 'denied') return myCity ? { city: myCity.city, country: myCity.country } : {};
         return null;
     }
   }, [mode, myCity, otherCity, nearStatus, nearStoreIds]);

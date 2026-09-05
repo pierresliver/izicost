@@ -10,7 +10,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Brand, Spacing } from '@/constants/theme';
 import {
-  addItem, clearList, createList, deleteList, getActiveList, itemBrandOptions, listItems, listLists, mergeLists, removeChecked, removeItem, renameList, searchProducts, setActiveList, shareList, updateItem, watchListItems,
+  addItem, clearList, createList, deleteList, getActiveList, itemBrandOptions, listItems, listLists, mergeLists, removeChecked, removeItem, removeItems, renameList, searchProducts, setActiveList, shareList, updateItem, watchListItems,
   type BasketItem, type BasketList, type BrandOption, type ListRow, type ProductHit,
 } from '@/features/basket/api';
 import { formatMoney } from '@/lib/receipts';
@@ -20,6 +20,7 @@ import { BasketItemRow } from '@/features/basket/components/basket-item-row';
 import { VoiceSheet, type VoicePhase } from '@/features/basket/components/voice-sheet';
 import '@/features/basket/i18n';
 import { parseShoppingList, ParseLimitError, type MatchedItem } from '@/features/basket/parse';
+import { downloadList, listAsText, sendToWhatsApp, shareText } from '@/features/basket/share-list';
 import { ALERTS_HREF, BASKET_QUOTE_HREF } from '@/features/basket/routes';
 import { loadVoiceLang, saveVoiceLang, useVoiceInput, type VoiceError, type VoiceLang } from '@/features/basket/voice';
 import { PromptModal } from '@/features/prices/components/prompt-modal';
@@ -44,6 +45,10 @@ export default function BasketScreen() {
   const [adding, setAdding] = useState(false);
   const [prompt, setPrompt] = useState<'new' | 'rename' | null>(null);
   const [menuFor, setMenuFor] = useState<ListRow | null>(null); // the list whose menu is open (not always the active one)
+  const [toolsOpen, setToolsOpen] = useState(false);                 // the bin in the header: remove ticked / select / empty
+  const [shareOpen, setShareOpen] = useState(false);                 // the share button in the header: WhatsApp / share / download
+  const [selecting, setSelecting] = useState(false);                 // selection mode (checkboxes, Select all, Remove N)
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [brandFor, setBrandFor] = useState<BasketItem | null>(null); // the line whose brand picker is open
   const [brandOptions, setBrandOptions] = useState<BrandOption[] | null>(null);
   const scope = useScope();
@@ -75,6 +80,7 @@ export default function BasketScreen() {
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   async function switchList(l: BasketList) {
+    setSelecting(false); setSelected(new Set()); // a selection belongs to one list
     await setActiveList(l.id);
     setLoading(true);
     await load(l);
@@ -191,6 +197,32 @@ export default function BasketScreen() {
     }
   }
 
+  function toggleSelect(id: string) {
+    setSelected((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  }
+  function startSelect(id?: string) { setSelecting(true); setSelected(new Set(id ? [id] : [])); }
+  function exitSelect() { setSelecting(false); setSelected(new Set()); }
+  const selectedIds = items.filter((i) => selected.has(i.id)).map((i) => i.id); // live items only (never stale ids)
+  function removeSelected() {
+    const ids = selectedIds;
+    if (!ids.length) return;
+    const all = ids.length === items.length && list;
+    Alert.alert(ids.length === 1 ? t('Remove 1 item?') : t('Remove %n% items?', { n: ids.length }), undefined, [
+      { text: t('Cancel'), style: 'cancel' },
+      { text: t('Remove'), style: 'destructive', onPress: () => run(async () => {
+        if (all) await clearList(list.id); else await removeItems(ids);
+        setItems((c) => c.filter((i) => !ids.includes(i.id))); exitSelect();
+      }) },
+    ]);
+  }
+  function emptyList() {
+    const target = list; if (!target || !items.length) return;
+    Alert.alert(t('Remove all %n% items from "%name%"?', { n: items.length, name: target.name }), t('The list stays; only its items are removed.'), [
+      { text: t('Cancel'), style: 'cancel' },
+      { text: t('Empty'), style: 'destructive', onPress: () => run(async () => { await clearList(target.id); setItems([]); exitSelect(); }) },
+    ]);
+  }
+
   async function patch(item: BasketItem, p: { qty?: number; checked?: boolean }) {
     setItems((cur) => cur.map((i) => (i.id === item.id ? { ...i, ...p } : i)));
     try { await updateItem(item.id, p); } catch { load(); }
@@ -301,18 +333,41 @@ export default function BasketScreen() {
           ))}
         </ThemedView>
       ) : null}
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: Spacing.one }}>
-        <ThemedText type="smallBold" style={{ fontSize: 16, flex: 1 }}>{items.length === 1 ? t('1 item') : t('%n% items', { n: items.length })}</ThemedText>
-        {busy ? <ActivityIndicator size="small" color={Brand.primary} /> : null}
-        {checked ? <Pressable onPress={clearChecked} hitSlop={8}><ThemedText type="small" style={{ color: Brand.primary }}>{t('Clear ticked items')}</ThemedText></Pressable> : null}
-      </View>
+      {selecting ? (
+        <View style={[styles.selectBar, { backgroundColor: theme.backgroundElement }]}>
+          <Pressable onPress={() => setSelected(selectedIds.length === items.length ? new Set() : new Set(items.map((i) => i.id)))} hitSlop={8}>
+            <ThemedText type="small" style={{ color: Brand.primary, fontWeight: '700' }}>{selectedIds.length === items.length ? t('Select none') : t('Select all')}</ThemedText>
+          </Pressable>
+          <ThemedText type="small" themeColor="textSecondary" style={{ flex: 1, textAlign: 'center' }}>{t('%n% selected', { n: selectedIds.length })}</ThemedText>
+          <Pressable onPress={removeSelected} disabled={!selectedIds.length} style={[styles.removeBtn, !selectedIds.length && { opacity: 0.4 }]}>
+            <Ionicons name="trash-outline" size={16} color="#fff" />
+            <ThemedText type="small" style={{ color: '#fff', fontWeight: '700' }}>{t('Remove')}</ThemedText>
+          </Pressable>
+        </View>
+      ) : (
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: Spacing.one }}>
+          <ThemedText type="smallBold" style={{ fontSize: 16, flex: 1 }}>{items.length === 1 ? t('1 item') : t('%n% items', { n: items.length })}</ThemedText>
+          {busy ? <ActivityIndicator size="small" color={Brand.primary} /> : null}
+          {checked ? <Pressable onPress={clearChecked} hitSlop={8}><ThemedText type="small" style={{ color: Brand.primary }}>{t('Clear ticked items')}</ThemedText></Pressable> : null}
+        </View>
+      )}
     </View>
   );
 
   const others = lists.filter((l) => l.id !== list?.id && l.mine);
   return (
     <ThemedView style={{ flex: 1 }}>
-      <Stack.Screen options={{ title: list?.name ?? t('My basket') }} />
+      <Stack.Screen options={{
+        title: selecting ? t('%n% selected', { n: selectedIds.length }) : list?.name ?? t('My basket'),
+        headerRight: () => selecting
+          ? <Pressable onPress={exitSelect} hitSlop={8} style={{ marginRight: 12 }}><ThemedText style={{ color: Brand.primary, fontWeight: '700' }}>{t('Cancel')}</ThemedText></Pressable>
+          : items.length ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 18, marginRight: 12 }}>
+              <Pressable onPress={() => setShareOpen(true)} hitSlop={8} accessibilityLabel={t('Share the list')}><Ionicons name="share-social-outline" size={22} color={Brand.primary} /></Pressable>
+              <Pressable onPress={() => setToolsOpen(true)} hitSlop={8} accessibilityLabel={t('Remove items')}><Ionicons name="trash-outline" size={22} color={Brand.primary} /></Pressable>
+            </View>
+          ) : null,
+      }} />
       <FlatList
         data={items} keyExtractor={(i) => i.id} contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled"
         ListHeaderComponent={header}
@@ -331,7 +386,8 @@ export default function BasketScreen() {
           <BasketItemRow
             item={item} onToggle={() => patch(item, { checked: !item.checked })} onQty={(qty) => patch(item, { qty })} onRemove={() => remove(item)}
             onOpen={item.product_key ? () => router.push({ pathname: '/product/[key]', params: { key: item.product_key! } }) : undefined}
-            onBrand={() => openBrand(item)}
+            onBrand={selecting ? undefined : () => openBrand(item)}
+            selectMode={selecting} selected={selected.has(item.id)} onSelect={() => toggleSelect(item.id)} onLongPress={() => { if (!selecting) startSelect(item.id); }}
           />
         )}
       />
@@ -388,6 +444,43 @@ export default function BasketScreen() {
             </Pressable>
           ))}
           <Pressable onPress={() => setMenuFor(null)} style={{ alignItems: 'center', paddingVertical: Spacing.two }}><ThemedText themeColor="textSecondary">{t('Cancel')}</ThemedText></Pressable>
+        </View>
+      </Modal>
+      <Modal visible={shareOpen} transparent animationType="fade" onRequestClose={() => setShareOpen(false)}>
+        <Pressable style={styles.backdrop} onPress={() => setShareOpen(false)} />
+        <View style={[styles.sheet, { backgroundColor: theme.background }]}>
+          <ThemedText type="smallBold" style={{ fontSize: 17 }}>{t('Share the list')}</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">{t('%n% items as plain text, one per line.', { n: items.length })}</ThemedText>
+          {[
+            // the sheet closes first; iOS refuses to present a share dialog while a modal is still dismissing
+            { icon: 'logo-whatsapp' as const, label: t('Send to WhatsApp'), onPress: () => { setShareOpen(false); setTimeout(() => sendToWhatsApp(listAsText(list?.name ?? t('My basket'), items)).catch(() => {}), 350); } },
+            { icon: 'share-social-outline' as const, label: t('Share with another app…'), onPress: () => { setShareOpen(false); setTimeout(() => shareText(listAsText(list?.name ?? t('My basket'), items)).catch(() => {}), 350); } },
+            { icon: 'download-outline' as const, label: t('Download as a text file'), onPress: () => { setShareOpen(false); setTimeout(() => run(() => downloadList(list?.name ?? t('My basket'), items)), 350); } },
+          ].map((o) => (
+            <Pressable key={o.label} onPress={o.onPress} style={styles.menuRow}>
+              <Ionicons name={o.icon} size={20} color={Brand.primary} />
+              <ThemedText>{o.label}</ThemedText>
+            </Pressable>
+          ))}
+          <Pressable onPress={() => setShareOpen(false)} style={{ alignItems: 'center', paddingVertical: Spacing.two }}><ThemedText themeColor="textSecondary">{t('Cancel')}</ThemedText></Pressable>
+        </View>
+      </Modal>
+      <Modal visible={toolsOpen} transparent animationType="fade" onRequestClose={() => setToolsOpen(false)}>
+        <Pressable style={styles.backdrop} onPress={() => setToolsOpen(false)} />
+        <View style={[styles.sheet, { backgroundColor: theme.background }]}>
+          <ThemedText type="smallBold" style={{ fontSize: 17 }}>{t('Remove items')}</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">{t('You can also hold an item to start selecting.')}</ThemedText>
+          {[
+            { icon: 'checkbox-outline' as const, label: t('Select items…'), onPress: () => { setToolsOpen(false); startSelect(); } },
+            ...(checked ? [{ icon: 'checkmark-done-outline' as const, label: t('Remove the %n% ticked items', { n: checked }), onPress: () => { setToolsOpen(false); clearChecked(); } }] : []),
+            { icon: 'remove-circle-outline' as const, label: t('Empty this list'), danger: true, onPress: () => { setToolsOpen(false); emptyList(); } },
+          ].map((o) => (
+            <Pressable key={o.label} onPress={o.onPress} style={styles.menuRow}>
+              <Ionicons name={o.icon} size={20} color={'danger' in o && o.danger ? Brand.danger : Brand.primary} />
+              <ThemedText style={'danger' in o && o.danger ? { color: Brand.danger } : undefined}>{o.label}</ThemedText>
+            </Pressable>
+          ))}
+          <Pressable onPress={() => setToolsOpen(false)} style={{ alignItems: 'center', paddingVertical: Spacing.two }}><ThemedText themeColor="textSecondary">{t('Cancel')}</ThemedText></Pressable>
         </View>
       </Modal>
       <Modal visible={brandFor !== null} transparent animationType="fade" onRequestClose={() => setBrandFor(null)}>
@@ -463,4 +556,6 @@ const styles = StyleSheet.create({
   sheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: Spacing.three, paddingBottom: Spacing.five, gap: Spacing.two },
   mergeRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingVertical: 10 },
   menuRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, paddingVertical: 12 },
+  selectBar: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, borderRadius: 12, paddingVertical: 8, paddingHorizontal: 12, marginTop: Spacing.one },
+  removeBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: Brand.danger, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
 });

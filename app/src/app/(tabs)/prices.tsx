@@ -19,9 +19,12 @@ import { RadiusPicker } from '@/features/prices/components/radius-picker';
 import { Segmented } from '@/features/prices/components/segmented';
 import { Ticker } from '@/features/prices/components/ticker';
 import '@/features/prices/i18n';
-import { useScope, type ScopeMode } from '@/features/prices/use-scope';
+import { useScope, type RadiusKm, type ScopeMode } from '@/features/prices/use-scope';
 import { useTheme } from '@/hooks/use-theme';
 import { t, useLang } from '@/lib/i18n';
+
+const RADII: RadiusKm[] = [2, 5, 10, 25];
+const nextRadius = (km: RadiusKm): RadiusKm => RADII[Math.min(RADII.indexOf(km) + 1, RADII.length - 1)];
 
 export default function PricesScreen() {
   useLang();
@@ -58,9 +61,9 @@ export default function PricesScreen() {
     switch (scope.mode) {
       case 'near':
         if (scope.nearStatus === 'locating') return { icon: 'navigate' as const, text: t('Finding stores near you…') };
-        if (scope.nearStatus === 'ok') return { icon: 'navigate' as const, text: t('Stores within %km% km', { km: scope.radiusKm }) };
+        if (scope.nearStatus === 'ok') return { icon: 'navigate' as const, text: (scope.nearStoreIds?.length ?? 0) === 1 ? t('1 store within %km% km', { km: scope.radiusKm }) : t('%n% stores within %km% km', { n: scope.nearStoreIds?.length ?? 0, km: scope.radiusKm }) };
         if (scope.nearStatus === 'denied') return { icon: 'alert-circle-outline' as const, text: scope.myCity ? t('No location — showing %city%', { city: scope.myCity.city }) : t('No location — showing everywhere') };
-        return { icon: 'alert-circle-outline' as const, text: scope.myCity ? t('No known store nearby — showing %city%', { city: scope.myCity.city }) : t('No known store nearby — showing everywhere') };
+        return { icon: 'alert-circle-outline' as const, text: t('No known store within %km% km of you', { km: scope.radiusKm }) };
       case 'mycity': return { icon: 'location' as const, text: scope.myCity?.city ?? t('Choose your city'), onPress: () => setPicker('my') };
       case 'bycity': return { icon: 'map' as const, text: scope.otherCity?.city ?? t('Choose a city'), onPress: () => setPicker('other') };
       default: return { icon: 'globe-outline' as const, text: t('All cities') };
@@ -110,6 +113,19 @@ export default function PricesScreen() {
           <Pressable onPress={scope.refreshNear} hitSlop={8}><Ionicons name="refresh" size={16} color={Brand.primary} /></Pressable>
         ) : null}
       </Pressable>
+      {scope.mode === 'near' && scope.nearStatus === 'empty' ? (
+        <View style={[styles.nearEmpty, { backgroundColor: theme.backgroundElement }]}>
+          <ThemedText type="small" themeColor="textSecondary" style={{ flex: 1 }}>{t('Widen the circle or look at your whole city.')}</ThemedText>
+          {scope.radiusKm < 25 ? (
+            <Pressable onPress={() => scope.setRadiusKm(nextRadius(scope.radiusKm))} style={styles.nearBtn}>
+              <ThemedText type="small" style={{ color: Brand.primary, fontWeight: '700' }}>{t('Widen to %km% km', { km: nextRadius(scope.radiusKm) })}</ThemedText>
+            </Pressable>
+          ) : null}
+          <Pressable onPress={() => onMode('mycity')} style={styles.nearBtn}>
+            <ThemedText type="small" style={{ color: Brand.primary, fontWeight: '700' }}>{t('My city')}</ThemedText>
+          </Pressable>
+        </View>
+      ) : null}
       <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: Spacing.one }}>
         <ThemedText type="smallBold" style={{ fontSize: 16, flex: 1 }}>{query.trim() ? t('Results') : t('Recently seen')}</ThemedText>
         {loading ? <ActivityIndicator color={Brand.primary} /> : null}
@@ -171,6 +187,8 @@ const styles = StyleSheet.create({
   basketAlerts: { width: 64, alignItems: 'center', justifyContent: 'center', gap: 2, borderLeftWidth: StyleSheet.hairlineWidth },
   search: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, borderRadius: 14, paddingHorizontal: 12, height: 46 },
   searchInput: { flex: 1, fontSize: 16, paddingVertical: 0 },
+  nearEmpty: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 12, padding: 10, flexWrap: 'wrap' },
+  nearBtn: { borderWidth: 1.5, borderColor: Brand.primary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   scopeLine: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 4 },
   empty: { alignItems: 'center', gap: Spacing.two, paddingHorizontal: Spacing.three, paddingTop: Spacing.four },
   emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(11,110,79,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.one },

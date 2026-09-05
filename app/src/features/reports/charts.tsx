@@ -37,7 +37,15 @@ type BarChartProps = {
   formatValue?: (v: number) => string;
 };
 
-/** Vertical bars with rounded tops, a baseline, labels below and the value above the highlighted bar. Bars grow in. */
+/** "18.1k" style values so twelve bars can each carry a number. */
+export function compactValue(v: number): string {
+  if (v >= 1e6) return `${(v / 1e6).toFixed(1)}M`;
+  if (v >= 1e4) return `${Math.round(v / 1000)}k`;
+  if (v >= 1e3) return `${(v / 1000).toFixed(1)}k`;
+  return String(Math.round(v));
+}
+
+/** Vertical bars with rounded tops, a baseline, labels below and a value above each bar (every other one when crowded). Bars grow in. */
 export function BarChart({ data, height = 150, color, onPressBar, formatValue }: BarChartProps) {
   const p = useChartPalette();
   const [width, onLayout] = useWidth();
@@ -69,8 +77,8 @@ export function BarChart({ data, height = 150, color, onPressBar, formatValue }:
             <G key={d.key} onPress={onPressBar ? () => onPressBar(d) : undefined}>
               <Rect x={i * slot} y={0} width={slot} height={height} fill="transparent" />
               {h > 0 ? <Path d={path} fill={fill} opacity={dim ? 0.45 : 1} /> : null}
-              {d.highlight && d.value > 0 && grow > 0.95 ? (
-                <SvgText x={x + barW / 2} y={y - 6} fontSize={11} fontWeight="700" fill={p.label} textAnchor="middle">{fmt(d.value)}</SvgText>
+              {d.value > 0 && grow > 0.95 && (n <= 8 || d.highlight || (n - 1 - i) % 2 === 0) ? (
+                <SvgText x={x + barW / 2} y={y - 5} fontSize={n > 8 ? 9 : 11} fontWeight={d.highlight ? '700' : '500'} fill={p.label} textAnchor="middle">{n > 8 ? compactValue(d.value) : fmt(d.value)}</SvgText>
               ) : null}
               {n <= 8 || d.highlight || (n - 1 - i) % 2 === 0 ? (
                 <SvgText x={x + barW / 2} y={height - 6} fontSize={n > 8 ? 10 : 11} fill={p.label} textAnchor="middle" fontWeight={d.highlight ? '700' : '400'}>

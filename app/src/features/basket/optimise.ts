@@ -139,6 +139,22 @@ export function tripAdvice(ranked: RankedQuote[], minPerKm = 15): TripAdvice | n
   return { best, nearest, extraKm: Math.round(extraKm * 10) / 10, saving: Math.round(saving * 100) / 100, perKm, worthIt: perKm >= minPerKm };
 }
 
+/**
+ * Price level per store: on average, how far above the cheapest available price (across the stores given) each
+ * store is for the items it has. 0 = cheapest on everything it sells; +6 = 6% dearer on average.
+ */
+export function priceLevel(quotes: StoreQuote[]): Map<string, number | null> {
+  const min = new Map<string, number>();
+  for (const s of quotes) for (const i of s.items) { const m = min.get(i.item_id); if (m === undefined || i.price < m) min.set(i.item_id, i.price); }
+  const out = new Map<string, number | null>();
+  for (const s of quotes) {
+    let sum = 0, n = 0;
+    for (const i of s.items) { const m = min.get(i.item_id); if (m && m > 0) { sum += i.price / m - 1; n++; } }
+    out.set(s.store_id, n ? Math.round((sum / n) * 1000) / 10 : null);
+  }
+  return out;
+}
+
 /** Names of list items that no store in scope has a price for. */
 export function missingItems(quotes: StoreQuote[], allItems: { id: string; name: string }[]): string[] {
   const seen = new Set<string>();

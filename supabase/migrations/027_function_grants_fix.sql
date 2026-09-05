@@ -21,7 +21,7 @@ end $$;
 -- the four the app calls that had no grant at all
 grant execute on function public.city_price_index(int) to authenticated;
 grant execute on function public.city_staples(text, text) to authenticated;
-grant execute on function public.community_ticker(int) to authenticated;
+do $$ begin grant execute on function public.community_ticker(int) to authenticated; exception when undefined_function then null; end $$;  -- signature replaced in 029
 grant execute on function public.product_store_trend(text, text) to authenticated;
 
 -- internal helpers stay internal (never callable from the app)

@@ -2,6 +2,9 @@
 import { registerTranslations } from '@/lib/i18n';
 
 registerTranslations({
+  'Categories': 'Categorias',
+  'Stores': 'Lojas',
+  'Price index': 'Índice de preços',
   'What do you need to buy?': 'O que precisa de comprar?',
   'Say it or type it. We show you which store sells it all cheapest, near you or in any city.':
     'Diga ou escreva. Mostramos-lhe que loja vende tudo mais barato, perto de si ou em qualquer cidade.',

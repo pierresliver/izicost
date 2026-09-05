@@ -176,9 +176,9 @@ export async function cityStaples(city: string, currency = 'MZN'): Promise<Stapl
 export type TickerRow = { kind: 'move' | 'activity'; city: string; display_name: string | null; product_key: string | null; change_pct: number | null; price: number | null; currency: string | null; n: number };
 
 /** This week's biggest movers per city plus how many prices arrived today. */
-export async function communityTicker(limit = 12): Promise<TickerRow[]> {
+export async function communityTicker(limit = 12, city?: string | null): Promise<TickerRow[]> {
   await ensureSession();
-  const { data, error } = await supabase.rpc('community_ticker', { p_limit: limit });
+  const { data, error } = await supabase.rpc('community_ticker', { p_limit: limit, p_city: city ?? null });
   if (error) throw new Error(error.message);
   return ((data ?? []) as TickerRow[]).map((r) => ({ ...r, change_pct: numOrNull(r.change_pct), price: numOrNull(r.price), n: Number(r.n) }));
 }

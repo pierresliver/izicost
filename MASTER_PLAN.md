@@ -489,6 +489,25 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
 **Day 5 (2026-09-05):**
 - ✅ PS created the account (pcmdsiziadvertising@gmail.com): the guest d36d289a was upgraded in place (same id, all
   receipts/lists/demo year kept). Flagged as trusted seeder → Shelf scan card appears for PS. No receipt move needed.
+- ✅ **Round "seven + two" (PS's list after testing build 10, ~10:35; built for build 11):**
+  1. Basket bulk delete: bin in the header → sheet (Select items… / Remove the N ticked / Empty this list); selection
+     mode with checkboxes, Select all / none, "Remove N"; long-press an item to start selecting (`removeItems`).
+  2. "All reports": full-width green button under the week card + 4 shortcuts (month, categories, stores, price index).
+  3. My items: rows already opened the product and long-press removed; added the hint line and "+ Add an item to
+     watch" (catalogue search → `watchProduct`).
+  4. 12-month bar chart: a compact value on every bar ("18.1k"), current month bold (`compactValue`).
+  5. Live ticker at the top of Home with chips "%city% only" / "All cities" (remembered) and a ★ on products that are
+     on the basket or in My items (`community_ticker(p_limit, p_city)`, migration 029; `basketProductKeys`).
+  6. Radius bug: "Near me" silently fell back to the whole city when no shop was inside the circle, so 2 and 25 km
+     looked identical. Now the filter is honest (`storeIds: []`), the line says "N stores within X km" or "No known
+     store within X km of you", and a card offers "Widen to Y km" / "My city".
+  7. Quote ranking "Price level": average % above the cheapest available price per store, complete baskets first
+     (`priceLevel`); each store card explains its level; the 2-shop split card was already on top.
+  + "Why this price?": tap any line in a store card → matched product, brand, unit price, freshness, reports, Open product.
+  + Ticker stars (see 5). + PS's extra: share the basket to WhatsApp (`whatsapp://send`, falls back to the share
+  sheet), share with any app, download as a .txt (`features/basket/share-list.ts`; share button in the header).
+  Typecheck clean, lint baseline unchanged (9 old errors), translations 0 missing, RPC suite passes. Two review agents
+  (functional + security) launched before build 11.
 - ✅ **Build 10 (PS: "ok go", ~09:30):** `builds/izicost-v0.5.3-2026-09-05-0955.apk` (0.5.3 / versionCode 10, aapt-checked) with the basket fixes of the previous evening; PS installed it by 10:19.
 
 - 🏁 **Session ended 2026-09-04 ~19:40.** On PS's phone: build 9 (`izicost-v0.5.2-2026-09-04-1904.apk`); slim 0.5.2

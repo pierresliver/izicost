@@ -12,7 +12,14 @@ import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View } from '
 
 import { ThemedText } from '@/components/themed-text';
 import { Brand, Spacing } from '@/constants/theme';
-import { countOpenItems } from '@/features/basket/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { ThemedView } from '@/components/themed-view';
+import { basketProductKeys, countOpenItems } from '@/features/basket/api';
+import { Ticker } from '@/features/prices/components/ticker';
+import '@/features/prices/i18n';
+import { useScope } from '@/features/prices/use-scope';
+import { watchlist } from '@/features/watch/api';
 import { BASKET_HREF } from '@/features/basket/routes';
 import { memberName, refreshHousehold, useHousehold } from '@/features/household/api';
 import { ScopeToggle } from '@/features/household/components/scope-toggle';
@@ -27,7 +34,7 @@ import { DueSoonCard, InflationTeaser, RecapAskCard } from '@/features/reports/h
 import { categoryInflation, detectRecurring, fetchHistory, personalInflation, type CategoryInflation, type Recurring } from '@/features/reports/insights';
 import { enableWeeklyRecap, getRecapPref, rescheduleWeeklyRecap, setRecapPref, type RecapPref } from '@/features/reports/notifications';
 import { assignColors, useChartPalette } from '@/features/reports/palette';
-import { Card, ErrorText, Row, SectionTitle, styles as ui } from '@/features/reports/ui';
+import { Card, Chip, ErrorText, Row, SectionTitle, styles as ui } from '@/features/reports/ui';
 import { shareApp } from '@/features/share/share';
 import { WatchCard } from '@/features/watch/components/watch-card';
 import { t, useLang } from '@/lib/i18n';
@@ -51,6 +58,18 @@ export default function HomeScreen() {
   const [recapPref, setRecapPrefState] = useState<RecapPref>('off');
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  // live ticker at the top: my city or every city (remembered), with a star on products I care about
+  const priceScope = useScope();
+  const [tickerScope, setTickerScope] = useState<'city' | 'all'>('all');
+  const [highlightKeys, setHighlightKeys] = useState<Set<string>>(() => new Set());
+  useFocusEffect(useCallback(() => {
+    let alive = true;
+    AsyncStorage.getItem(TICKER_KEY).then((v) => { if (alive && (v === 'city' || v === 'all')) setTickerScope(v); }).catch(() => {});
+    Promise.all([watchlist().catch(() => []), basketProductKeys().catch(() => [])]).then(([w, b]) => {
+      if (alive) setHighlightKeys(new Set([...w.map((r) => r.product_key), ...b]));
+    });
+    return () => { alive = false; };
+  }, []));
   const seq = useRef(0); // a load that finishes after a newer one started must not overwrite it
 
   // Loads straight away with whatever is known; re-runs when the household/scope becomes known or changes.
@@ -119,6 +138,16 @@ export default function HomeScreen() {
         </Card>
       ) : null}
 
+      {/* 0. The market, live: this week's movers in my city or everywhere; ★ = on my basket or My items */}
+      <View style={{ gap: 6 }}>
+        <Ticker city={tickerScope === 'city' ? priceScope.myCity?.city ?? null : null} highlight={highlightKeys} showEmpty />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Chip label={priceScope.myCity ? t('%city% only', { city: priceScope.myCity.city }) : t('My city')} active={tickerScope === 'city'} onPress={() => { if (!priceScope.myCity) { router.push('/prices'); return; } setTickerScope('city'); AsyncStorage.setItem(TICKER_KEY, 'city').catch(() => {}); }} />
+          <Chip label={t('All cities')} active={tickerScope === 'all'} onPress={() => { setTickerScope('all'); AsyncStorage.setItem(TICKER_KEY, 'all').catch(() => {}); }} />
+          <ThemedText type="small" themeColor="textSecondary" style={{ flex: 1, textAlign: 'right', fontSize: 11 }}>{t('★ = on your basket or My items')}</ThemedText>
+        </View>
+      </View>
+
       {/* 1. The promise: tell us what you need, we find the cheapest store */}
       <View style={s.hero}>
         <ThemedText style={s.heroTitle}>{t('What do you need to buy?')}</ThemedText>
@@ -149,6 +178,30 @@ export default function HomeScreen() {
       {household ? <ScopeToggle /> : null}
       {hasReceipts && d ? <HeadlineCard d={d} monthName={monthName} overall={overall} onBudget={() => go('/reports/budgets')} onOpen={() => go(`/reports/month?ym=${d.months[d.months.length - 1].ym}`)} /> : null}
       {hasReceipts && d ? <WeeklyCard d={d} onStory={() => go('/recap')} /> : null}
+      {hasReceipts && d ? (
+        <View style={{ gap: Spacing.two }}>
+          <Pressable onPress={() => go('/reports')} style={({ pressed }) => [s.reportsBtn, pressed && { opacity: 0.85 }]} accessibilityRole="button">
+            <Ionicons name="stats-chart" size={20} color="#fff" />
+            <ThemedText style={{ color: '#fff', fontWeight: '700', fontSize: 16, flex: 1 }}>{t('All reports')}</ThemedText>
+            <Ionicons name="chevron-forward" size={18} color="#fff" />
+          </Pressable>
+          <View style={{ flexDirection: 'row', gap: Spacing.two }}>
+            {([
+              { icon: 'calendar-outline', label: t('By month'), href: `/reports/month?ym=${d.months[d.months.length - 1].ym}` },
+              { icon: 'pie-chart-outline', label: t('Categories'), href: '/reports/categories' },
+              { icon: 'storefront-outline', label: t('Stores'), href: '/reports/stores' },
+              { icon: 'trending-up-outline', label: t('Price index'), href: '/reports/price-index' },
+            ] as { icon: React.ComponentProps<typeof Ionicons>['name']; label: string; href: string }[]).map((r) => (
+              <Pressable key={r.label} onPress={() => go(r.href)} style={({ pressed }) => [{ flex: 1 }, pressed && { opacity: 0.8 }]} accessibilityRole="button">
+                <ThemedView type="backgroundElement" style={s.reportShortcut}>
+                  <Ionicons name={r.icon} size={20} color={Brand.primary} />
+                  <ThemedText type="small" style={{ fontSize: 11, textAlign: 'center' }} numberOfLines={1}>{r.label}</ThemedText>
+                </ThemedView>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      ) : null}
 
       {/* 3. Your usual items: cheapest price now, green/red since you last bought, bell for drops */}
       <WatchCard onEmptyScan={() => router.navigate('/scan')} />
@@ -219,7 +272,11 @@ export default function HomeScreen() {
   );
 }
 
+const TICKER_KEY = 'izicost.home.tickerScope';
+
 const s = StyleSheet.create({
+  reportsBtn: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: Brand.primary, borderRadius: 14, paddingVertical: 12, paddingHorizontal: Spacing.three },
+  reportShortcut: { alignItems: 'center', gap: 4, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 4 },
   hero: { backgroundColor: Brand.primary, borderRadius: 20, padding: Spacing.three, gap: Spacing.two },
   heroTitle: { color: '#fff', fontSize: 24, lineHeight: 30, fontWeight: '800' },
   heroSub: { color: '#E6F4EE', fontSize: 14, lineHeight: 20 },

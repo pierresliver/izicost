@@ -178,6 +178,24 @@ export async function addItem(listId: string, x: { name: string; productId?: str
   return toItem(data as unknown as RawItem);
 }
 
+/** Catalogue keys of my open basket lines (for highlighting them in the live ticker). Never creates a list. */
+export async function basketProductKeys(): Promise<string[]> {
+  const uid = await ensureSession();
+  const { data, error } = await supabase.from('shopping_list_items').select('products(product_key)').eq('user_id', uid).eq('checked', false);
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as unknown as { products: RawProduct | RawProduct[] | null }[])
+    .map((r) => (Array.isArray(r.products) ? r.products[0] : r.products)?.product_key)
+    .filter((k): k is string => !!k);
+}
+
+/** Remove several lines at once (selection mode). */
+export async function removeItems(ids: string[]): Promise<void> {
+  for (let i = 0; i < ids.length; i += 50) { // chunks keep the request URL short (200 ids would hit the 8 KB line limit)
+    const { error } = await supabase.from('shopping_list_items').delete().in('id', ids.slice(i, i + 50));
+    if (error) throw new Error(error.message);
+  }
+}
+
 /** Home screen: how many unticked items are waiting, without creating a list for a brand-new user. */
 export async function countOpenItems(): Promise<number> {
   const uid = await ensureSession();

@@ -3,8 +3,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Brand, Spacing } from '@/constants/theme';
@@ -15,17 +15,61 @@ import { useTheme } from '@/hooks/use-theme';
 import { t } from '@/lib/i18n';
 import { formatMoney } from '@/lib/receipts';
 
-import { autofill, isNewDrop, markNotified, movement, setNotify, unwatch, watchlist, type Movement, type WatchRow } from '../api';
+import { searchProducts, type ProductHit } from '@/features/basket/api';
+import { useScope } from '@/features/prices/use-scope';
+
+import { autofill, isNewDrop, markNotified, movement, setNotify, unwatch, watchlist, watchProduct, type Movement, type WatchRow } from '../api';
 import '../i18n';
 import { enableDrops, ensureDropsArmed, getDropPref, notifyDrops, type DropPref } from '../notify';
 import { Sparkline } from './sparkline';
 
 const MAX_ROWS = 10;
 
+/** Search the catalogue and pin a product to My items. */
+function AddWatchModal({ visible, onClose, currency, onAdded }: { visible: boolean; onClose: () => void; currency: string; onAdded: () => void }) {
+  const theme = useTheme();
+  const [q, setQ] = useState('');
+  const [hits, setHits] = useState<ProductHit[]>([]);
+  const [busy, setBusy] = useState<string | null>(null);
+  useEffect(() => {
+    if (!visible) return;
+    const h = setTimeout(() => { if (q.trim().length < 2) { setHits([]); return; } searchProducts(q, 10).then(setHits).catch(() => setHits([])); }, q.trim().length < 2 ? 0 : 200);
+    return () => clearTimeout(h);
+  }, [q, visible]);
+  async function pick(h: ProductHit) {
+    setBusy(h.id);
+    try { await watchProduct(h.id, currency); Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {}); setQ(''); setHits([]); onAdded(); }
+    catch (e) { Alert.alert(t('Could not add'), String((e as Error).message ?? e)); }
+    finally { setBusy(null); }
+  }
+  const close = () => { setQ(''); setHits([]); onClose(); };
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
+      <Pressable style={styles.backdrop} onPress={close} />
+      <View style={[styles.sheet, { backgroundColor: theme.background }]}>
+        <ThemedText type="smallBold" style={{ fontSize: 17 }}>{t('Add an item to watch')}</ThemedText>
+        <TextInput autoFocus value={q} onChangeText={setQ} placeholder={t('Search a product, e.g. picanha')} placeholderTextColor="#888" style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]} />
+        {hits.map((h) => (
+          <Pressable key={h.id} onPress={() => pick(h)} disabled={busy !== null} style={({ pressed }) => [styles.hit, pressed && { opacity: 0.7 }]}>
+            <Ionicons name="pricetag-outline" size={16} color={Brand.primary} />
+            <ThemedText style={{ flex: 1 }} numberOfLines={1}>{h.display_name}</ThemedText>
+            {busy === h.id ? <ActivityIndicator color={Brand.primary} /> : <ThemedText type="small" themeColor="textSecondary">{sizeLabel(h.size_value, h.size_unit)}</ThemedText>}
+          </Pressable>
+        ))}
+        {q.trim().length >= 2 && !hits.length ? <ThemedText type="small" themeColor="textSecondary">{t('No product with that name in the catalogue yet.')}</ThemedText> : null}
+        <Pressable onPress={close} style={{ alignItems: 'center', paddingVertical: Spacing.two }}><ThemedText themeColor="textSecondary">{t('Cancel')}</ThemedText></Pressable>
+      </View>
+    </Modal>
+  );
+}
+
 export function WatchCard({ onEmptyScan }: { onEmptyScan: () => void }) {
   const router = useRouter();
   const [rows, setRows] = useState<WatchRow[] | null>(null);
   const [drops, setDrops] = useState<WatchRow[]>([]);
+  const [addOpen, setAddOpen] = useState(false);
+  const priceScope = useScope();
+  const watchCurrency = priceScope.myCity?.country === 'ZA' ? 'ZAR' : 'MZN'; // same rule as the basket
   const [pref, setPref] = useState<DropPref>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -80,6 +124,11 @@ export function WatchCard({ onEmptyScan }: { onEmptyScan: () => void }) {
         </Pressable>
       ) : null}
 
+      <Pressable onPress={() => setAddOpen(true)} style={[styles.addBtn, { borderColor: Brand.primary }]} accessibilityRole="button">
+        <Ionicons name="add-circle-outline" size={18} color={Brand.primary} />
+        <ThemedText type="small" style={{ color: Brand.primary, fontWeight: '700' }}>{t('Add an item to watch')}</ThemedText>
+      </Pressable>
+      <AddWatchModal visible={addOpen} onClose={() => setAddOpen(false)} currency={watchCurrency} onAdded={() => { setAddOpen(false); load(); }} />
       {rows.length === 0 ? (
         <Pressable onPress={onEmptyScan} style={styles.empty}>
           <Ionicons name="star-outline" size={28} color={Brand.primary} />
@@ -95,9 +144,11 @@ export function WatchCard({ onEmptyScan }: { onEmptyScan: () => void }) {
           {rows.slice(0, MAX_ROWS).map((r) => (
             <WatchRowView key={r.watch_id} row={r} m={movement(r)} onOpen={() => router.push({ pathname: '/product/[key]', params: { key: r.product_key } })} onBell={() => toggleBell(r)} onRemove={() => remove(r)} />
           ))}
+          <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 11, lineHeight: 14 }}>{t('Tap an item to open it · hold it to remove it')}</ThemedText>
           <ThemedText type="small" themeColor="textSecondary" style={{ fontSize: 11, lineHeight: 14 }}>
             {pref === 'on' ? t('Alerts on: the app checks prices every few hours, even when closed.') : t('Turn on a bell to get alerts when an item gets cheaper.')}
           </ThemedText>
+
         </>
       )}
     </Card>
@@ -148,6 +199,11 @@ function WatchRowView({ row: r, m, onOpen, onBell, onRemove }: { row: WatchRow; 
 }
 
 const styles = StyleSheet.create({
+  addBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1.5, borderRadius: 12, paddingVertical: 9, marginTop: 2 },
+  backdrop: { flex: 1, backgroundColor: '#00000066' },
+  sheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: Spacing.three, paddingBottom: Spacing.five, gap: Spacing.two },
+  input: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 16 },
+  hit: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingVertical: 10 },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingVertical: 10, borderTopWidth: StyleSheet.hairlineWidth },
   pill: { minWidth: 54, alignItems: 'center', justifyContent: 'center', borderRadius: 8, paddingHorizontal: 6, paddingVertical: 5 },
   hot: { backgroundColor: 'rgba(181,84,47,0.12)', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 1 },
