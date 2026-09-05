@@ -14,6 +14,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Brand, Spacing } from '@/constants/theme';
 import { ThemedView } from '@/components/themed-view';
 import { basketProductKeys, countOpenItems } from '@/features/basket/api';
+import { topReceiptCity } from '@/features/prices/api';
 import { Ticker } from '@/features/prices/components/ticker';
 import '@/features/prices/i18n';
 import { useScope } from '@/features/prices/use-scope';
@@ -59,11 +60,14 @@ export default function HomeScreen() {
   // two live lines at the top (my city, all cities) with a star on products I care about
   const priceScope = useScope();
   const [highlightKeys, setHighlightKeys] = useState<Set<string>>(() => new Set());
+  const [receiptCity, setReceiptCity] = useState<string | null>(null); // fallback when "My city" was never chosen on Prices
+  const tickerCity = priceScope.myCity?.city ?? receiptCity;
   useFocusEffect(useCallback(() => {
     let alive = true;
     Promise.all([watchlist().catch(() => []), basketProductKeys().catch(() => [])]).then(([w, b]) => {
       if (alive) setHighlightKeys(new Set([...w.map((r) => r.product_key), ...b]));
     });
+    topReceiptCity().then((c) => { if (alive) setReceiptCity(c); }).catch(() => {});
     return () => { alive = false; };
   }, []));
   const seq = useRef(0); // a load that finishes after a newer one started must not overwrite it
@@ -136,7 +140,7 @@ export default function HomeScreen() {
 
       {/* 0. The market, live: this week's movers in my city or everywhere; ★ = on my basket or My items */}
       <View style={{ gap: 6 }}>
-        {priceScope.myCity ? <Ticker city={priceScope.myCity.city} label={priceScope.myCity.city} highlight={highlightKeys} showEmpty /> : null}
+        {tickerCity ? <Ticker city={tickerCity} label={tickerCity} highlight={highlightKeys} showEmpty /> : null}
         <Ticker city={null} label={t('All cities')} highlight={highlightKeys} showEmpty />
         <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'right', fontSize: 11 }}>{t('★ = on your basket or My items')}</ThemedText>
       </View>

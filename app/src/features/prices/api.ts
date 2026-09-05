@@ -193,6 +193,20 @@ export async function cityPriceIndex(months = 6): Promise<CityIndexPoint[]> {
   return ((data ?? []) as CityIndexPoint[]).map((r) => ({ ...r, index: Number(r.index), change_pct: Number(r.change_pct), products: Number(r.products) }));
 }
 
+/** The city where I shop most (from my recent receipts' branches); null when unknown. Used when "My city" is not set. */
+export async function topReceiptCity(): Promise<string | null> {
+  const uid = await ensureSession();
+  const { data, error } = await supabase.from('receipts').select('stores(city)').eq('user_id', uid)
+    .order('purchased_on', { ascending: false, nullsFirst: false }).limit(150);
+  if (error) throw new Error(error.message);
+  const counts = new Map<string, number>();
+  for (const r of (data ?? []) as unknown as { stores: { city: string | null } | { city: string | null }[] | null }[]) {
+    const s = Array.isArray(r.stores) ? r.stores[0] : r.stores;
+    if (s?.city) counts.set(s.city, (counts.get(s.city) ?? 0) + 1);
+  }
+  return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+}
+
 /** Every known city (reference table), for the quick-add picker. */
 export async function allCities(): Promise<CityRow[]> {
   await ensureSession();
