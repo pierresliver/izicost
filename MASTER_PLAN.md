@@ -486,6 +486,11 @@ to-community ON by default with a real-but-low-key opt-out in Settings** + stron
   "no price yet" and explains why; the brand chip moved under the item name (it was squeezing names to "sal fino de
   mes…"); the Home pill "N items in your basket" opens the basket (it went straight to the comparison); basket icon
   in the Home and Prices headers (PS: "hard to find the basket"); list menu gains "Empty this list" (`clearList`).
+**Day 5 (2026-09-05):**
+- ✅ PS created the account (pcmdsiziadvertising@gmail.com): the guest d36d289a was upgraded in place (same id, all
+  receipts/lists/demo year kept). Flagged as trusted seeder → Shelf scan card appears for PS. No receipt move needed.
+- ✅ **Build 10 (PS: "ok go", ~09:30):** `builds/izicost-v0.5.3-2026-09-05-0955.apk` (0.5.3 / versionCode 10, aapt-checked) with the basket fixes of the previous evening; PS installed it by 10:19.
+
 - 🏁 **Session ended 2026-09-04 ~19:40.** On PS's phone: build 9 (`izicost-v0.5.2-2026-09-04-1904.apk`); slim 0.5.2
   published. Waiting on PS: uninstall the white `com.helloworld` app; create the account (Me tab) → then
   `trust-seeder.js` for Shelf scan; yes/no for build 10 (basket fixes). Migrations 001–028 applied; demo data (12
